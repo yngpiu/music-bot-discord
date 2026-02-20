@@ -1,0 +1,126 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+
+lavalink:
+  plugins:
+    # YouTube source - replaces deprecated built-in source
+    - dependency: dev.lavalink.youtube:youtube-plugin:1.17.0
+      snapshot: false
+
+    # LavaSrc - Spotify, Apple Music, Deezer support
+    - dependency: com.github.topi314.lavasrc:lavasrc-plugin:4.8.1
+      snapshot: false
+
+    # LavaSearch - Advanced search
+    - dependency: com.github.topi314.lavasearch:lavasearch-plugin:1.0.0
+      snapshot: false
+
+    # LavaLyrics - Lyrics API
+    - dependency: com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0
+      snapshot: false
+
+    # SponsorBlock - Skip sponsor segments
+    - dependency: com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.1
+      snapshot: false
+
+  server:
+    password: ${LAVALINK_SERVER_PASSWORD}
+    sources:
+      youtube: false # Disabled - using youtube-plugin instead
+      bandcamp: false
+      soundcloud: true
+      twitch: false
+      vimeo: false
+      http: true
+      local: false
+
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: true
+      timescale: true
+      tremolo: true
+      vibrato: true
+      distortion: true
+      rotation: true
+      channelMix: true
+      lowPass: true
+
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    youtubePlaylistLoadLimit: 6
+    playerUpdateInterval: 5
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+
+plugins:
+  lavasrc:
+    providers: # Custom providers for track loading. This is the default
+      - 'dzisrc:%ISRC%' # If ISRC available, search on deezer
+      - 'ytsearch:"%ISRC%"' # If ISRC available, search on youtube
+      - 'dzsearch:%QUERY%' # Search on deezer, if no results found use the next provider
+      - 'ytsearch:%QUERY%' # If no result found on music.youtube, search on www.youtube
+      - 'ytmsearch:%QUERY%' # If you want music.youtube results first
+      - 'scsearch:%QUERY%' # Last try to search on soundcloud.
+    sources:
+      spotify: true # Enable Spotify source
+      applemusic: true # Enable Apple Music source
+      deezer: true # Enable Deezer source
+      yandexmusic: false # Enable Yandex Music source
+      flowerytts: false # Enable Flowery TTS source
+      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+      vkmusic: false # Enable Vk Music source
+      tidal: false # Enable Tidal source
+      qobuz: false # Enabled qobuz source
+      ytdlp: false # Enable yt-dlp source
+      jiosaavn: false # Enable JioSaavn source
+    lyrics-sources:
+      spotify: false # Enable Spotify lyrics source
+      deezer: true # Enable Deezer lyrics source
+      youtube: true # Enable YouTube lyrics source
+      yandexmusic: false # Enable Yandex Music lyrics source
+      vkmusic: false # Enable Vk Music lyrics source
+      lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
+    spotify:
+      # clientId: ${LAVASRC_SPOTIFY_CLIENT_ID}
+      # clientSecret: ${LAVASRC_SPOTIFY_CLIENT_SECRET}
+      # spDc: "your sp dc cookie" # the sp dc cookie used for accessing the spotify lyrics api
+      countryCode: 'VN' # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      playlistLoadLimit: 1 # The number of pages at 100 tracks each
+      albumLoadLimit: 1 # The number of pages at 50 tracks each
+      resolveArtistsInSearch: true # Whether to resolve artists in track search results (can be slow)
+      localFiles: false # Enable local files support with Spotify playlists. Please note `uri` & `isrc` will be `null` & `identifier` will be `"local"`
+      preferAnonymousToken: true # Whether to use the anonymous token for resolving tracks, artists and albums. Spotify generated playlists are always resolved with the anonymous tokens since they do not work otherwise. This requires the customTokenEndpoint to be set.
+      customTokenEndpoint: 'http://192.168.0.106:3012/api/token' # Optional custom endpoint for getting the anonymous token. If not set, spotify's default endpoint will be used which might not work. The response must match spotify's anonymous token response format.
+    applemusic:
+      countryCode: 'VN' # the country code you want to use for filtering the artists top tracks and language. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      mediaAPIToken: ${LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN} # apple music api token
+      playlistLoadLimit: 6 # The number of pages at 300 tracks each
+      albumLoadLimit: 6 # The number of pages at 300 tracks each
+    deezer:
+      masterDecryptionKey: ${LAVASRC_DEEZER_MASTER_DECRYPTION_KEY} # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
+      arl: ${LAVASRC_DEEZER_ARL} # the arl cookie used for accessing the deezer api this is not optional anymore
+      formats: ['MP3_128', 'MP3_64'] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
+    youtube:
+      countryCode: 'VN' # the country code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      language: 'vi' # the language code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+
+logging:
+  file:
+    max-history: 30
+    max-size: 1GB
+
+  level:
+    root: INFO
+    lavalink: INFO
+    com.github.topi314.lavasrc: DEBUG
+
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: false
+    includeQueryString: true
+    includePayload: true
+    maxPayloadLength: 10000
