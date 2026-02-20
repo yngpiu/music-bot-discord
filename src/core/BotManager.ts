@@ -1,0 +1,136 @@
+import { Redis } from 'ioredis'
+import { LavalinkManager } from 'lavalink-client'
+import { config } from '~/config/env.js'
+
+import { BotClient } from '~/core/BotClient.js'
+import { Loader } from '~/core/Loader.js'
+import { RedisQueueStore } from '~/lib/QueueStore.js'
+
+import { logger } from '~/utils/logger.js'
+
+export class BotManager {
+  public bots: BotClient[] = []
+  private redis: Redis
+
+  constructor() {
+    this.redis = new Redis({
+      host: config.redis.url ? new URL(config.redis.url).hostname : 'localhost',
+      port: config.redis.url ? parseInt(new URL(config.redis.url).port || '6379') : 6379,
+      password: config.redis.password,
+      lazyConnect: true
+    })
+  }
+
+  async start() {
+    // Connect Redis
+    try {
+      await this.redis.connect()
+      logger.info('[Boot] Successfully established connection to Redis Server.')
+    } catch {
+      logger.warn('[Boot] Failed to connect to Redis. Falling back to in-memory store.')
+    }
+
+    // Create bot clients
+    for (let i = 0; i < config.bots.length; i++) {
+      const botConfig = config.bots[i]
+      const bot = new BotClient(i)
+
+      // Setup LavalinkManager for this bot
+      bot.lavalink = new LavalinkManager({
+        nodes: [
+          {
+            id: `node_${i}`,
+            host: config.lavalink.host,
+            port: config.lavalink.port,
+            authorization: config.lavalink.password,
+            secure: config.lavalink.secure,
+            retryAmount: 5,
+            retryDelay: 5000
+          }
+        ],
+        sendToShard: (guildId, payload) => bot.guilds.cache.get(guildId)?.shard?.send(payload),
+        client: {
+          id: botConfig.clientId,
+          username: `MusicBot #${i + 1}`
+        },
+        autoSkip: true,
+        playerOptions: {
+          defaultSearchPlatform: 'dzsearch',
+          onDisconnect: {
+            autoReconnect: true,
+            destroyPlayer: false
+          },
+          onEmptyQueue: {
+            destroyAfterMs: 180000
+          }
+        },
+        queueOptions: {
+          maxPreviousTracks: 10,
+          queueStore: new RedisQueueStore(this.redis)
+        }
+      })
+
+      // Load commands
+      await Loader.loadCommands(bot)
+
+      // Register events
+      await Loader.registerEvents(bot, this)
+
+      // Register lavalink events
+      await Loader.registerLavalinkEvents(bot)
+
+      // Login
+      await bot.login(botConfig.token)
+      this.bots.push(bot)
+      logger.info(`[Boot] Bot instance ${i + 1}/${config.bots.length} authenticated successfully.`)
+    }
+  }
+
+  /**
+   * Core routing — follows bots_flow.md:
+   *
+   * Voice commands:
+   *   Priority 1 — Bot already in user's VC
+   *   Priority 2 — Any idle bot
+   *   Fallback    — null (all busy)
+   *
+   * Non-voice commands:
+   *   Distribute evenly using message ID hash (no state needed)
+   */
+  getOrAssignBot(
+    guildId: string,
+    options: { vcId?: string; messageId?: string; requiresVoice: boolean }
+  ): BotClient | null {
+    const { vcId, messageId, requiresVoice } = options
+
+    if (requiresVoice) {
+      // Priority 1: bot already in user's VC
+      if (vcId) {
+        for (const bot of this.bots) {
+          const botVcId = bot.guilds.cache.get(guildId)?.members.me?.voice?.channelId
+          if (botVcId && botVcId === vcId) return bot
+        }
+      }
+
+      // Priority 2: any idle bot
+      for (const bot of this.bots) {
+        if (this.isIdle(bot, guildId)) return bot
+      }
+
+      return null // all bots busy
+    }
+
+    // Non-voice: distribute using message ID hash
+    const id = BigInt(messageId ?? '0')
+    const idx = Number(id % BigInt(this.bots.length))
+    return this.bots[idx] ?? this.bots[0] ?? null
+  }
+
+  /**
+   * A bot is "idle" in a guild if it has no active/playing player.
+   */
+  isIdle(bot: BotClient, guildId: string): boolean {
+    const player = bot.lavalink.getPlayer(guildId)
+    return !player || !player.playing
+  }
+}
