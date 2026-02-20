@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: music-bot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - music-bot-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: music-bot-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - music-bot-network
+
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4-alpine
+    container_name: music-bot-lavalink
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=2333
+      - LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
+      # LavaSrc - Spotify
+      - LAVASRC_SPOTIFY_CLIENT_ID=${LAVASRC_SPOTIFY_CLIENT_ID}
+      - LAVASRC_SPOTIFY_CLIENT_SECRET=${LAVASRC_SPOTIFY_CLIENT_SECRET}
+      # LavaSrc - Apple Music
+      - LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN=${LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN}
+      # LavaSrc - Deezer
+      - LAVASRC_DEEZER_MASTER_DECRYPTION_KEY=${LAVASRC_DEEZER_MASTER_DECRYPTION_KEY}
+      - LAVASRC_DEEZER_ARL=${LAVASRC_DEEZER_ARL}
+    ports:
+      - '2333:2333'
+    volumes:
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      - ./lavalink/plugins:/opt/Lavalink/plugins
+    networks:
+      - music-bot-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  music-bot-network:
+    driver: bridge
