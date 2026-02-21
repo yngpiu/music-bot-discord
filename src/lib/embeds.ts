@@ -1,11 +1,9 @@
-import { AttachmentBuilder, ContainerBuilder, EmbedBuilder, MessageFlags } from 'discord.js'
+import { AttachmentBuilder, EmbedBuilder } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { EMOJI } from '~/constants/emoji'
-
-import { formatDuration, lines } from '~/utils/stringUtil'
+import { formatDuration } from '~/utils/stringUtil'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const assetsDir = path.join(__dirname, '../../assets')
@@ -49,27 +47,6 @@ function getTrackInfo(track: Track | UnresolvedTrack) {
 /**
  * "Started playing X by Y" — shown on trackStart event
  */
-export function buildNowPlayingEmbed(track: Track) {
-  const trackLink = track?.info?.uri || 'https://github.com/yngpiu'
-  const authorLink = track?.pluginInfo?.artistUrl || null
-  let stringDuration = ''
-  if (track.info.duration) {
-    stringDuration = formatDuration(track.info.duration)
-  }
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      lines(
-        `${EMOJI.ANIMATED_CD_SPINNING} Bắt đầu phát **[[${stringDuration}] ${track.info.title}](${trackLink})**${authorLink ? ` bởi **[${track.info.author}](${authorLink})**` : ''}`
-      )
-    )
-  )
-
-  return {
-    components: [container],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    flags: MessageFlags.IsComponentsV2 as any
-  }
-}
 
 /**
  * "Added Track" embed — shown when a single track is queued
