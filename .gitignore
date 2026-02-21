@@ -6,3 +6,4 @@ node_modules
 logs/
 lavalink-client-open-source/
 .spotify-token-cache.json
+/dist

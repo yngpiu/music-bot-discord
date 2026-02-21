@@ -69,9 +69,12 @@ const command: Command = {
       if (isFirstPlay) {
         await loadingMsg.delete().catch(() => {})
       } else {
-        await loadingMsg.edit(
-          buildAddedPlaylistEmbed(result.playlist?.title ?? 'Playlist', result.tracks, thumbnail)
+        const playlistEmbed = buildAddedPlaylistEmbed(
+          result.playlist?.title ?? 'Playlist',
+          result.tracks,
+          thumbnail
         )
+        await loadingMsg.edit({ content: '', ...playlistEmbed })
       }
     } else {
       const track = result.tracks[0]
@@ -82,9 +85,12 @@ const command: Command = {
       if (isFirstPlay) {
         await loadingMsg.delete().catch(() => {})
       } else {
-        await loadingMsg.edit(
-          buildAddedTrackEmbed(track, player, message.member?.user ?? message.author)
+        const trackEmbed = buildAddedTrackEmbed(
+          track,
+          player,
+          message.member?.user ?? message.author
         )
+        await loadingMsg.edit({ content: '', ...trackEmbed })
       }
     }
 
