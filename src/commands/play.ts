@@ -40,6 +40,10 @@ const command: Command = {
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh voice của tôi!')
 
+    if (!player.get('owner')) {
+      player.set('owner', message.author.id)
+    }
+
     // Search — Spotify is handled by our custom resolver, everything else by Lavalink natively
     const result = isSpotifyQuery(query)
       ? await spotifySearch(player, query, message.author)

@@ -7,6 +7,7 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder
 } from 'discord.js'
+import { UnresolvedTrack } from 'lavalink-client'
 
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
@@ -53,6 +54,10 @@ const command: Command = {
 
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh voice của tôi!')
+
+    if (!player.get('owner')) {
+      player.set('owner', message.author.id)
+    }
 
     const result = await player.search({ query }, message.author)
 

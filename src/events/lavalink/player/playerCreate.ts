@@ -7,5 +7,8 @@ import { logger } from '~/utils/logger.js'
 export const name = 'playerCreate'
 
 export const execute = async (bot: BotClient, player: Player) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Player instance created for the guild.`)
+  const owner = player.get<string | null>('owner')
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Player instance created for the guild. Owner: ${owner || 'None'}.`
+  )
 }
