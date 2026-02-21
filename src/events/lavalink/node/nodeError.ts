@@ -13,6 +13,7 @@ export const execute = async (
   payload: unknown
 ) => {
   logger.error(
-    `[Lavalink: Node] ${node.id} :: ERRORED :: ${error} :: PAYLOAD :: ${JSON.stringify(payload)}`
+    `[Lavalink:Node] ${node.id} :: Encountered a critical error: ${error.message || error}`,
+    payload
   )
 }

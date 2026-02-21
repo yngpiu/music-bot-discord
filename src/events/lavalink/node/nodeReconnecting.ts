@@ -7,5 +7,5 @@ import { logger } from '~/utils/logger.js'
 export const name = 'nodeReconnecting'
 
 export const execute = async (bot: BotClient, node: LavalinkNode) => {
-  logger.info(`[Lavalink: Node] ${node.id} :: RECONNECTING ::`)
+  logger.info(`[Lavalink:Node] ${node.id} :: Reconnecting to the Lavalink server...`)
 }

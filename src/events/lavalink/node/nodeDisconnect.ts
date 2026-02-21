@@ -11,5 +11,7 @@ export const execute = async (
   node: LavalinkNode,
   reason: { code?: number; reason?: string }
 ) => {
-  logger.info(`[Lavalink: Node] ${node.id} :: DISCONNECT :: \nReason: ${JSON.stringify(reason)}`)
+  logger.warn(
+    `[Lavalink:Node] ${node.id} :: Disconnected from the Lavalink server. Code: ${reason.code ?? 'Unknown'}, Reason: ${reason.reason ?? 'No reason provided'}.`
+  )
 }

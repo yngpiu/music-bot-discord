@@ -5,5 +5,5 @@ import { logger } from '~/utils/logger.js'
 export const name = 'nodeDestroy'
 
 export const execute = async (node: LavalinkNode) => {
-  logger.info(`[Lavalink:Node] ${node.id} :: DESTROYED ::`)
+  logger.warn(`[Lavalink:Node] ${node.id} :: Node has been destroyed and removed from the manager.`)
 }
