@@ -5,9 +5,8 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-export const name = 'playerQueueEmptyStart'
 
-export const execute = async (bot: BotClient, player: Player, delayMs: number) => {
+export default async (bot: BotClient, player: Player, delayMs: number) => {
   logger.info(`[Lavalink:Player] ${player.guildId} :: Queue empty. Disconnect timer started...`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)

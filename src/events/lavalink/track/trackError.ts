@@ -4,9 +4,8 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-export const name = 'trackError'
 
-export const execute = async (
+export default async (
   bot: BotClient,
   player: Player,
   track: Track | UnresolvedTrack | null,

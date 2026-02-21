@@ -59,19 +59,31 @@ export class Loader {
 
     for (const filePath of eventFiles) {
       const event = await import(filePath)
-      if (event.name && event.execute) {
+      const execute = event.default || event
+
+      if (typeof execute === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bot.lavalink.on(event.name, (...args: any[]) => event.execute(bot, ...args))
+        const executeParams = (...args: any[]) => execute(bot, ...args)
+        const eventName =
+          filePath
+            .split('/')
+            .pop()
+            ?.replace(/\.(js|ts)$/, '') || ''
+
+        if (filePath.includes('/node/')) {
+          // Các file node (nodeError, nodeDisconnect) cần được nối vào nodeManager
+          // Tên event sẽ bị bỏ chữ 'node' (VD: 'nodeError' -> 'error')
+          let nodeEventName = eventName.replace(/^node/, '')
+          nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          bot.lavalink.nodeManager.on(nodeEventName as any, executeParams)
+        } else {
+          // Các event của player, track... nối thẳng vào LavalinkManager
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          bot.lavalink.on(eventName as any, executeParams)
+        }
       }
     }
-
-    // 🛡️ Bắt sự kiện lỗi 'error' từ NodeManager để chống sập Node.js (Unhandled 'error' event)
-    bot.lavalink.nodeManager.on('error', (node, error) => {
-      import('~/utils/logger.js').then(({ logger }) => {
-        logger.error(
-          `[Lavalink:Node] ${node.id} :: Unhandled Node Error (Caught to prevent crash): ${error.message || error}`
-        )
-      })
-    })
   }
 }

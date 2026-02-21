@@ -4,8 +4,7 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-export const name = 'playerSuppressChange'
 
-export const execute = async (bot: BotClient, player: Player, suppress: boolean) => {
+export default async (bot: BotClient, player: Player, suppress: boolean) => {
   logger.info(`[Lavalink:Player] ${player.guildId} :: Suppress status changed.`, { suppress })
 }

@@ -5,9 +5,8 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-export const name = 'playerDestroy'
 
-export const execute = async (bot: BotClient, player: Player, reason?: string) => {
+export default async (bot: BotClient, player: Player, reason?: string) => {
   logger.info(
     `[Lavalink:Player] ${player.guildId} :: Player destroyed. Reason: ${reason || 'Unknown'}`
   )

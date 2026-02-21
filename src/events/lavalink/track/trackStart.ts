@@ -1,4 +1,4 @@
-import { ContainerBuilder, MessageFlags } from 'discord.js'
+import { ContainerBuilder } from 'discord.js'
 import { Player, Track } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
@@ -7,9 +7,8 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 import { formatDuration, lines } from '~/utils/stringUtil'
 
-export const name = 'trackStart'
 
-export const execute = async (bot: BotClient, player: Player, track: Track) => {
+export default async (bot: BotClient, player: Player, track: Track) => {
   logger.info(
     `[Lavalink:Engine] ${player.guildId} :: Started playing track: ${track.info?.title || 'Unknown'}.`
   )
@@ -37,6 +36,6 @@ export const execute = async (bot: BotClient, player: Player, track: Track) => {
 
   await channel.send({
     components: [container],
-    flags: MessageFlags.IsComponentsV2
+    flags: ['IsComponentsV2', 'SuppressNotifications']
   })
 }

@@ -1,12 +1,14 @@
+import { ContainerBuilder } from 'discord.js'
 import { Player, Track, TrackStuckEvent } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { lines } from '~/utils/stringUtil'
 
-export const name = 'trackStuck'
 
-export const execute = async (
+export default async (
   bot: BotClient,
   player: Player,
   track: Track | null,
@@ -17,19 +19,23 @@ export const execute = async (
     payload
   )
 
-  const channel = bot.channels.cache.get(player.textChannelId!)
+  if (!track || !player.textChannelId) return
+
+  const channel = bot.channels.cache.get(player.textChannelId)
+
   if (!channel?.isTextBased() || !('send' in channel)) return
+  const trackLink = track?.info?.uri || 'https://github.com/yngpiu'
 
-  // Dynamic import to avoid circular dependencies if BotManager imports this file
-  const { EmbedBuilder } = await import('discord.js')
-
-  const embed = new EmbedBuilder()
-    .setColor('Orange')
-    .setTitle('⚠️ Bài hát bị kẹt (Stuck)')
-    .setDescription(
-      `Bài hát **${track?.info?.title ?? 'Unknown Track'}** đang bị kẹt. Hệ thống sẽ tự động chuyển bài.`
+  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+    t.setContent(
+      lines(
+        `${EMOJI.ANIMATED_IDK} [${track.info.title}](${trackLink}) đang bị kẹt do lỗi, mình sẽ bỏ qua bài này.`
+      )
     )
-    .setTimestamp()
+  )
 
-  await (channel as import('discord.js').TextChannel).send({ embeds: [embed] }).catch(() => null)
+  await channel.send({
+    components: [container],
+    flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
 }
