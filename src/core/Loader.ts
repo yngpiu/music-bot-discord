@@ -64,5 +64,14 @@ export class Loader {
         bot.lavalink.on(event.name, (...args: any[]) => event.execute(bot, ...args))
       }
     }
+
+    // 🛡️ Bắt sự kiện lỗi 'error' từ NodeManager để chống sập Node.js (Unhandled 'error' event)
+    bot.lavalink.nodeManager.on('error', (node, error) => {
+      import('~/utils/logger.js').then(({ logger }) => {
+        logger.error(
+          `[Lavalink:Node] ${node.id} :: Unhandled Node Error (Caught to prevent crash): ${error.message || error}`
+        )
+      })
+    })
   }
 }
