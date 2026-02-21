@@ -1,15 +1,13 @@
+import { logger } from '~/utils/logger.js'
 import { EmbedBuilder, TextChannel } from 'discord.js'
 import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 
-import { logger } from '~/utils/logger.js'
 
 
 export default async (bot: BotClient, player: Player, voiceChannelId: string) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Successfully reconnected to voice channel <#${voiceChannelId}>.`
-  )
+  logger.info(`[Lavalink:Player] ${player.guildId} :: Successfully reconnected to voice channel <#${voiceChannelId}>.`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return

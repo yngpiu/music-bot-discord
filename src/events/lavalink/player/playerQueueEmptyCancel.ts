@@ -1,15 +1,13 @@
+import { logger } from '~/utils/logger.js'
 import { EmbedBuilder, TextChannel } from 'discord.js'
 import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 
-import { logger } from '~/utils/logger.js'
 
 
 export default async (bot: BotClient, player: Player) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Queue no longer empty. Disconnect timer cancelled.`
-  )
+  logger.info(`[Lavalink:Player] ${player.guildId} :: Queue no longer empty. Disconnect timer cancelled.`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   const msgId = player.get<string | null>('queueEmptyMessageId')

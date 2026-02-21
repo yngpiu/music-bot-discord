@@ -5,7 +5,6 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
 export default async (bot: BotClient, player: Player, delayMs: number) => {
   logger.info(`[Lavalink:Player] ${player.guildId} :: Queue empty. Disconnect timer started...`)
 

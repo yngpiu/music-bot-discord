@@ -1,6 +1,6 @@
+import { logger } from '~/utils/logger.js'
 import { LavalinkNode, LavalinkPlayer } from 'lavalink-client'
 
-import { logger } from '~/utils/logger.js'
 
 
 export default async (
@@ -8,7 +8,5 @@ export default async (
   payload: { resumed: boolean; sessionId: string; op: 'ready' },
   players: LavalinkPlayer[]
 ) => {
-  logger.info(
-    `[Lavalink:Node] ${node.id} :: RESUMED :: ${Array.isArray(players) ? players.length : players} PLAYERS STILL PLAYING ::`
-  )
+  logger.info(`[Lavalink:Node] ${node.id} :: RESUMED :: ${Array.isArray(players) ? players.length : players} PLAYERS STILL PLAYING ::`)
 }

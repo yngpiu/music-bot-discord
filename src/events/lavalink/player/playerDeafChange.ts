@@ -4,15 +4,8 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
-export default async (
-  bot: BotClient,
-  player: Player,
-  selfDeaf: boolean,
-  serverDeaf: boolean
-) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Deaf status changed.`, {
-    selfDeaf,
-    serverDeaf
-  })
+export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverDeaf: boolean) => {
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Deaf status changed. ${JSON.stringify({ selfDeaf, serverDeaf })}`
+  )
 }

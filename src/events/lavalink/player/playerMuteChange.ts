@@ -4,17 +4,10 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
-export default async (
-  bot: BotClient,
-  player: Player,
-  selfMuted: boolean,
-  serverMuted: boolean
-) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Mute status changed.`, {
-    selfMuted,
-    serverMuted
-  })
+export default async (bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean) => {
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Mute status changed. ${JSON.stringify({ selfMuted, serverMuted })}`
+  )
 
   if (serverMuted) {
     player.set('paused_of_servermute', true)

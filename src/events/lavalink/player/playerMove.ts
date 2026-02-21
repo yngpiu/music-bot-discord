@@ -1,8 +1,8 @@
+import { logger } from '~/utils/logger.js'
 import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 
-import { logger } from '~/utils/logger.js'
 
 
 export default async (
@@ -11,7 +11,5 @@ export default async (
   oldVoiceChannelId: string,
   newVoiceChannelId: string
 ) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Moved from voice channel <#${oldVoiceChannelId}> to <#${newVoiceChannelId}>.`
-  )
+  logger.info(`[Lavalink:Player] ${player.guildId} :: Moved from voice channel <#${oldVoiceChannelId}> to <#${newVoiceChannelId}>.`)
 }

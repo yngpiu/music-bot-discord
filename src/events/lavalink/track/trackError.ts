@@ -4,7 +4,6 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
 export default async (
   bot: BotClient,
   player: Player,
@@ -12,8 +11,7 @@ export default async (
   payload: TrackExceptionEvent
 ) => {
   logger.error(
-    `[Lavalink:Engine] ${player.guildId} :: Encountered a fatal exception while playing track. Details:`,
-    payload
+    `[Lavalink:Player] ${player.guildId} :: ERROR: Encountered a fatal exception while playing track. Details: ${JSON.stringify(payload)}`
   )
 
   const channel = bot.channels.cache.get(player.textChannelId!)

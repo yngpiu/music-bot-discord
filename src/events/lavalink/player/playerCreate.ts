@@ -4,7 +4,6 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
 export default async (bot: BotClient, player: Player) => {
   const owner = player.get<string | null>('owner')
   logger.info(

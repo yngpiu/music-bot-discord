@@ -4,9 +4,8 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-
 export default async (bot: BotClient, player: Player, track: Track | null) => {
   logger.info(
-    `[Lavalink:Engine] ${player.guildId} :: Player queue finished. Last track: ${track?.info?.title || 'Unknown'}.`
+    `[Lavalink:Player] ${player.guildId} :: Player queue finished. Last track: ${track?.info?.title || 'Unknown'}.`
   )
 }

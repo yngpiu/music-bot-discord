@@ -7,7 +7,6 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 import { formatDuration, lines } from '~/utils/stringUtil'
 
-
 export default async (bot: BotClient, player: Player, track: Track) => {
   logger.info(
     `[Lavalink:Engine] ${player.guildId} :: Started playing track: ${track.info?.title || 'Unknown'}.`

@@ -1,12 +1,11 @@
+import { logger } from '~/utils/logger.js'
 import { ContainerBuilder } from 'discord.js'
 import { Player, Track, TrackStuckEvent } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
-import { logger } from '~/utils/logger.js'
 import { lines } from '~/utils/stringUtil'
-
 
 export default async (
   bot: BotClient,
@@ -14,10 +13,7 @@ export default async (
   track: Track | null,
   payload: TrackStuckEvent
 ) => {
-  logger.error(
-    `[Lavalink:Engine] ${player.guildId} :: Track is permanently stuck. System will skip. Details:`,
-    payload
-  )
+  logger.error(`[Lavalink:Player] ${player.guildId} :: Track is permanently stuck. System will skip. Details:`, payload)
 
   if (!track || !player.textChannelId) return
 
