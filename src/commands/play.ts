@@ -5,6 +5,8 @@ import { BotError } from '~/core/errors.js'
 import { buildAddedPlaylistEmbed, buildAddedTrackEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
+import { sendLoadingMessage } from '~/utils/messageUtil.js'
+
 const command: Command = {
   name: 'play',
   aliases: ['p'],
@@ -23,6 +25,9 @@ const command: Command = {
 
     const query = args.join(' ')
     if (!query) throw new BotError('Vui lòng nhập tên bài hát hoặc đường link!')
+
+    // Reply loading immediately
+    const loadingMsg = await sendLoadingMessage(message)
 
     // Get or create player
     const player =
@@ -59,15 +64,28 @@ const command: Command = {
       const thumbnail =
         result.playlist?.thumbnail ??
         ('info' in result.tracks[0] ? result.tracks[0].info.artworkUrl : null)
-      await message.reply(
-        buildAddedPlaylistEmbed(result.playlist?.title ?? 'Playlist', result.tracks, thumbnail)
-      )
+
+      const isFirstPlay = !player.playing && player.queue.tracks.length === result.tracks.length
+      if (isFirstPlay) {
+        await loadingMsg.delete().catch(() => {})
+      } else {
+        await loadingMsg.edit(
+          buildAddedPlaylistEmbed(result.playlist?.title ?? 'Playlist', result.tracks, thumbnail)
+        )
+      }
     } else {
       const track = result.tracks[0]
+      const isFirstPlay = !player.playing && player.queue.tracks.length === 0
+
       await player.queue.add(track)
-      await message.reply(
-        buildAddedTrackEmbed(track, player, message.member?.user ?? message.author)
-      )
+
+      if (isFirstPlay) {
+        await loadingMsg.delete().catch(() => {})
+      } else {
+        await loadingMsg.edit(
+          buildAddedTrackEmbed(track, player, message.member?.user ?? message.author)
+        )
+      }
     }
 
     if (!player.playing) await player.play()

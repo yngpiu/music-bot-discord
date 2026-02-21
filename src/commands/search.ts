@@ -203,18 +203,26 @@ const command: Command = {
 
         if (!track) return
 
+        const isFirstPlay = !player.playing && player.queue.tracks.length === 0
         await player.queue.add(track)
 
         if (!player.playing) await player.play()
 
-        const addedEmbed = buildAddedTrackEmbed(track, player, message.author)
-
-        await interaction.update({
-          content: `Đã chọn: **${track.info.title}**`,
-          embeds: addedEmbed.embeds,
-          files: addedEmbed.files,
-          components: []
-        })
+        if (!isFirstPlay) {
+          const addedEmbed = buildAddedTrackEmbed(track, player, message.author)
+          await interaction.update({
+            content: '',
+            embeds: addedEmbed.embeds,
+            files: addedEmbed.files,
+            components: []
+          })
+        } else {
+          await interaction.update({
+            content: '',
+            embeds: [],
+            components: []
+          })
+        }
 
         collector.stop('selected')
       }
