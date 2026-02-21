@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 export const name = 'playerQueueEmptyStart'
 
 export const execute = async (bot: BotClient, player: Player, delayMs: number) => {
-  logger.info(`[Lavalink: Player] ${player.guildId} :: QUEUE EMPTY START ::`)
+  logger.info(`[Lavalink:Player] ${player.guildId} :: Queue empty. Disconnect timer started...`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return

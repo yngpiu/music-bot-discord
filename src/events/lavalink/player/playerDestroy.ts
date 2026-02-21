@@ -8,7 +8,9 @@ import { logger } from '~/utils/logger.js'
 export const name = 'playerDestroy'
 
 export const execute = async (bot: BotClient, player: Player, reason?: string) => {
-  logger.info(`[Lavalink: Player] ${player.guildId} :: DESTROYED :: Reason: ${reason}`)
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Player destroyed. Reason: ${reason || 'Unknown'}`
+  )
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return

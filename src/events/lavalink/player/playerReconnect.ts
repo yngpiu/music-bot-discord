@@ -9,7 +9,7 @@ export const name = 'playerReconnect'
 
 export const execute = async (bot: BotClient, player: Player, voiceChannelId: string) => {
   logger.info(
-    `[Lavalink:Player] ${player.guildId} :: RECONNECTED :: to voice channel ${voiceChannelId}`
+    `[Lavalink:Player] ${player.guildId} :: Successfully reconnected to voice channel <#${voiceChannelId}>.`
   )
 
   const channel = bot.channels.cache.get(player.textChannelId!)

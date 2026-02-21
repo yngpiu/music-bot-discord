@@ -12,7 +12,7 @@ export const execute = async (
   selfMuted: boolean,
   serverMuted: boolean
 ) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: playerMuteChange ::`, {
+  logger.info(`[Lavalink:Player] ${player.guildId} :: Mute status changed.`, {
     selfMuted,
     serverMuted
   })

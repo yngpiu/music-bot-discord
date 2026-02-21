@@ -13,7 +13,7 @@ export const execute = async (
   payload: TrackExceptionEvent
 ) => {
   logger.error(
-    `[Lavalink:Engine] Fatal exception while playing track in Guild ${player.guildId}. Details:`,
+    `[Lavalink:Engine] ${player.guildId} :: Encountered a fatal exception while playing track. Details:`,
     payload
   )
 

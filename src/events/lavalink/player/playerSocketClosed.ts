@@ -8,7 +8,7 @@ export const name = 'playerSocketClosed'
 
 export const execute = async (bot: BotClient, player: Player, payload: WebSocketClosedEvent) => {
   logger.error(
-    `[Lavalink:Player] ${player.guildId} :: SOCKET CLOSED :: Lavalink websocket closed. Details:`,
+    `[Lavalink:Player] ${player.guildId} :: Websocket closed unexpectedly. Code: ${payload.code}, Reason: ${payload.reason}`,
     payload
   )
 }

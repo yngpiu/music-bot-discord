@@ -13,7 +13,7 @@ export const execute = async (
   payload: TrackStuckEvent
 ) => {
   logger.error(
-    `[Lavalink:Engine] Track permanently stuck in Guild ${player.guildId}. Details:`,
+    `[Lavalink:Engine] ${player.guildId} :: Track is permanently stuck. System will skip. Details:`,
     payload
   )
 

@@ -8,7 +8,9 @@ import { logger } from '~/utils/logger.js'
 export const name = 'playerQueueEmptyCancel'
 
 export const execute = async (bot: BotClient, player: Player) => {
-  logger.info(`[Lavalink: Player] ${player.guildId} :: QUEUE EMPTY CANCEL ::`)
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Queue no longer empty. Disconnect timer cancelled.`
+  )
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   const msgId = player.get<string | null>('queueEmptyMessageId')

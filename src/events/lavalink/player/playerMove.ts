@@ -6,7 +6,6 @@ import { logger } from '~/utils/logger.js'
 
 export const name = 'playerMove'
 
- 
 export const execute = async (
   bot: BotClient,
   player: Player,
@@ -14,6 +13,6 @@ export const execute = async (
   newVoiceChannelId: string
 ) => {
   logger.info(
-    `[Lavalink:Player] ${player.guildId} :: MOVED :: from ${oldVoiceChannelId} to ${newVoiceChannelId}`
+    `[Lavalink:Player] ${player.guildId} :: Moved from voice channel <#${oldVoiceChannelId}> to <#${newVoiceChannelId}>.`
   )
 }

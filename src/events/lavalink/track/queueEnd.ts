@@ -8,6 +8,6 @@ export const name = 'queueEnd'
 
 export const execute = async (bot: BotClient, player: Player, track: Track | null) => {
   logger.info(
-    `[Lavalink:Engine] ${player.guildId} :: No more tracks in the queue, after playing :: ${track?.info?.title}`
+    `[Lavalink:Engine] ${player.guildId} :: Player queue finished. Last track: ${track?.info?.title || 'Unknown'}.`
   )
 }

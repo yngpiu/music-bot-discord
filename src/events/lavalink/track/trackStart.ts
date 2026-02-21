@@ -8,10 +8,9 @@ import { logger } from '~/utils/logger.js'
 export const name = 'trackStart'
 
 export const execute = async (bot: BotClient, player: Player, track: Track) => {
-  logger.debug(
-    `[Lavalink:Player] Started playing track "${track.info?.title}" for Guild ${player.guildId}`
+  logger.info(
+    `[Lavalink:Engine] ${player.guildId} :: Started playing track: ${track.info?.title || 'Unknown'}.`
   )
-  logger.info(track)
 
   if (!track) return
 
