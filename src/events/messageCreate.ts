@@ -6,6 +6,7 @@ import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
 import { asyncMessageHandler } from '~/lib/asyncHandlers.js'
 
+import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { lines } from '~/utils/stringUtil'
 
 export default {
@@ -37,7 +38,7 @@ export default {
         )
       )
       // All bots busy — pick one predictably based on message ID to avoid duplicates
-      const randomBotIndex = Number(message.id.slice(-5)) % manager.bots.length
+      const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
       if (bot.botIndex === randomBotIndex) {
         await message.reply({ components: [container], flags: ['IsComponentsV2'] })
       }

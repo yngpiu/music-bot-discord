@@ -7,6 +7,7 @@ import { Loader } from '~/core/Loader.js'
 import { RedisQueueStore } from '~/lib/QueueStore.js'
 
 import { logger } from '~/utils/logger.js'
+import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 
 export class BotManager {
   public bots: BotClient[] = []
@@ -121,8 +122,7 @@ export class BotManager {
     }
 
     // Non-voice: distribute using message ID hash
-    const id = BigInt(messageId ?? '0')
-    const idx = Number(id % BigInt(this.bots.length))
+    const idx = getDeterministicIndexFromId(messageId, this.bots.length)
     return this.bots[idx] ?? this.bots[0] ?? null
   }
 
