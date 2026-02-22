@@ -16,16 +16,16 @@ export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverD
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_IDK} Bot đã bị ${serverDeaf ? '**Server Deafen (Bịt Tai)**' : '**bỏ Server Deafen**'}`
-    )
-  )
+  const message = serverDeaf
+    ? `${EMOJI.ANIMATED_CAT_CRYING} Ơ kìa...ai đã bịt tai của tớ vậy?`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Yay...cuối cùng tớ cũng nghe được lại rồi nè.`
+
+  const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }

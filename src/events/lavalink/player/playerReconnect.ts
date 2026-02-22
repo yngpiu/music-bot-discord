@@ -15,15 +15,13 @@ export default async (bot: BotClient, player: Player, voiceChannelId: string) =>
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_CAT_DANCE} Đã kết nối lại thành công vào kênh <#${voiceChannelId}>`
-    )
+    t.setContent(`${EMOJI.ANIMATED_CAT_CONGRATULATION} Yay...tớ đã kết nối lại thành công!`)
   )
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }

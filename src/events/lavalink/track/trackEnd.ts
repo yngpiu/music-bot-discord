@@ -4,6 +4,7 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
+// IGNORE
 export default async (bot: BotClient, player: Player, track: Track | null) => {
   logger.info(
     `[Lavalink:Player] ${player.guildId} :: Finished playing track: ${track?.info?.title || 'Unknown'}.`

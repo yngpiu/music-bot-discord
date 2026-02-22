@@ -20,13 +20,15 @@ export default async (
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(`${EMOJI.ANIMATED_IDK} Bot đã bị bê sang kênh <#${newVoiceChannelId}>`)
+    t.setContent(
+      `${EMOJI.ANIMATED_CAT_NO_IDEA} Ủa...ai đó đã bê tớ sang kênh <#${newVoiceChannelId}>`
+    )
   )
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }

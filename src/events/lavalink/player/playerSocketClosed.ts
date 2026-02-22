@@ -11,19 +11,21 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
     `[Lavalink:Player] ${player.guildId} :: ERROR: Websocket closed unexpectedly. Code: ${payload.code}, Reason: ${payload.reason} ${JSON.stringify(payload)}`
   )
 
+  // Code 4014 means Discord disconnected the Voice WebSocket. This happens naturally
+  // during playerMove and playerDisconnect. We should ignore it to prevent spam.
+  if (payload.code === 4014) return
+
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_IDK} Gặp sự cố kết nối với Lavalink Server! (Code: ${payload.code})`
-    )
+    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} Ui...nhà tớ đang bị cháy, tớ về nhà xem thế nào đây...`)
   )
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }

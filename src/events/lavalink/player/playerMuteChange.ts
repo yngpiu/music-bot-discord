@@ -26,11 +26,11 @@ export default async (bot: BotClient, player: Player, selfMuted: boolean, server
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_IDK} Bot đã bị ${serverMuted ? '**Server Mute** nên nhạc sẽ tạm dừng' : '**bỏ Server Mute**, tiếp tục phát nhạc'}`
-    )
-  )
+  const message = serverMuted
+    ? `${EMOJI.ANIMATED_CAT_CRYING} Ui...ai đó đã bịt miệng tớ vậy.`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Hehe...cuối cùng cũng nói lại được rồi.`
+
+  const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
   await channel
     .send({

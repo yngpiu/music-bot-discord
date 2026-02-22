@@ -14,16 +14,16 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_IDK} Bot đã bị ${suppress ? '**Chuyển thành Khán giả** (bị tắt mic) trên Stage' : '**Chuyển thành Diễn giả** (được cấp mic) trên Stage'}`
-    )
-  )
+  const message = suppress
+    ? `${EMOJI.ANIMATED_CAT_CRYING} Huhu...tớ bị đuổi khỏi sân khấu mất rồi.`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Hehe...tớ được lên sân khấu làm MC rồi nha.`
+
+  const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }
