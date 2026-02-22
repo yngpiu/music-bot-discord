@@ -74,6 +74,9 @@ export class BotManager {
       // Load commands
       await Loader.loadCommands(bot)
 
+      // Load interactions (buttons, modals, autocompletes)
+      await Loader.loadInteractions(bot)
+
       // Register events
       await Loader.registerEvents(bot, this)
 

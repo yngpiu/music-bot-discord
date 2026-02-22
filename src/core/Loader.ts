@@ -182,4 +182,36 @@ export class Loader {
       }
     }
   }
+
+  static async loadInteractions(bot: BotClient) {
+    const interactionsPath = join(__dirname, '../interactions')
+
+    const dirs = [
+      { folder: 'buttons', collection: bot.buttonHandlers },
+      { folder: 'modals', collection: bot.modalHandlers },
+      { folder: 'autocompletes', collection: bot.autocompleteHandlers }
+    ] as const
+
+    for (const { folder, collection } of dirs) {
+      const dirPath = join(interactionsPath, folder)
+
+      let files: string[]
+      try {
+        files = readdirSync(dirPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'))
+      } catch {
+        // Directory doesn't exist yet, skip
+        continue
+      }
+
+      for (const file of files) {
+        const mod = await import(join(dirPath, file))
+        const handler = mod.default ?? mod
+
+        if (typeof handler === 'object' && handler.customId && handler.execute) {
+          // Format: { customId: 'xxx', execute: async (interaction, bot) => {...} }
+          collection.set(handler.customId, handler.execute)
+        }
+      }
+    }
+  }
 }
