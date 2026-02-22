@@ -1,14 +1,55 @@
+import { Prisma } from '@prisma/client'
+import { Message } from 'discord.js'
 import { readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
+import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 import { BotManager } from '~/core/BotManager.js'
+import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+// ─── Error Helpers ────────────────────────────────────────────────────────────
+
+function isPrismaError(err: unknown): boolean {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientUnknownRequestError ||
+    err instanceof Prisma.PrismaClientValidationError ||
+    err instanceof Prisma.PrismaClientRustPanicError ||
+    err instanceof Prisma.PrismaClientInitializationError
+  )
+}
+
+async function replyError(message: Message, text: string): Promise<void> {
+  await message.reply(`${EMOJI.ERROR} ${text}`).catch(() => {})
+}
+
+/**
+ * Finds a Discord Message instance from the event arguments.
+ * Used to auto-reply errors back to the user who triggered the command.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function findMessage(args: any[]): Message | null {
+  for (const arg of args) {
+    if (arg instanceof Message) return arg
+  }
+  return null
+}
+
+// ─── Safe Execute ─────────────────────────────────────────────────────────────
+
+/**
+ * Wraps any event handler with centralized error handling.
+ *
+ * - `BotError`  → reply error message to user (if Message found in args)
+ * - Prisma      → log DB error + reply generic DB message
+ * - Unknown     → log unexpected error + reply generic system message
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,10 +57,30 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
     try {
       await fn(...args)
     } catch (err) {
-      logger.error(`[Event:${eventName}] Unhandled error:`, err)
+      const message = findMessage(args)
+
+      // BotError: user-facing, just reply, no logging
+      if (err instanceof BotError) {
+        if (message) await replyError(message, err.message)
+        return
+      }
+
+      // Log all non-BotError exceptions
+      const label = isPrismaError(err) ? 'DATABASE ERROR' : 'UNEXPECTED ERROR'
+      logger.error(`[Event:${eventName}] [${label}]:`, err)
+
+      // Reply to user if we have a message context
+      if (message) {
+        const msg = isPrismaError(err)
+          ? 'Cơ sở dữ liệu đã gặp sự cố, vui lòng thử lại hoặc liên hệ với **Ban quản lý** để được hỗ trợ.'
+          : 'Hệ thống đã gặp sự cố, vui lòng thử lại hoặc liên hệ với **Ban quản lý** để được hỗ trợ.'
+        await replyError(message, msg)
+      }
     }
   }
 }
+
+// ─── Loader ───────────────────────────────────────────────────────────────────
 
 export class Loader {
   static async loadCommands(bot: BotClient) {

@@ -4,7 +4,6 @@ import { config } from '~/config/env.js'
 import { EMOJI } from '~/constants/emoji'
 import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
-import { asyncMessageHandler } from '~/lib/asyncHandlers.js'
 
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { lines } from '~/utils/stringUtil'
@@ -47,6 +46,6 @@ export default {
 
     if (chosenBot.user?.id !== bot.user?.id) return
 
-    await asyncMessageHandler(command.execute)(bot, message, args)
+    await command.execute(bot, message, args)
   }
 }
