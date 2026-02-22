@@ -36,8 +36,9 @@ export default {
           lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
         )
       )
-      // All bots busy — only first bot replies to avoid duplicates
-      if (bot.botIndex === 0) {
+      // All bots busy — pick one predictably based on message ID to avoid duplicates
+      const randomBotIndex = Number(message.id.slice(-5)) % manager.bots.length
+      if (bot.botIndex === randomBotIndex) {
         await message.reply({ components: [container], flags: ['IsComponentsV2'] })
       }
       return
