@@ -9,8 +9,9 @@ export const formatDuration = (ms: number): string => {
 
   const parts = []
   if (hours > 0) parts.push(`${hours}h`)
-  if (minutes > 0) parts.push(`${minutes}m`)
-  if (seconds > 0) parts.push(`${seconds}s`)
+  if (hours > 0 || minutes > 0) parts.push(`${minutes}m`)
 
-  return parts.join('') || '0s'
+  parts.push(`${seconds}s`)
+
+  return parts.join('')
 }
