@@ -1,11 +1,9 @@
-import type { GuildMember, Message, VoiceChannel } from 'discord.js'
+import type { GuildMember, Message, TextChannel, VoiceChannel } from 'discord.js'
 
-import type { BotClient } from '~/core/BotClient'
+import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 import { buildAddedPlaylistEmbed, buildAddedTrackEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
-
-import { sendLoadingMessage } from '~/utils/messageUtil.js'
 
 const command: Command = {
   name: 'play',
@@ -25,9 +23,6 @@ const command: Command = {
 
     const query = args.join(' ')
     if (!query) throw new BotError('Vui lòng nhập tên bài hát hoặc đường link!')
-
-    // Reply loading immediately
-    const loadingMsg = await sendLoadingMessage(message)
 
     // Get or create player
     const player =
@@ -66,15 +61,13 @@ const command: Command = {
         ('info' in result.tracks[0] ? result.tracks[0].info.artworkUrl : null)
 
       const isFirstPlay = !player.playing && player.queue.tracks.length === result.tracks.length
-      if (isFirstPlay) {
-        await loadingMsg.delete().catch(() => {})
-      } else {
+      if (!isFirstPlay) {
         const playlistEmbed = buildAddedPlaylistEmbed(
           result.playlist?.title ?? 'Playlist',
           result.tracks,
           thumbnail
         )
-        await loadingMsg.edit({ content: '', ...playlistEmbed })
+        await (message.channel as TextChannel).send(playlistEmbed)
       }
     } else {
       const track = result.tracks[0]
@@ -82,15 +75,13 @@ const command: Command = {
 
       await player.queue.add(track)
 
-      if (isFirstPlay) {
-        await loadingMsg.delete().catch(() => {})
-      } else {
+      if (!isFirstPlay) {
         const trackEmbed = buildAddedTrackEmbed(
           track,
           player,
           message.member?.user ?? message.author
         )
-        await loadingMsg.edit({ content: '', ...trackEmbed })
+        await (message.channel as TextChannel).send(trackEmbed)
       }
     }
 
