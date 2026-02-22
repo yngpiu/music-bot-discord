@@ -28,13 +28,15 @@ export default async (bot: BotClient, player: Player, track: Track) => {
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(
       lines(
-        `${EMOJI.ANIMATED_CD_SPINNING} Bắt đầu phát **[[${stringDuration}] ${track.info.title}](${trackLink})**${authorLink ? ` bởi **[${track.info.author}](${authorLink})**` : ''}`
+        `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **[[${stringDuration}] ${track.info.title}](${trackLink})**${authorLink ? ` bởi **[${track.info.author}](${authorLink})**` : ''}`
       )
     )
   )
 
-  await channel.send({
-    components: [container],
-    flags: ['IsComponentsV2', 'SuppressNotifications']
-  })
+  await channel
+    .send({
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    })
+    .catch(() => null)
 }

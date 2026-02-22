@@ -1,8 +1,11 @@
+import { ContainerBuilder } from 'discord.js'
 import { Player, Track, TrackExceptionEvent, UnresolvedTrack } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { lines } from '~/utils/stringUtil'
 
 export default async (
   bot: BotClient,
@@ -14,19 +17,25 @@ export default async (
     `[Lavalink:Player] ${player.guildId} :: ERROR: Encountered a fatal exception while playing track. Details: ${JSON.stringify(payload)}`
   )
 
-  const channel = bot.channels.cache.get(player.textChannelId!)
+  if (!track || !player.textChannelId) return
+
+  const channel = bot.channels.cache.get(player.textChannelId)
+
   if (!channel?.isTextBased() || !('send' in channel)) return
+  const trackLink = track?.info?.uri || 'https://github.com/yngpiu'
 
-  // Dynamic import to avoid circular dependencies if BotManager imports this file
-  const { EmbedBuilder } = await import('discord.js')
-
-  const embed = new EmbedBuilder()
-    .setColor('Red')
-    .setTitle('❌ Lỗi phát nhạc')
-    .setDescription(
-      `Không thể phát bài: **${track?.info?.title ?? 'Unknown Track'}**\nLỗi: \`${String(payload.error || payload.exception?.message || 'Unknown Error')}\``
+  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+    t.setContent(
+      lines(
+        `${EMOJI.ANIMATED_CAT_CRYING} **[${track.info.title}](${trackLink})** đã gặp sự cố, tớ sẽ **bỏ qua** bài hát này.`
+      )
     )
-    .setTimestamp()
+  )
 
-  await (channel as import('discord.js').TextChannel).send({ embeds: [embed] }).catch(() => null)
+  await channel
+    .send({
+      components: [container],
+      flags: ['IsComponentsV2']
+    })
+    .catch(() => null)
 }
