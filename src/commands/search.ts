@@ -11,7 +11,7 @@ import { UnresolvedTrack } from 'lavalink-client'
 
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
-import { buildAddedTrackEmbed } from '~/lib/embeds.js'
+import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { searchSpotify } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
@@ -209,7 +209,21 @@ const command: Command = {
         if (!player.playing) await player.play()
 
         if (!isFirstPlay) {
-          const addedEmbed = buildAddedTrackEmbed(track, player, message.author)
+          const addedEmbed = buildAddedItemEmbed(
+            'track',
+            {
+              title: track.info.title,
+              tracks: [track],
+              thumbnailUrl: track.info.artworkUrl ?? null,
+              author: track.info.author,
+              trackLink: track.info.uri ?? 'https://github.com/yngpiu',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              authorLink: (track as any).pluginInfo?.artistUrl ?? null
+            },
+            player,
+            message.author,
+            bot.user?.displayAvatarURL()
+          )
           await interaction.update({
             content: '',
             embeds: addedEmbed.embeds,

@@ -31,7 +31,13 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   const content = `${EMOJI.ERROR} ${text}`
 
   if (target instanceof Message) {
-    await target.reply(content).catch(() => {})
+    const reply = await target.reply(content).catch(() => null)
+    if (reply) {
+      setTimeout(() => {
+        reply.delete().catch(() => {})
+        target.delete().catch(() => {})
+      }, 30000)
+    }
     return
   }
 

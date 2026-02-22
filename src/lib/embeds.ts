@@ -1,41 +1,7 @@
-import { AttachmentBuilder, EmbedBuilder } from 'discord.js'
+import { EmbedBuilder } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 import { formatDuration } from '~/utils/stringUtil'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const assetsDir = path.join(__dirname, '../../assets')
-
-// ─── Source icon helpers ───────────────────────────────────────────────────────
-
-type SourceName =
-  | 'spotify'
-  | 'deezer'
-  | 'youtube'
-  | 'youtubemusic'
-  | 'soundcloud'
-  | 'applemusic'
-  | string
-
-function getSourceIcon(
-  sourceName: SourceName
-): { attachment: AttachmentBuilder; filename: string } | null {
-  const map: Record<string, string> = {
-    spotify: 'spotify.png',
-    deezer: 'deezer.png',
-    youtube: 'youtube.png',
-    youtubemusic: 'youtube_music.png',
-    soundcloud: 'soundcloud.png',
-    applemusic: 'apple_music.png'
-  }
-  const file = map[sourceName?.toLowerCase()]
-  if (!file) return null
-  const filename = file
-  const attachment = new AttachmentBuilder(path.join(assetsDir, file), { name: filename })
-  return { attachment, filename }
-}
 
 function getTrackInfo(track: Track | UnresolvedTrack) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,73 +17,78 @@ function getTrackInfo(track: Track | UnresolvedTrack) {
 /**
  * "Added Track" embed — shown when a single track is queued
  */
-export function buildAddedTrackEmbed(
-  track: Track | UnresolvedTrack,
+export type AddedItemType = 'track' | 'playlist'
+
+export function buildAddedItemEmbed(
+  type: AddedItemType,
+  item: {
+    title: string
+    tracks: (Track | UnresolvedTrack)[]
+    thumbnailUrl?: string | null
+    author?: string | null
+    trackLink?: string
+    playlistLink?: string
+    authorLink?: string | null
+  },
   player: Player,
-  requester: { displayName?: string; username?: string; displayAvatarURL?: () => string } | null
+  requester?: { displayName?: string; username?: string; displayAvatarURL?: () => string } | null,
+  botAvatarUrl?: string
 ) {
-  const info = getTrackInfo(track)
-  const queueLength = player.queue.tracks.length
-  const positionInQueue = queueLength // just added, so it's at the end
+  const isPlaylist = type === 'playlist'
+  const totalDurationMs = item.tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
+
+  // Calculate estimated time and queue position
+  // player.queue.tracks -> is the future list, it doesn't include the upcoming track if we just enqueued it unless it's the very first play
+  const incomingLength = isPlaylist ? item.tracks.length : 1
+  let queueLength = 0
+  if (player.playing) {
+    queueLength = player.queue.tracks.length - incomingLength + 1
+  }
+
   const estimatedMs = Math.max(
     0,
-    player.queue.utils.totalDuration() -
-      (getTrackInfo(track).duration ?? 0) -
-      (player.position ?? 0)
+    player.queue.utils.totalDuration() - totalDurationMs - (player.position ?? 0)
   )
 
-  const source = getSourceIcon(info.sourceName)
-
   const embed = new EmbedBuilder()
-    .setColor(0x2b2d31)
+    .setColor(0x00c2e6)
     .setAuthor({
-      name: 'Added Track',
-      iconURL: source ? `attachment://${source.filename}` : undefined
+      name: isPlaylist ? 'Thêm danh sách phát' : 'Thêm bài hát',
+      iconURL: botAvatarUrl
     })
-    .setThumbnail(info.artworkUrl ?? null)
-    .addFields(
-      {
-        name: 'Track',
-        value: `**[${info.title}](${info.uri ?? ''}) by ${info.author}**`,
-        inline: false
-      },
-      { name: 'Estimated time until played', value: formatDuration(estimatedMs), inline: true },
-      { name: 'Track Length', value: formatDuration(info.duration ?? 0), inline: true },
-      { name: 'Position in upcoming', value: `${Math.max(1, queueLength - 1)}`, inline: true },
-      { name: 'Position in queue', value: `${positionInQueue}`, inline: true }
-    )
+    .setThumbnail(item.thumbnailUrl ?? null)
+
+  if (isPlaylist) {
+    embed.addFields({
+      name: 'Danh sách phát',
+      value: item.playlistLink ? `**[${item.title}](${item.playlistLink})**` : `**${item.title}**`,
+      inline: false
+    })
+  } else {
+    embed.addFields({
+      name: 'Bài hát',
+      value: `**[${item.title}](${item.trackLink})**${item.authorLink ? ` bởi **[${item.author}](${item.authorLink})**` : ''}`,
+      inline: false
+    })
+  }
+
+  // Common fields
+  embed.addFields(
+    {
+      name: 'Thời lượng',
+      value: `${formatDuration(totalDurationMs)} ${isPlaylist ? `• ${item.tracks.length} bài` : ''}`,
+      inline: false
+    },
+    { name: 'Vị trí', value: `${Math.max(0, queueLength)}`, inline: true },
+    { name: 'Thời gian chờ', value: formatDuration(estimatedMs), inline: true }
+  )
 
   if (requester) {
-    const name = requester.displayName ?? requester.username ?? 'Unknown'
+    const requesterName = requester.displayName ?? requester.username ?? null
     const avatar = requester.displayAvatarURL?.() ?? undefined
-    embed.setFooter({ text: `Requested by ${name}`, iconURL: avatar })
+    if (requesterName)
+      embed.setFooter({ text: `Được yêu cầu bởi ${requesterName}`, iconURL: avatar })
   }
-
-  return {
-    embeds: [embed],
-    files: source ? [source.attachment] : []
-  }
-}
-
-/**
- * "Added Playlist" embed — shown when a playlist/album is queued
- */
-export function buildAddedPlaylistEmbed(
-  name: string,
-  tracks: (Track | UnresolvedTrack)[],
-  thumbnailUrl?: string | null
-) {
-  const totalDurationMs = tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
-
-  const embed = new EmbedBuilder()
-    .setColor(0x2b2d31)
-    .setAuthor({ name: 'Added Playlist' })
-    .setThumbnail(thumbnailUrl ?? null)
-    .addFields(
-      { name: 'Playlist', value: `**${name}**`, inline: false },
-      { name: 'Playlist Length', value: formatDuration(totalDurationMs), inline: true },
-      { name: 'Tracks', value: `${tracks.length}`, inline: true }
-    )
 
   return { embeds: [embed], files: [] }
 }
