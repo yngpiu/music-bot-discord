@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { BaseInteraction, ContainerBuilder, Message } from 'discord.js'
+import { BaseInteraction, Message } from 'discord.js'
 import { readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -10,7 +10,6 @@ import { BotManager } from '~/core/BotManager.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { lines } from '~/utils/stringUtil.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -29,24 +28,19 @@ function isPrismaError(err: unknown): boolean {
 }
 
 async function replyError(target: ReplyTarget, text: string): Promise<void> {
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(lines(`${EMOJI.ERROR} ${text}`))
-  )
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const payload = { components: [container], flags: ['IsComponentsV2'] as any[] }
+  const content = `${EMOJI.ERROR} ${text}`
 
   if (target instanceof Message) {
-    await target.reply(payload).catch(() => {})
+    await target.reply(content).catch(() => {})
     return
   }
 
   // Interaction (button, modal, slash command...)
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
-      await target.editReply(payload).catch(() => {})
+      await target.editReply({ content }).catch(() => {})
     } else {
-      await target.reply({ ...payload, flags: ['IsComponentsV2', 'Ephemeral'] }).catch(() => {})
+      await target.reply({ content, flags: ['Ephemeral'] }).catch(() => {})
     }
   }
 }
