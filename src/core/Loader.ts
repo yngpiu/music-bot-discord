@@ -5,7 +5,21 @@ import { fileURLToPath } from 'url'
 import { BotClient } from '~/core/BotClient.js'
 import { BotManager } from '~/core/BotManager.js'
 
+import { logger } from '~/utils/logger.js'
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return async (...args: any[]) => {
+    try {
+      await fn(...args)
+    } catch (err) {
+      logger.error(`[Event:${eventName}] Unhandled error:`, err)
+    }
+  }
+}
 
 export class Loader {
   static async loadCommands(bot: BotClient) {
@@ -32,11 +46,17 @@ export class Loader {
       const mod = await import(join(eventsPath, file))
       const event = mod.default ?? mod
       if (event.once) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bot.once(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+        bot.once(
+          event.name,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+        )
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bot.on(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+        bot.on(
+          event.name,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+        )
       }
     }
   }
@@ -62,26 +82,24 @@ export class Loader {
       const execute = event.default || event
 
       if (typeof execute === 'function') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const executeParams = (...args: any[]) => execute(bot, ...args)
         const eventName =
           filePath
             .split('/')
             .pop()
             ?.replace(/\.(js|ts)$/, '') || ''
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wrappedHandler = safeExecute(eventName, (...args: any[]) => execute(bot, ...args))
+
         if (filePath.includes('/node/')) {
-          // Các file node (nodeError, nodeDisconnect) cần được nối vào nodeManager
-          // Tên event sẽ bị bỏ chữ 'node' (VD: 'nodeError' -> 'error')
           let nodeEventName = eventName.replace(/^node/, '')
           nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          bot.lavalink.nodeManager.on(nodeEventName as any, executeParams)
+          bot.lavalink.nodeManager.on(nodeEventName as any, wrappedHandler)
         } else {
-          // Các event của player, track... nối thẳng vào LavalinkManager
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          bot.lavalink.on(eventName as any, executeParams)
+          bot.lavalink.on(eventName as any, wrappedHandler)
         }
       }
     }
