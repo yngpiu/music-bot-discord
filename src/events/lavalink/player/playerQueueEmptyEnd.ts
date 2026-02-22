@@ -1,13 +1,14 @@
-import { logger } from '~/utils/logger.js'
-import { EmbedBuilder, TextChannel } from 'discord.js'
+import { TextChannel } from 'discord.js'
 import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 
-
+import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Disconnect timer ended. Player leaving channel.`)
+  logger.info(
+    `[Lavalink:Player] ${player.guildId} :: Disconnect timer ended. Player leaving channel.`
+  )
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -17,17 +18,11 @@ export default async (bot: BotClient, player: Player) => {
   if (msgId) {
     try {
       const msg = await (channel as TextChannel).messages.fetch(msgId as string)
-      if (msg?.editable) {
-        await msg.edit({
-          embeds: [
-            new EmbedBuilder()
-              .setColor('Red')
-              .setDescription(`Bot đã rời kênh do hết nhạc quá lâu.`)
-          ]
-        })
+      if (msg?.deletable) {
+        await msg.delete()
       }
     } catch (error) {
-      logger.error(`Failed to edit queue empty message on end: ${error}`)
+      logger.error(`Failed to delete queue empty message on end: ${error}`)
     }
   }
 }
