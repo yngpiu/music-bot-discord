@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { Message } from 'discord.js'
+import { BaseInteraction, Message } from 'discord.js'
 import { readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -15,6 +15,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // ─── Error Helpers ────────────────────────────────────────────────────────────
 
+type ReplyTarget = Message | BaseInteraction
+
 function isPrismaError(err: unknown): boolean {
   return (
     err instanceof Prisma.PrismaClientKnownRequestError ||
@@ -25,18 +27,33 @@ function isPrismaError(err: unknown): boolean {
   )
 }
 
-async function replyError(message: Message, text: string): Promise<void> {
-  await message.reply(`${EMOJI.ERROR} ${text}`).catch(() => {})
+async function replyError(target: ReplyTarget, text: string): Promise<void> {
+  const content = `${EMOJI.ERROR} ${text}`
+
+  if (target instanceof Message) {
+    await target.reply(content).catch(() => {})
+    return
+  }
+
+  // Interaction (button, modal, slash command...)
+  if (target.isRepliable()) {
+    if (target.deferred || target.replied) {
+      await target.editReply({ content }).catch(() => {})
+    } else {
+      await target.reply({ content, flags: ['Ephemeral'] }).catch(() => {})
+    }
+  }
 }
 
 /**
- * Finds a Discord Message instance from the event arguments.
- * Used to auto-reply errors back to the user who triggered the command.
+ * Finds a Discord Message or Interaction from the event arguments.
+ * Used to auto-reply errors back to the user who triggered the action.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function findMessage(args: any[]): Message | null {
+function findReplyTarget(args: any[]): ReplyTarget | null {
   for (const arg of args) {
     if (arg instanceof Message) return arg
+    if (arg instanceof BaseInteraction) return arg
   }
   return null
 }
@@ -46,7 +63,7 @@ function findMessage(args: any[]): Message | null {
 /**
  * Wraps any event handler with centralized error handling.
  *
- * - `BotError`  → reply error message to user (if Message found in args)
+ * - `BotError`  → reply error message to user (if Message/Interaction found)
  * - Prisma      → log DB error + reply generic DB message
  * - Unknown     → log unexpected error + reply generic system message
  */
@@ -57,11 +74,11 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
     try {
       await fn(...args)
     } catch (err) {
-      const message = findMessage(args)
+      const target = findReplyTarget(args)
 
       // BotError: user-facing, just reply, no logging
       if (err instanceof BotError) {
-        if (message) await replyError(message, err.message)
+        if (target) await replyError(target, err.message)
         return
       }
 
@@ -69,12 +86,12 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
       const label = isPrismaError(err) ? 'DATABASE ERROR' : 'UNEXPECTED ERROR'
       logger.error(`[Event:${eventName}] [${label}]:`, err)
 
-      // Reply to user if we have a message context
-      if (message) {
+      // Reply to user if we have a reply target
+      if (target) {
         const msg = isPrismaError(err)
           ? 'Cơ sở dữ liệu đã gặp sự cố, vui lòng thử lại hoặc liên hệ với **Ban quản lý** để được hỗ trợ.'
           : 'Hệ thống đã gặp sự cố, vui lòng thử lại hoặc liên hệ với **Ban quản lý** để được hỗ trợ.'
-        await replyError(message, msg)
+        await replyError(target, msg)
       }
     }
   }
