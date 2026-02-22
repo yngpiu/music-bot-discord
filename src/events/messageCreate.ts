@@ -1,9 +1,12 @@
-import { Events, Message } from 'discord.js'
+import { ContainerBuilder, Events, Message } from 'discord.js'
 import { config } from '~/config/env.js'
 
+import { EMOJI } from '~/constants/emoji'
 import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
 import { asyncMessageHandler } from '~/lib/asyncHandlers.js'
+
+import { lines } from '~/utils/stringUtil'
 
 export default {
   name: Events.MessageCreate,
@@ -28,9 +31,14 @@ export default {
     })
 
     if (!chosenBot) {
+      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+        t.setContent(
+          lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
+        )
+      )
       // All bots busy — only first bot replies to avoid duplicates
       if (bot.botIndex === 0) {
-        await message.reply('❌ All bots are currently busy! Please try again later.')
+        await message.reply({ components: [container], flags: ['IsComponentsV2'] })
       }
       return
     }

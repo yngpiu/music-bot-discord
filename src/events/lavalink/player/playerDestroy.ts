@@ -1,6 +1,7 @@
-import { EmbedBuilder, TextChannel } from 'discord.js'
+import { ContainerBuilder } from 'discord.js'
 import { Player } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
@@ -13,14 +14,14 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
-  // We just need the channel to send the embed, no need to import from lib/embeds
-  // unless we're using a specific build function
+  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} Bye...tớ đi đây.`)
+  )
 
-  const embed = new EmbedBuilder()
-    .setColor('Red')
-    .setTitle('❌ Player Destroyed')
-    .setDescription(`Reason: ${reason || 'Unknown'}`)
-    .setTimestamp()
-
-  await (channel as TextChannel).send({ embeds: [embed] }).catch(() => null)
+  await channel
+    .send({
+      components: [container],
+      flags: ['IsComponentsV2']
+    })
+    .catch(() => null)
 }

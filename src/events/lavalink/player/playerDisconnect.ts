@@ -15,9 +15,7 @@ export default async (bot: BotClient, player: Player, voiceChannelId: string) =>
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_IDK} Cục Lavalink đã bị ngắt kết nối khỏi kênh <#${voiceChannelId}>`
-    )
+    t.setContent(`${EMOJI.ANIMATED_CAT_CRYING} Huhu...tớ đã bị ngắt kết nối rồi.`)
   )
 
   await channel
