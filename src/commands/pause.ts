@@ -25,11 +25,11 @@ const command: Command = {
     }
 
     if (!player.playing && !player.paused) {
-      return
+      throw new BotError('Không có bài hát nào đang được phát.')
     }
 
     if (player.paused) {
-      return
+      throw new BotError('Nhạc đang được tạm dừng rồi mà!')
     }
 
     await player.pause()

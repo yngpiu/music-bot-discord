@@ -25,7 +25,7 @@ const command: Command = {
     }
 
     if (!player.paused) {
-      return
+      throw new BotError('Có bài nào đang tạm dừng đâu nhỉ!')
     }
 
     await player.resume()
