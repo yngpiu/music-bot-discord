@@ -15,6 +15,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    console.log(bot, message)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player || (!player.playing && !player.queue.current)) {
@@ -77,27 +78,33 @@ const command: Command = {
         })
     }
 
+    const parseEmoji = (emoji: string) => {
+      const match = emoji.match(/^<(a?):(\w+):(\d+)>$/)
+      if (match) return { animated: !!match[1], name: match[2], id: match[3] }
+      return emoji
+    }
+
     const getRow = (page: number) => {
       const row = new ActionRowBuilder<ButtonBuilder>()
       row.addComponents(
         new ButtonBuilder()
           .setCustomId('queue_first')
-          .setEmoji(EMOJI.FIRST)
+          .setEmoji(parseEmoji(EMOJI.FIRST))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === 1),
         new ButtonBuilder()
           .setCustomId('queue_prev')
-          .setEmoji(EMOJI.PREV)
+          .setEmoji(parseEmoji(EMOJI.PREV))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === 1),
         new ButtonBuilder()
           .setCustomId('queue_next')
-          .setEmoji(EMOJI.NEXT)
+          .setEmoji(parseEmoji(EMOJI.NEXT))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === totalPages),
         new ButtonBuilder()
           .setCustomId('queue_last')
-          .setEmoji(EMOJI.LAST)
+          .setEmoji(parseEmoji(EMOJI.LAST))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === totalPages)
       )
@@ -111,7 +118,10 @@ const command: Command = {
           embeds: [generateEmbed(currentPage)],
           components: totalPages > 1 ? [getRow(currentPage)] : []
         })
-        .catch(() => null)
+        .catch((e) => {
+          console.error('Error sending queue message:', e)
+          return null
+        })
     }
 
     if (!replyMessage) return
