@@ -59,7 +59,6 @@ const command: Command = {
 
       // Always show current track at the bottom
       if (current) {
-        descLines.push('') // Add empty line spacing
         descLines.push('**0. Đang phát**')
         descLines.push(buildTrackString(current, ''))
       }
