@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
 
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
-import { checkRateLimit } from '~/utils/rateLimiter.js'
+import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
 import { lines } from '~/utils/stringUtil'
 
 export default {
@@ -21,6 +21,14 @@ export default {
 
     const command = bot.commands.get(commandName)
     if (!command) return
+
+    // ─── Ban check ────────────────────────────────────────────────────────────
+    const banRemainingMs = await getBanRemainingMs(message.author.id)
+    if (banRemainingMs > 0) {
+      // Silently delete the message and ignore — don't reply to avoid feeding spammers
+      message.delete().catch(() => {})
+      return
+    }
 
     // ─── Rate Limit ───────────────────────────────────────────────────────────
     const { limited, remainingMs } = await checkRateLimit(message.author.id)
@@ -42,7 +50,6 @@ export default {
       }
       return
     }
-    // }
 
     const member = message.guild.members.cache.get(message.author.id)
     const vcId = member?.voice?.channelId ?? undefined
