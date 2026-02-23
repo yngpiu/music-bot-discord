@@ -29,21 +29,19 @@ const command: Command = {
       )
     )
 
-    let replyMessage
-    if (message.channel.isTextBased() && 'send' in message.channel) {
-      replyMessage = await message.channel
-        .send({
-          components: [container],
-          flags: ['IsComponentsV2']
-        })
-        .catch((e) => {
-          logger.error(e)
-          return null
-        })
-    }
+    const replyMessage = await message
+      .reply({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
+      .catch((e) => {
+        logger.error(e)
+        return null
+      })
 
     if (replyMessage) {
       setTimeout(() => {
+        replyMessage.delete().catch((e: Error) => logger.error(e))
         message.delete().catch((e: Error) => logger.error(e))
       }, 10000)
     }

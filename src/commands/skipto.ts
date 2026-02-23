@@ -1,4 +1,4 @@
-import type { Message } from 'discord.js'
+import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'skipto',
-  aliases: ['st'],
+  aliases: ['st', 'nextto', 'nt'],
   description: 'Chuyển đến một bài hát cụ thể trong danh sách chờ',
   requiresVoice: true,
 
@@ -21,14 +21,14 @@ const command: Command = {
     }
 
     if (!args[0]) {
-      throw new BotError('Vui lòng cung cấp vị trí bài hát muốn chuyển tới (VD: `!skipto 3`).')
+      throw new BotError('Vui lòng cung cấp vị trí bài hát muốn chuyển tới.')
     }
 
     const position = parseInt(args[0], 10)
 
     if (isNaN(position) || position < 1 || position > player.queue.tracks.length) {
       throw new BotError(
-        `Vị trí bài hát không hợp lệ. Vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`
+        `Vị trí bài hát không hợp lệ, vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`
       )
     }
 
@@ -37,11 +37,18 @@ const command: Command = {
     const index = position - 1
     await player.skip(index)
 
-    const replyMessage = await message
-      .reply(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã nhảy đến bài thứ **${position}** trong hàng đợi!`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã nhảy đến bài thứ **${position}** trong hàng đợi.`
       )
-      .catch((e: Error) => {
+    )
+
+    const replyMessage = await message
+      .reply({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
+      .catch((e) => {
         logger.error(e)
         return null
       })
@@ -49,8 +56,8 @@ const command: Command = {
     if (replyMessage) {
       setTimeout(() => {
         replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch(() => {})
-      }, 60000)
+        message.delete().catch((e: Error) => logger.error(e))
+      }, 10000)
     }
   }
 }
