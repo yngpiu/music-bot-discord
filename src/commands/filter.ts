@@ -42,10 +42,21 @@ const command: Command = {
     let actionText = ''
 
     try {
-      switch (filterArg) {
-        case 'bassboost':
-          if (player.filterManager.equalizerBands.some((b) => b.band === 0 && b.gain === 0.25)) {
-            await player.filterManager.clearEQ()
+      if (['clear', 'off'].includes(filterArg)) {
+        await player.filterManager.resetFilters()
+        await player.filterManager.clearEQ()
+        actionText = 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản bản ✨'
+      } else {
+        // Handle Bassboost (EQ)
+        if (filterArg === 'bassboost') {
+          const isBassboosted = player.filterManager.equalizerBands.some(
+            (b) => b.band === 0 && b.gain === 0.25
+          )
+
+          await player.filterManager.resetFilters()
+          await player.filterManager.clearEQ()
+
+          if (isBassboosted) {
             actionText = 'tắt bộ chỉnh âm (EQ)'
           } else {
             await player.filterManager.setEQ([
@@ -55,65 +66,61 @@ const command: Command = {
             ])
             actionText = 'bật 🎧 **Bassboost**'
           }
-          break
+        } else {
+          // Check if the requested filter is currently active
+          const filterKey = (
+            filterArg === 'rotation' || filterArg === '3d' || filterArg === '8d'
+              ? 'rotation'
+              : filterArg === 'lowpass'
+                ? 'lowPass'
+                : filterArg
+          ) as keyof typeof player.filterManager.filters
 
-        case 'nightcore':
-          await player.filterManager.toggleNightcore()
-          actionText = player.filterManager.filters.nightcore
-            ? 'bật 🐿️ **Nightcore** (nhanh & cao)'
-            : 'tắt 🐿️ **Nightcore**'
-          break
+          const isCurrentlyActive = !!player.filterManager.filters[filterKey]
 
-        case 'vaporwave':
-          await player.filterManager.toggleVaporwave()
-          actionText = player.filterManager.filters.vaporwave
-            ? 'bật 🌆 **Vaporwave** (chậm & vang)'
-            : 'tắt 🌆 **Vaporwave**'
-          break
-
-        case 'karaoke':
-          await player.filterManager.toggleKaraoke()
-          actionText = player.filterManager.filters.karaoke
-            ? 'bật 🎤 **Karaoke** (lọc giọng)'
-            : 'tắt 🎤 **Karaoke**'
-          break
-
-        case 'rotation':
-        case '3d':
-        case '8d':
-          await player.filterManager.toggleRotation()
-          actionText = player.filterManager.filters.rotation
-            ? 'bật 🌀 **8D Audio** (âm thanh xoay vòng)'
-            : 'tắt 🌀 **8D Audio**'
-          break
-
-        case 'tremolo':
-          await player.filterManager.toggleTremolo()
-          actionText = player.filterManager.filters.tremolo
-            ? 'bật 〰️ **Tremolo** (rung âm lượng)'
-            : 'tắt 〰️ **Tremolo**'
-          break
-
-        case 'vibrato':
-          await player.filterManager.toggleVibrato()
-          actionText = player.filterManager.filters.vibrato
-            ? 'bật ♒ **Vibrato** (rung cao độ)'
-            : 'tắt ♒ **Vibrato**'
-          break
-
-        case 'lowpass':
-          await player.filterManager.toggleLowPass()
-          actionText = player.filterManager.filters.lowPass
-            ? 'bật 📻 **LowPass** (âm thanh qua tường)'
-            : 'tắt 📻 **LowPass**'
-          break
-
-        case 'clear':
-        case 'off':
+          // Always clear everything first so they don't stack
           await player.filterManager.resetFilters()
           await player.filterManager.clearEQ()
-          actionText = 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản bản ✨'
-          break
+
+          // If it was already active, we just leave it cleared (toggle OFF)
+          // If it was not active, we turn it ON
+          if (isCurrentlyActive) {
+            actionText = `tắt hiệu ứng **${filterArg}**`
+          } else {
+            switch (filterArg) {
+              case 'nightcore':
+                await player.filterManager.toggleNightcore()
+                actionText = 'bật 🐿️ **Nightcore** (nhanh & cao)'
+                break
+              case 'vaporwave':
+                await player.filterManager.toggleVaporwave()
+                actionText = 'bật 🌆 **Vaporwave** (chậm & vang)'
+                break
+              case 'karaoke':
+                await player.filterManager.toggleKaraoke()
+                actionText = 'bật 🎤 **Karaoke** (lọc giọng)'
+                break
+              case 'rotation':
+              case '3d':
+              case '8d':
+                await player.filterManager.toggleRotation()
+                actionText = 'bật 🌀 **8D Audio** (âm thanh xoay vòng)'
+                break
+              case 'tremolo':
+                await player.filterManager.toggleTremolo()
+                actionText = 'bật 〰️ **Tremolo** (rung âm lượng)'
+                break
+              case 'vibrato':
+                await player.filterManager.toggleVibrato()
+                actionText = 'bật ♒ **Vibrato** (rung cao độ)'
+                break
+              case 'lowpass':
+                await player.filterManager.toggleLowPass()
+                actionText = 'bật 📻 **LowPass** (âm thanh qua tường)'
+                break
+            }
+          }
+        }
       }
     } catch (e) {
       throw new BotError(

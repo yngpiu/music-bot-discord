@@ -24,7 +24,7 @@ export default async (bot: BotClient, player: Player) => {
       }
       const container = new ContainerBuilder().addTextDisplayComponents((t) =>
         t.setContent(
-          `${EMOJI.ANIMATED_CAT_BYE} Không thấy ai yêu cầu phát nhạc, **${bot.user?.displayName || 'tớ'}** đã rời đi.`
+          `${EMOJI.ANIMATED_CAT_BYE} Không thấy yêu cầu nào nữa, **${bot.user?.displayName || 'tớ'}** đã rời đi.`
         )
       )
       await channel.send({

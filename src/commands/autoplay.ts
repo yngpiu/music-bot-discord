@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'autoplay',
   aliases: ['ap', 'endless'],
-  description: 'Bật/tắt chế độ tự động phát nhạc khi hết danh sách chờ',
+  description: 'Bật/tắt chế độ tự động phát nhạc đề xuất khi hết danh sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -27,8 +27,8 @@ const command: Command = {
     const isAutoplayEnabled = player.get<boolean>('autoplay')
 
     const actionText = isAutoplayEnabled
-      ? 'bật ♾️ **Autoplay (Tự động phát)**'
-      : 'tắt ⏸️ **Autoplay (Tự động phát)**'
+      ? '**bật** chế độ `Tự động phát`'
+      : '**tắt** chế độ `Tự động phát`'
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(

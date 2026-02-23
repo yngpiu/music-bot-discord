@@ -64,7 +64,7 @@ export class BotManager {
             destroyPlayer: false
           },
           onEmptyQueue: {
-            destroyAfterMs: 180000,
+            destroyAfterMs: 300000,
             autoPlayFunction: async (player, lastPlayedTrack) => {
               if (!player.get('autoplay')) return
 

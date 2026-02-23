@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'clear',
   aliases: ['c', 'empty'],
-  description: 'Xóa toàn bộ bài hát trong sách chờ (Yêu cầu quyền người gọi lệnh)',
+  description: 'Xóa toàn bộ bài hát trong sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -22,7 +22,7 @@ const command: Command = {
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ có người gọi tớ vào phòng mới được quyền xóa toàn bộ hàng đợi.')
+      throw new BotError('Chỉ có **Chủ xị** mới có quyền xóa toàn bộ hàng đợi.')
     }
 
     const trackCount = player.queue.tracks.length

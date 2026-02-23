@@ -15,7 +15,7 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã rời đi...`)
+    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã rời đi.`)
   )
 
   await channel
@@ -23,5 +23,8 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+    .catch((e) => {
+      logger.error(e)
+      return null
+    })
 }
