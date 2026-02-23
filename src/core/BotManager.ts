@@ -168,6 +168,6 @@ export class BotManager {
    */
   isIdle(bot: BotClient, guildId: string): boolean {
     const player = bot.lavalink.getPlayer(guildId)
-    return !player || !player.playing
+    return !player
   }
 }
