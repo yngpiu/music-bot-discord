@@ -32,10 +32,9 @@ const command: Command = {
       )
     }
 
-    // Lavalink-client `skipTo` expects the 0-based index of the track in the queue array.
-    // e.g. position 1 corresponds to `player.queue.tracks[0]`, so we skip to index 0.
-    const index = position - 1
-    await player.skip(index)
+    // Lavalink-client `skipTo` actually expects the 1-based position (number of tracks to skip).
+    // e.g. position 2 corresponds to skipping 1 track and playing the 2nd.
+    await player.skip(position)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
