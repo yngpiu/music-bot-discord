@@ -1,4 +1,4 @@
-import type { Message } from 'discord.js'
+import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'skip',
-  aliases: ['s'],
+  aliases: ['s', 'n', 'next'],
   description: 'Bỏ qua bài hát hiện tại để phát bài tiếp theo',
   requiresVoice: true,
 
@@ -21,22 +21,31 @@ const command: Command = {
     }
 
     const currentTrack = player.queue.current
-    await player.skip()
+    await player.skip(0, false)
 
-    const replyMessage = await message
-      .reply(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã bỏ qua bài hát **${currentTrack?.info.title || 'hiện tại'}**!`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã bỏ qua bài hát **${currentTrack?.info.title || 'hiện tại'}**.`
       )
-      .catch((e: Error) => {
-        logger.error(e)
-        return null
-      })
+    )
+
+    let replyMessage
+    if (message.channel.isTextBased() && 'send' in message.channel) {
+      replyMessage = await message.channel
+        .send({
+          components: [container],
+          flags: ['IsComponentsV2']
+        })
+        .catch((e) => {
+          logger.error(e)
+          return null
+        })
+    }
 
     if (replyMessage) {
       setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch(() => {})
-      }, 60000)
+        message.delete().catch((e: Error) => logger.error(e))
+      }, 10000)
     }
   }
 }
