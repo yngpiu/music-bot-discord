@@ -107,6 +107,13 @@ plugins:
       countryCode: 'VN' # the country code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
       language: 'vi' # the language code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
 
+youtube:
+  clients:
+    - TVHTML5EMBEDDED
+    - ANDROID_VR
+    - WEB_REMIX
+    - WEB
+
 logging:
   file:
     max-history: 30
