@@ -126,7 +126,7 @@ const command: Command = {
     if (totalPages > 1) {
       const collector = replyMessage.createMessageComponentCollector({
         filter: (i) => i.user.id === message.author.id,
-        time: 60000
+        idle: 60000
       })
 
       collector.on('collect', async (i) => {
@@ -141,14 +141,16 @@ const command: Command = {
         })
       })
 
-      collector.on('end', () => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch(() => {}) // Ignore errors if already deleted
+      collector.on('end', (collected, reason) => {
+        if (reason === 'idle' || reason === 'time') {
+          replyMessage.delete().catch((e: Error) => logger.error(e))
+          message.delete().catch((e: Error) => logger.error(e))
+        }
       })
     } else {
       setTimeout(() => {
         replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch(() => {})
+        message.delete().catch((e: Error) => logger.error(e))
       }, 60000)
     }
   }
