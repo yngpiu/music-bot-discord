@@ -6,10 +6,9 @@
  *   Value: list of invocation timestamps (ms as strings)
  *
  * Algorithm:
- *  1. Remove entries older than WINDOW_MS (via LRANGE then LSET/LTRIM equivalent via pipeline).
- *  2. Count remaining entries.
- *  3. If count >= MAX_USES → rate limited, return how long until the oldest entry expires.
- *  4. Otherwise push current timestamp, set key TTL.
+ *  1. LRANGE to get all timestamps, filter those inside the window.
+ *  2. If count >= MAX_USES → rate limited, return remaining ms until oldest expires.
+ *  3. Otherwise push current timestamp, rebuild list, set TTL.
  */
 import type { Redis } from 'ioredis'
 
@@ -22,24 +21,19 @@ export function setRedisClient(client: Redis) {
   redis = client
 }
 
-export function checkRateLimit(userId: string): { limited: boolean; remainingMs: number } {
+export async function checkRateLimit(
+  userId: string
+): Promise<{ limited: boolean; remainingMs: number }> {
   if (!redis) {
-    // Fallback in case Redis isn't ready yet — let the command through
+    // Fallback if Redis isn't ready yet — let the command through
     return { limited: false, remainingMs: 0 }
   }
 
-  return _checkRateLimitAsync(userId) as unknown as { limited: boolean; remainingMs: number }
-}
-
-async function _checkRateLimitAsync(
-  userId: string
-): Promise<{ limited: boolean; remainingMs: number }> {
   const key = `ratelimit:${userId}`
   const now = Date.now()
   const windowStart = now - WINDOW_MS
 
-  // Atomic pipeline: get current entries, push new one, trim, set expiry
-  const timestamps: string[] = await redis!.lrange(key, 0, -1)
+  const timestamps: string[] = await redis.lrange(key, 0, -1)
 
   // Keep only entries within the window
   const recent = timestamps.map(Number).filter((t) => t > windowStart)
@@ -50,8 +44,8 @@ async function _checkRateLimitAsync(
     return { limited: true, remainingMs }
   }
 
-  // Add current timestamp and update window
-  const pipeline = redis!.pipeline()
+  // Rebuild the list with current timestamp appended, reset TTL
+  const pipeline = redis.pipeline()
   pipeline.del(key)
   for (const t of recent) {
     pipeline.rpush(key, String(t))

@@ -23,28 +23,26 @@ export default {
     if (!command) return
 
     // ─── Rate Limit ───────────────────────────────────────────────────────────
-    const isOwner = message.author.id === message.guild.ownerId
-    if (!isOwner) {
-      const { limited, remainingMs } = checkRateLimit(message.author.id)
-      if (limited) {
-        const remaining = (remainingMs / 1000).toFixed(1)
-        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-          t.setContent(
-            `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
-          )
+    const { limited, remainingMs } = await checkRateLimit(message.author.id)
+    if (limited) {
+      const remaining = (remainingMs / 1000).toFixed(1)
+      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+        t.setContent(
+          `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
         )
-        const reply = await message
-          .reply({ components: [container], flags: ['IsComponentsV2'] })
-          .catch(() => null)
-        if (reply) {
-          setTimeout(() => {
-            reply.delete().catch(() => {})
-            message.delete().catch(() => {})
-          }, 5000)
-        }
-        return
+      )
+      const reply = await message
+        .reply({ components: [container], flags: ['IsComponentsV2'] })
+        .catch(() => null)
+      if (reply) {
+        setTimeout(() => {
+          reply.delete().catch(() => {})
+          message.delete().catch(() => {})
+        }, remainingMs)
       }
+      return
     }
+    // }
 
     const member = message.guild.members.cache.get(message.author.id)
     const vcId = member?.voice?.channelId ?? undefined
