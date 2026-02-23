@@ -12,7 +12,7 @@ const command: Command = {
   name: 'queue',
   aliases: ['q', 'list'],
   description: 'Hiển thị danh sách phát nhạc hiện tại',
-  requiresVoice: false,
+  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
