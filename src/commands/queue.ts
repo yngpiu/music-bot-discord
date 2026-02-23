@@ -40,27 +40,29 @@ const command: Command = {
       return `${firstLine}\n${EMOJI.CORNER} Yêu cầu bởi: ${requesterStr}`
     }
 
-    const totalPages = Math.ceil(tracks.length / 10) || 1
+    const totalPages = Math.ceil(tracks.length / 5) || 1
     let currentPage = 1
 
     const generateEmbed = (page: number) => {
       const descLines: string[] = []
-      const start = (page - 1) * 10
-      const end = start + 10
+
+      // Always show current track at the top
+      if (current) {
+        descLines.push('**1. Đang phát**\n')
+        descLines.push(buildTrackString(current, ''))
+        descLines.push('')
+      }
+
+      const start = (page - 1) * 5
+      const end = start + 5
       const currentTracks = tracks.slice(start, end)
 
       if (currentTracks.length > 0) {
         for (let i = 0; i < currentTracks.length; i++) {
-          descLines.push(buildTrackString(currentTracks[i], `${start + i + 1}.`))
+          descLines.push(buildTrackString(currentTracks[i], `${start + i + 2}.`))
         }
-      } else {
+      } else if (!current) {
         descLines.push('Không có bài hát nào trong hàng đợi.')
-      }
-
-      // Always show current track at the bottom
-      if (current) {
-        descLines.push('\n**0. Đang phát**')
-        descLines.push(buildTrackString(current, ''))
       }
 
       return new EmbedBuilder()
