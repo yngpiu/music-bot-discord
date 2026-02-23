@@ -32,7 +32,9 @@ export function buildAddedItemEmbed(
   },
   player: Player,
   requester?: { displayName?: string; username?: string; displayAvatarURL?: () => string } | null,
-  botAvatarUrl?: string
+  botAvatarUrl?: string,
+  positionOverride?: number,
+  estimatedMsOverride?: number
 ) {
   const isPlaylist = type === 'playlist'
   const totalDurationMs = item.tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
@@ -40,15 +42,14 @@ export function buildAddedItemEmbed(
   // Calculate estimated time and queue position
   // player.queue.tracks -> is the future list, it doesn't include the upcoming track if we just enqueued it unless it's the very first play
   const incomingLength = isPlaylist ? item.tracks.length : 1
-  let queueLength = 0
-  if (player.playing) {
+  let queueLength = positionOverride ?? 0
+  if (!positionOverride && player.playing) {
     queueLength = player.queue.tracks.length - incomingLength + 1
   }
 
-  const estimatedMs = Math.max(
-    0,
-    player.queue.utils.totalDuration() - totalDurationMs - (player.position ?? 0)
-  )
+  const estimatedMs =
+    estimatedMsOverride ??
+    Math.max(0, player.queue.utils.totalDuration() - totalDurationMs - (player.position ?? 0))
 
   const embed = new EmbedBuilder()
     .setColor(0x00c2e6)
