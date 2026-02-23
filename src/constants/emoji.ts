@@ -1,4 +1,5 @@
 export const EMOJI = {
+  CORNER: '<:corner:1475340420065136741>',
   ERROR: '<:error:1473959725673742441>',
   SPOTIFY: '<:spotify:1473959643394084996>',
   APPLE_MUSIC: '<:apple_music:1474361437962109070>',
