@@ -17,8 +17,8 @@ export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverD
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const message = serverDeaf
-    ? `${EMOJI.ANIMATED_CAT_CRYING} Ơ kìa...ai đã bịt tai của tớ vậy?`
-    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Yay...cuối cùng tớ cũng nghe được lại rồi nè.`
+    ? `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bị ai đó bịt tai.`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã có thể nghe được trở lại.`
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 

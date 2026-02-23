@@ -27,15 +27,15 @@ export default async (bot: BotClient, player: Player, selfMuted: boolean, server
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const message = serverMuted
-    ? `${EMOJI.ANIMATED_CAT_CRYING} Ui...ai đó đã bịt miệng tớ vậy.`
-    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Hehe...cuối cùng cũng nói lại được rồi.`
+    ? `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã nói lại được rồi, có thể tiếp tục phát nhạc.`
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
+      flags: ['IsComponentsV2']
     })
     .catch(() => null)
 }

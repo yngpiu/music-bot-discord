@@ -21,7 +21,7 @@ export default async (
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(
-      `${EMOJI.ANIMATED_CAT_NO_IDEA} Ủa...ai đó đã bê tớ sang kênh <#${newVoiceChannelId}>`
+      `${EMOJI.ANIMATED_CAT_NO_IDEA} Ai đó đã bê **${bot.user?.displayName || 'tớ'}** sang kênh <#${newVoiceChannelId}>.`
     )
   )
 

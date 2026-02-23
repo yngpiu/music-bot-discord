@@ -19,7 +19,9 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} Ui...nhà tớ đang bị cháy, tớ về nhà xem thế nào đây...`)
+    t.setContent(
+      `${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`
+    )
   )
 
   await channel

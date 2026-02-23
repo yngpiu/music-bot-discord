@@ -15,8 +15,8 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const message = suppress
-    ? `${EMOJI.ANIMATED_CAT_CRYING} Huhu...tớ bị đuổi khỏi sân khấu mất rồi.`
-    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} Hehe...tớ được lên sân khấu làm MC rồi nha.`
+    ? `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bị đuổi khỏi sân khấu, không thể tiếp tục phát nhạc.`
+    : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã được bế lên sân khấu để phát nhạc.`
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
