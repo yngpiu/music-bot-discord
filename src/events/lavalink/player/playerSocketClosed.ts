@@ -29,5 +29,5 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch(() => null)
+    .catch((e) => { logger.error(e); return null })
 }

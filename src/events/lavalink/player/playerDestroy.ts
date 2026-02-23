@@ -23,5 +23,5 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch(() => null)
+    .catch((e) => { logger.error(e); return null })
 }

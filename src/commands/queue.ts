@@ -6,6 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { formatDuration } from '~/utils/stringUtil.js'
+import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'queue',
@@ -149,7 +150,7 @@ const command: Command = {
           (c as ButtonBuilder).setDisabled(true)
         )
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(disabledRow)
-        replyMessage.edit({ components: [row] }).catch(() => {})
+        replyMessage.edit({ components: [row] }).catch((e) => logger.error(e))
       })
     }
   }

@@ -28,7 +28,8 @@ export default async (bot: BotClient, player: Player) => {
       'music_offtopic',
       'filler'
     ])
-  } catch {
+  } catch (e) {
+    logger.error(e)
     logger.warn(`[Lavalink:Player] ${player.guildId} :: Failed to set SponsorBlock segments.`)
   }
 }

@@ -27,5 +27,5 @@ export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverD
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch(() => null)
+    .catch((e) => { logger.error(e); return null })
 }

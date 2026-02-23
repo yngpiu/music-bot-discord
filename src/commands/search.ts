@@ -248,8 +248,8 @@ const command: Command = {
 
         if (!track) return
 
-        await interaction.deferUpdate().catch(() => {})
-        await interaction.message.delete().catch(() => {})
+        await interaction.deferUpdate().catch((e) => logger.error(e))
+        await interaction.message.delete().catch((e) => logger.error(e))
 
         await player.queue.add(track)
 
@@ -279,15 +279,15 @@ const command: Command = {
 
     collector.on('end', async (collected, reason) => {
       if (reason === 'time') {
-        await reply.delete().catch(() => {})
-        await message.delete().catch(() => {})
+        await reply.delete().catch((e) => logger.error(e))
+        await message.delete().catch((e) => logger.error(e))
 
         // Destroy player if not playing anything and queue is empty
         if (!player.playing && player.queue.tracks.length === 0) {
           await player.destroy()
         }
       } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
+        await reply.edit({ components: getComponents(true, currentSource) }).catch((e) => logger.error(e))
       }
     })
   }

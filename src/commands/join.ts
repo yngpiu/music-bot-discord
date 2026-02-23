@@ -3,6 +3,7 @@ import { ContainerBuilder, type GuildMember, type Message, type VoiceChannel } f
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'join',
@@ -61,11 +62,11 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-        .catch(() => null)
+        .catch((e) => { logger.error(e); return null })
 
       if (replyMessage) {
         setTimeout(() => {
-          message.delete().catch(() => {})
+          message.delete().catch((e) => logger.error(e))
         }, 10000)
       }
     }

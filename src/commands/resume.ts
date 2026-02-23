@@ -3,6 +3,7 @@ import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'resume',
@@ -25,7 +26,7 @@ const command: Command = {
     }
 
     if (!player.paused) {
-      throw new BotError('Có bài nào đang tạm dừng đâu nhỉ!')
+      throw new BotError('Nhạc có đang tạm dừng đâu nhỉ?')
     }
 
     await player.resume()
@@ -43,12 +44,12 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-        .catch(() => null)
+        .catch((e) => { logger.error(e); return null })
     }
 
     if (replyMessage) {
       setTimeout(() => {
-        message.delete().catch(() => {})
+        message.delete().catch((e) => logger.error(e))
       }, 10000)
     }
   }

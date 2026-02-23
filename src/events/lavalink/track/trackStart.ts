@@ -38,5 +38,5 @@ export default async (bot: BotClient, player: Player, track: Track) => {
       components: [container],
       flags: ['IsComponentsV2', 'SuppressNotifications']
     })
-    .catch(() => null)
+    .catch((e) => { logger.error(e); return null })
 }
