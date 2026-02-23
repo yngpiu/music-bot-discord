@@ -45,24 +45,22 @@ const command: Command = {
 
     const generateEmbed = (page: number) => {
       const descLines: string[] = []
-
-      // Always show current track at the top
-      if (current) {
-        descLines.push('**1. Đang phát**\n')
-        descLines.push(buildTrackString(current, ''))
-        descLines.push('')
-      }
-
       const start = (page - 1) * 5
       const end = start + 5
       const currentTracks = tracks.slice(start, end)
 
       if (currentTracks.length > 0) {
         for (let i = 0; i < currentTracks.length; i++) {
-          descLines.push(buildTrackString(currentTracks[i], `${start + i + 2}.`))
+          descLines.push(buildTrackString(currentTracks[i], `${start + i + 1}.`))
         }
-      } else if (!current) {
+      } else {
         descLines.push('Không có bài hát nào trong hàng đợi.')
+      }
+
+      // Always show current track at the bottom
+      if (current) {
+        descLines.push('\n**0. Đang phát**')
+        descLines.push(buildTrackString(current, ''))
       }
 
       return new EmbedBuilder()
