@@ -9,6 +9,16 @@ import { logger } from '~/utils/logger.js'
 export default async (bot: BotClient, player: Player, suppress: boolean) => {
   logger.info(`[Lavalink:Player] ${player.guildId} :: Suppress status changed.`, { suppress })
 
+  if (suppress) {
+    player.set('paused_of_servermute', true) // Reusing the same flag since the effect is identical (can't speak)
+    if (!player.paused) await player.pause()
+  } else {
+    if (player.get('paused_of_servermute')) {
+      if (player.paused) await player.resume()
+      player.set('paused_of_servermute', false)
+    }
+  }
+
   if (player.get('ignore_voice_state')) return
 
   const channel = bot.channels.cache.get(player.textChannelId!)
@@ -25,5 +35,8 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+    .catch((e) => {
+      logger.error(e)
+      return null
+    })
 }
