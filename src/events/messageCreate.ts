@@ -22,48 +22,7 @@ export default {
     const command = bot.commands.get(commandName)
     if (!command) return
 
-    // ─── Ban check ────────────────────────────────────────────────────────────
-    const banRemainingMs = await getBanRemainingMs(message.author.id)
-    if (banRemainingMs > 0) {
-      const banHours = (banRemainingMs / 3_600_000).toFixed(1)
-      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-        t.setContent(
-          `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
-        )
-      )
-      const reply = await message
-        .reply({ components: [container], flags: ['IsComponentsV2'] })
-        .catch(() => null)
-      if (reply) {
-        setTimeout(() => {
-          reply.delete().catch(() => {})
-          message.delete().catch(() => {})
-        }, 10000)
-      }
-      return
-    }
-
-    // ─── Rate Limit ───────────────────────────────────────────────────────────
-    const { limited, remainingMs } = await checkRateLimit(message.author.id)
-    if (limited) {
-      const remaining = (remainingMs / 1000).toFixed(1)
-      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-        t.setContent(
-          `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
-        )
-      )
-      const reply = await message
-        .reply({ components: [container], flags: ['IsComponentsV2'] })
-        .catch(() => null)
-      if (reply) {
-        setTimeout(() => {
-          reply.delete().catch(() => {})
-          message.delete().catch(() => {})
-        }, remainingMs)
-      }
-      return
-    }
-
+    // ─── Bot Routing (must run FIRST to avoid duplicate responses) ─────────
     const member = message.guild.members.cache.get(message.author.id)
     const vcId = member?.voice?.channelId ?? undefined
 
@@ -87,7 +46,57 @@ export default {
       return
     }
 
+    // Not the chosen bot — skip entirely (no rate limit, no reply)
     if (chosenBot.user?.id !== bot.user?.id) return
+
+    // ─── Owner bypass — skip rate limit & ban checks ──────────────────────
+    const isOwner = config.ownerId && message.author.id === config.ownerId
+
+    // ─── Ban check ────────────────────────────────────────────────────────────
+    if (!isOwner) {
+      const banRemainingMs = await getBanRemainingMs(message.author.id)
+      if (banRemainingMs > 0) {
+        const banHours = (banRemainingMs / 3_600_000).toFixed(1)
+        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+          t.setContent(
+            `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
+          )
+        )
+        const reply = await message
+          .reply({ components: [container], flags: ['IsComponentsV2'] })
+          .catch(() => null)
+        if (reply) {
+          setTimeout(() => {
+            reply.delete().catch(() => {})
+            message.delete().catch(() => {})
+          }, 10000)
+        }
+        return
+      }
+    }
+
+    // ─── Rate Limit ───────────────────────────────────────────────────────────
+    if (!isOwner) {
+      const { limited, remainingMs } = await checkRateLimit(message.author.id)
+      if (limited) {
+        const remaining = (remainingMs / 1000).toFixed(1)
+        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+          t.setContent(
+            `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
+          )
+        )
+        const reply = await message
+          .reply({ components: [container], flags: ['IsComponentsV2'] })
+          .catch(() => null)
+        if (reply) {
+          setTimeout(() => {
+            reply.delete().catch(() => {})
+            message.delete().catch(() => {})
+          }, remainingMs)
+        }
+        return
+      }
+    }
 
     await command.execute(bot, message, args)
   }
