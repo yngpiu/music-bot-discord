@@ -1,5 +1,5 @@
 import type { Message, User } from 'discord.js'
-import { EmbedBuilder } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -40,46 +40,105 @@ const command: Command = {
       return `${firstLine}\n${EMOJI.CORNER} Yêu cầu bởi: ${requesterStr}`
     }
 
-    const descLines: string[] = []
+    const totalPages = Math.ceil(tracks.length / 10) || 1
+    let currentPage = 1
 
-    // Lấy tối đa 10 bài tiếp theo
-    const nextTracksNum = Math.min(10, tracks.length)
-    if (nextTracksNum > 0) {
-      for (let i = 0; i < nextTracksNum; i++) {
-        descLines.push(buildTrackString(tracks[i], `${i + 1}.`))
+    const generateEmbed = (page: number) => {
+      const descLines: string[] = []
+      const start = (page - 1) * 10
+      const end = start + 10
+      const currentTracks = tracks.slice(start, end)
+
+      if (currentTracks.length > 0) {
+        for (let i = 0; i < currentTracks.length; i++) {
+          descLines.push(buildTrackString(currentTracks[i], `${start + i + 1}.`))
+        }
+      } else {
+        descLines.push('Không có bài hát nào trong hàng đợi.')
       }
 
-      if (tracks.length > 10) {
-        descLines.push(`\n*...và ${tracks.length - 10} bài hát nữa*`)
+      // Always show current track at the bottom
+      if (current) {
+        descLines.push('\n**0. Đang phát**')
+        descLines.push(buildTrackString(current, ''))
       }
-    } else {
-      descLines.push('Không có bài hát nào trong hàng đợi.')
+
+      return new EmbedBuilder()
+        .setColor(0x2b2d31)
+        .setAuthor({
+          name: `Danh sách chờ của ${message.guild?.name} - [ ${tracks.length + (current ? 1 : 0)} bài hát ]`,
+          iconURL: message.guild?.iconURL() ?? undefined
+        })
+        .setDescription(descLines.join('\n'))
+        .setFooter({
+          text: `Trang ${page}/${totalPages} • Yêu cầu bởi ${message.author.displayName}`
+        })
     }
 
-    // Current track
-    if (current) {
-      descLines.push('\n**0. Đang phát**')
-      descLines.push(buildTrackString(current, ''))
+    const getRow = (page: number) => {
+      const row = new ActionRowBuilder<ButtonBuilder>()
+      row.addComponents(
+        new ButtonBuilder()
+          .setCustomId('queue_first')
+          .setEmoji('⏮️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === 1),
+        new ButtonBuilder()
+          .setCustomId('queue_prev')
+          .setEmoji('◀️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === 1),
+        new ButtonBuilder()
+          .setCustomId('queue_next')
+          .setEmoji('▶️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === totalPages),
+        new ButtonBuilder()
+          .setCustomId('queue_last')
+          .setEmoji('⏭️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === totalPages)
+      )
+      return row
     }
-
-    const embed = new EmbedBuilder()
-      .setColor(0x2b2d31)
-      .setAuthor({
-        name: `Danh sách chờ của ${message.guild.name} - [ ${tracks.length} bài hát ]`,
-        iconURL: message.guild.iconURL() ?? undefined
-      })
-      .setDescription(descLines.join('\n'))
 
     let replyMessage
     if (message.channel.isTextBased() && 'send' in message.channel) {
-      replyMessage = await message.channel.send({ embeds: [embed] }).catch(() => null)
+      replyMessage = await message.channel
+        .send({
+          embeds: [generateEmbed(currentPage)],
+          components: totalPages > 1 ? [getRow(currentPage)] : []
+        })
+        .catch(() => null)
     }
 
-    if (replyMessage) {
-      setTimeout(() => {
-        replyMessage.delete().catch(() => {})
-        message.delete().catch(() => {})
-      }, 30000)
+    if (!replyMessage) return
+
+    if (totalPages > 1) {
+      const collector = replyMessage.createMessageComponentCollector({
+        filter: (i) => i.user.id === message.author.id,
+        time: 60000
+      })
+
+      collector.on('collect', async (i) => {
+        if (i.customId === 'queue_first') currentPage = 1
+        else if (i.customId === 'queue_prev') currentPage--
+        else if (i.customId === 'queue_next') currentPage++
+        else if (i.customId === 'queue_last') currentPage = totalPages
+
+        await i.update({
+          embeds: [generateEmbed(currentPage)],
+          components: [getRow(currentPage)]
+        })
+      })
+
+      collector.on('end', () => {
+        const disabledRow = getRow(currentPage).components.map((c) =>
+          (c as ButtonBuilder).setDisabled(true)
+        )
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(disabledRow)
+        replyMessage.edit({ components: [row] }).catch(() => {})
+      })
     }
   }
 }
