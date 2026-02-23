@@ -6,6 +6,7 @@ import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
 
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
+import { checkRateLimit } from '~/utils/rateLimiter.js'
 import { lines } from '~/utils/stringUtil'
 
 export default {
@@ -20,6 +21,30 @@ export default {
 
     const command = bot.commands.get(commandName)
     if (!command) return
+
+    // ─── Rate Limit ───────────────────────────────────────────────────────────
+    const isOwner = config.ownerId && message.author.id === config.ownerId
+    if (!isOwner) {
+      const { limited, remainingMs } = checkRateLimit(message.author.id, commandName)
+      if (limited) {
+        const remaining = (remainingMs / 1000).toFixed(1)
+        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+          t.setContent(
+            `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
+          )
+        )
+        const reply = await message
+          .reply({ components: [container], flags: ['IsComponentsV2'] })
+          .catch(() => null)
+        if (reply) {
+          setTimeout(() => {
+            reply.delete().catch(() => {})
+            message.delete().catch(() => {})
+          }, 5000)
+        }
+        return
+      }
+    }
 
     const member = message.guild.members.cache.get(message.author.id)
     const vcId = member?.voice?.channelId ?? undefined
