@@ -15,9 +15,7 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      `${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** mệt quá nên đã rời đi.`
-    )
+    t.setContent(`${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã rời đi...`)
   )
 
   await channel
