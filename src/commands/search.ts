@@ -9,12 +9,14 @@ import {
 } from 'discord.js'
 import { UnresolvedTrack } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { searchSpotify } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
+import { formatDuration, lines } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'search',
@@ -26,56 +28,59 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải vào kênh voice trước!')
+    if (!vcId) throw new BotError('Bạn phải vào kênh thoại trước.')
 
     const vc = member.voice.channel as VoiceChannel
-    if (!vc.joinable) throw new BotError('Tôi không thể vào kênh voice của bạn!')
+    if (!vc.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
 
     const query = args.join(' ')
-    if (!query) throw new BotError('Vui lòng nhập tên bài hát!')
+    if (!query) throw new BotError('Vui lòng nhập tên bài hát bạn muốn tìm kiếm.')
 
     // Block URLs
     if (/^https?:\/\//.test(query)) {
-      throw new BotError('Lệnh tìm kiếm không hỗ trợ link! Vui lòng dùng lệnh !play để phát link.')
+      throw new BotError('Lệnh tìm kiếm không hỗ trợ đường dẫn, vui lòng sử dụng lệnh `play`.')
     }
 
     // Get or create player
     const player =
       bot.lavalink.getPlayer(message.guild.id) ??
-      (await bot.lavalink.createPlayer({
+      bot.lavalink.createPlayer({
         guildId: message.guild.id,
         voiceChannelId: vcId,
         textChannelId: message.channel.id,
         selfDeaf: true,
         selfMute: false,
-        volume: 80,
+        volume: 100,
         instaUpdateFiltersFix: true
-      }))
+      })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh voice của tôi!')
+    if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh thoại của tớ.')
 
     if (!player.get('owner')) {
       player.set('owner', message.author.id)
     }
 
-    const result = await player.search({ query }, message.author)
-
-    if (result.loadType === 'error' || result.loadType === 'empty') {
-      throw new BotError('Không tìm thấy kết quả!')
-    }
+    // Default source is deezer, same as bot's default configuration if not specified
+    const result = await player.search({ query, source: 'dzsearch' }, message.author)
 
     let tracks = result.tracks.slice(0, 10)
 
+    let currentSource = 'dzsearch'
+
     // Helper to build components
-    const getComponents = (disabled = false) => {
+    const getComponents = (disabled = false, activeSource = 'dzsearch') => {
+      const isSelectDisabled = disabled || tracks.length === 0
+
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('search_select')
         .setPlaceholder('Chọn bài hát để phát...')
-        .addOptions(
+
+      if (tracks.length > 0) {
+        selectMenu.addOptions(
           tracks.map((track, index) => {
             const label = track.info.title.substring(0, 100)
-            const description = (track.info.author || 'Unknown Artist').substring(0, 100)
+            const description = (track.info.author || 'Vô danh').substring(0, 100)
             return new StringSelectMenuOptionBuilder()
               .setLabel(label)
               .setDescription(description)
@@ -83,23 +88,41 @@ const command: Command = {
               .setEmoji('🎵')
           })
         )
-        .setDisabled(disabled)
+      } else {
+        selectMenu.addOptions([
+          new StringSelectMenuOptionBuilder()
+            .setLabel('Không có bài hát nào')
+            .setValue('none')
+            .setEmoji('😢')
+        ])
+      }
+      selectMenu.setDisabled(isSelectDisabled)
 
       // Source buttons
       const sources = [
-        { label: 'Deezer', id: 'dzsearch', style: ButtonStyle.Primary },
-        { label: 'YouTube', id: 'ytsearch', style: ButtonStyle.Danger },
-        { label: 'SoundCloud', id: 'scsearch', style: ButtonStyle.Secondary },
-        { label: 'Apple Music', id: 'amsearch', style: ButtonStyle.Secondary },
-        { label: 'Spotify', id: 'spsearch', style: ButtonStyle.Success }
+        { label: 'Deezer', id: 'dzsearch', emoji: EMOJI.DEEZER, style: ButtonStyle.Secondary },
+        { label: 'YouTube', id: 'ytsearch', emoji: EMOJI.YOUTUBE, style: ButtonStyle.Secondary },
+        {
+          label: 'SoundCloud',
+          id: 'scsearch',
+          emoji: EMOJI.SOUNDCLOUD,
+          style: ButtonStyle.Secondary
+        },
+        {
+          label: 'Apple Music',
+          id: 'amsearch',
+          emoji: EMOJI.APPLE_MUSIC,
+          style: ButtonStyle.Secondary
+        },
+        { label: 'Spotify', id: 'spsearch', emoji: EMOJI.SPOTIFY, style: ButtonStyle.Secondary }
       ]
 
       const buttons = sources.map((s) =>
         new ButtonBuilder()
           .setCustomId(s.id)
-          .setLabel(s.label)
+          .setEmoji(s.emoji)
           .setStyle(s.style)
-          .setDisabled(disabled)
+          .setDisabled(disabled || s.id === activeSource)
       )
 
       return [
@@ -108,27 +131,59 @@ const command: Command = {
       ]
     }
 
+    const sourceMap: Record<string, string> = {
+      dzsearch: 'Deezer',
+      ytsearch: 'YouTube',
+      scsearch: 'SoundCloud',
+      amsearch: 'Apple Music',
+      spsearch: 'Spotify'
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buildDescription = (trackList: any[], sourceId: string) => {
+      if (trackList.length === 0) {
+        return lines(
+          'ㅤ',
+          `**Không có kết quả nào** từ nguồn **${sourceMap[sourceId] || 'Không xác định'}**`,
+          'ㅤ'
+        )
+      }
+
+      return trackList
+        .map((t, i) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const authorLink = (t as any).pluginInfo?.artistUrl
+          const authorStr = authorLink
+            ? `[**${t.info.author}**](${authorLink})`
+            : `**${t.info.author}**`
+
+          return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** **[${t.info.title}](${t.info.uri})** bởi ${authorStr}`
+        })
+        .join('\n')
+    }
+
     const embed = new EmbedBuilder()
       .setColor(0x2b2d31)
       .setTitle(`Kết quả tìm kiếm cho: "${query}"`)
-      .setDescription(
-        tracks
-          .map((t, i) => `**${i + 1}.** [${t.info.title}](${t.info.uri}) - ${t.info.author}`)
-          .join('\n')
-      )
-      .setFooter({ text: 'Chọn bài hát hoặc đổi nguồn phát (30s)' })
+      .setDescription(buildDescription(tracks, currentSource))
+      .setFooter({ text: 'Hãy chọn bài hát hoặc đổi nguồn tìm kiếm (60s).' })
 
-    const reply = await message.reply({ embeds: [embed], components: getComponents() })
+    const reply = await message.reply({
+      embeds: [embed],
+      components: getComponents(false, currentSource)
+    })
 
     const collector = reply.createMessageComponentCollector({
-      time: 30000,
+      time: 60000,
       filter: (i) => i.user.id === message.author.id
     })
 
     collector.on('collect', async (interaction) => {
       // Handle Button (Source Switch)
       if (interaction.isButton()) {
+        collector.resetTimer()
         const newSource = interaction.customId
+        currentSource = newSource
         await interaction.deferUpdate()
 
         let newResult
@@ -138,54 +193,44 @@ const command: Command = {
             const spotifyTracks = await searchSpotify(query, 10)
 
             if (!spotifyTracks.length) {
-              await interaction.followUp({
-                content: `Không tìm thấy kết quả bên Spotify!`,
-                ephemeral: true
-              })
-              return
+              newResult = { loadType: 'empty', tracks: [] }
+            } else {
+              // Convert to UnresolvedTrack
+              const tracks = spotifyTracks.map(
+                (t) =>
+                  player.LavalinkManager.utils.buildUnresolvedTrack(
+                    {
+                      title: t.name,
+                      author: t.artists.map((a) => a.name).join(', '),
+                      uri: `https://open.spotify.com/track/${t.id}`,
+                      identifier: t.id,
+                      artworkUrl: t.album.images[0]?.url ?? null,
+                      duration: t.duration_ms,
+                      isrc: t.isrc ?? null
+                    },
+                    message.author
+                  ) as UnresolvedTrack
+              )
+
+              newResult = { loadType: 'search', tracks }
             }
-
-            // Convert to UnresolvedTrack
-            const tracks = spotifyTracks.map(
-              (t) =>
-                player.LavalinkManager.utils.buildUnresolvedTrack(
-                  {
-                    title: t.name,
-                    author: t.artists.map((a) => a.name).join(', '),
-                    uri: `https://open.spotify.com/track/${t.id}`,
-                    identifier: t.id,
-                    artworkUrl: t.album.images[0]?.url ?? null,
-                    duration: t.duration_ms,
-                    isrc: t.isrc ?? null
-                  },
-                  message.author
-                ) as UnresolvedTrack
-            )
-
-            newResult = { loadType: 'search', tracks }
           } else {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             newResult = await player.search({ query, source: newSource as any }, message.author)
           }
 
           if (newResult.loadType === 'error' || newResult.loadType === 'empty') {
-            await interaction.followUp({
-              content: `Không tìm thấy kết quả bên ${newSource}!`,
-              ephemeral: true
-            })
-            return
+            tracks = []
+          } else {
+            tracks = newResult.tracks.slice(0, 10)
           }
 
-          // Update tracks and components
-          tracks = newResult.tracks.slice(0, 10)
+          embed.setDescription(buildDescription(tracks, newSource))
 
-          embed.setDescription(
-            tracks
-              .map((t, i) => `**${i + 1}.** [${t.info.title}](${t.info.uri}) - ${t.info.author}`)
-              .join('\n')
-          )
-
-          await interaction.editReply({ embeds: [embed], components: getComponents() })
+          await interaction.editReply({
+            embeds: [embed],
+            components: getComponents(false, currentSource)
+          })
         } catch (error) {
           logger.error(`Error searching source ${newSource}:`, error)
           await interaction.followUp({
@@ -203,48 +248,46 @@ const command: Command = {
 
         if (!track) return
 
-        const isFirstPlay = !player.playing && player.queue.tracks.length === 0
+        await interaction.deferUpdate().catch(() => {})
+        await interaction.message.delete().catch(() => {})
+
         await player.queue.add(track)
 
-        if (!player.playing) await player.play()
+        const addedEmbed = buildAddedItemEmbed(
+          'track',
+          {
+            title: track.info.title,
+            tracks: [track],
+            thumbnailUrl: track.info.artworkUrl ?? null,
+            author: track.info.author,
+            trackLink: track.info.uri ?? 'https://github.com/yngpiu',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            authorLink: (track as any).pluginInfo?.artistUrl ?? null
+          },
+          player,
+          message.author,
+          bot.user?.displayAvatarURL()
+        )
 
-        if (!isFirstPlay) {
-          const addedEmbed = buildAddedItemEmbed(
-            'track',
-            {
-              title: track.info.title,
-              tracks: [track],
-              thumbnailUrl: track.info.artworkUrl ?? null,
-              author: track.info.author,
-              trackLink: track.info.uri ?? 'https://github.com/yngpiu',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              authorLink: (track as any).pluginInfo?.artistUrl ?? null
-            },
-            player,
-            message.author,
-            bot.user?.displayAvatarURL()
-          )
-          await interaction.update({
-            content: '',
-            embeds: addedEmbed.embeds,
-            files: addedEmbed.files,
-            components: []
-          })
-        } else {
-          await interaction.update({
-            content: '',
-            embeds: [],
-            components: []
-          })
-        }
+        await message.reply(addedEmbed)
+
+        if (!player.playing) await player.play()
 
         collector.stop('selected')
       }
     })
 
     collector.on('end', async (collected, reason) => {
-      if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(true) }).catch(() => {})
+      if (reason === 'time') {
+        await reply.delete().catch(() => {})
+        await message.delete().catch(() => {})
+
+        // Destroy player if not playing anything and queue is empty
+        if (!player.playing && player.queue.tracks.length === 0) {
+          await player.destroy()
+        }
+      } else if (reason !== 'selected') {
+        await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
       }
     })
   }

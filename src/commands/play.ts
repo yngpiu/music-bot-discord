@@ -1,4 +1,4 @@
-import type { GuildMember, Message, TextChannel, VoiceChannel } from 'discord.js'
+import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
@@ -59,49 +59,42 @@ const command: Command = {
       await player.queue.add(result.tracks[0])
     }
 
-    // Send Embed if it's not the first play
-    const isFirstPlay =
-      !player.playing &&
-      player.queue.tracks.length === (result.loadType === 'playlist' ? result.tracks.length : 0)
-    if (!isFirstPlay) {
-      const addedEmbed = buildAddedItemEmbed(
-        result.loadType === 'playlist' ? 'playlist' : 'track',
-        {
-          title:
-            result.loadType === 'playlist'
-              ? (result.playlist?.title ?? 'Playlist')
-              : result.tracks[0].info.title,
-          tracks: result.loadType === 'playlist' ? result.tracks : [result.tracks[0]],
-          thumbnailUrl:
-            result.loadType === 'playlist'
-              ? (result.playlist?.thumbnail ??
-                ('info' in result.tracks[0] ? result.tracks[0].info.artworkUrl : null))
-              : 'info' in result.tracks[0]
-                ? result.tracks[0].info.artworkUrl
-                : null,
-          author: result.loadType === 'playlist' ? null : result.tracks[0].info.author,
-          trackLink:
-            result.loadType === 'playlist'
-              ? undefined
-              : (result.tracks[0].info.uri ?? 'https://github.com/yngpiu'),
-          playlistLink:
-            result.loadType === 'playlist'
-              ? query.startsWith('http')
-                ? query
-                : undefined
-              : undefined,
-          authorLink:
-            result.loadType === 'playlist'
-              ? null
-              : (result.tracks[0]?.pluginInfo?.artistUrl ?? null)
-        },
-        player,
-        message.author,
-        bot.user?.displayAvatarURL()
-      )
+    // Send Embed always
+    const addedEmbed = buildAddedItemEmbed(
+      result.loadType === 'playlist' ? 'playlist' : 'track',
+      {
+        title:
+          result.loadType === 'playlist'
+            ? (result.playlist?.title ?? 'Playlist')
+            : result.tracks[0].info.title,
+        tracks: result.loadType === 'playlist' ? result.tracks : [result.tracks[0]],
+        thumbnailUrl:
+          result.loadType === 'playlist'
+            ? (result.playlist?.thumbnail ??
+              ('info' in result.tracks[0] ? result.tracks[0].info.artworkUrl : null))
+            : 'info' in result.tracks[0]
+              ? result.tracks[0].info.artworkUrl
+              : null,
+        author: result.loadType === 'playlist' ? null : result.tracks[0].info.author,
+        trackLink:
+          result.loadType === 'playlist'
+            ? undefined
+            : (result.tracks[0].info.uri ?? 'https://github.com/yngpiu'),
+        playlistLink:
+          result.loadType === 'playlist'
+            ? query.startsWith('http')
+              ? query
+              : undefined
+            : undefined,
+        authorLink:
+          result.loadType === 'playlist' ? null : (result.tracks[0]?.pluginInfo?.artistUrl ?? null)
+      },
+      player,
+      message.author,
+      bot.user?.displayAvatarURL()
+    )
 
-      await (message.channel as TextChannel).send(addedEmbed)
-    }
+    await message.reply(addedEmbed)
 
     if (!player.playing) await player.play()
   }

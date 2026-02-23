@@ -1,13 +1,20 @@
 export const lines = (...args: string[]) => args.join('\n')
 
 export const formatDuration = (ms: number): string => {
-  if (ms === 0) return '00:00:00'
+  const totalSeconds = Math.floor(ms / 1000)
 
-  const seconds = Math.floor((ms / 1000) % 60)
-  const minutes = Math.floor((ms / (1000 * 60)) % 60)
-  const hours = Math.floor(ms / (1000 * 60 * 60))
+  const seconds = totalSeconds % 60
+  const totalMinutes = Math.floor(totalSeconds / 60)
+  const minutes = totalMinutes % 60
+  const hours = Math.floor(totalMinutes / 60)
 
   const pad = (n: number) => n.toString().padStart(2, '0')
 
+  // < 1 hour → mm:ss
+  if (hours === 0) {
+    return `${pad(minutes)}:${pad(seconds)}`
+  }
+
+  // >= 1 hour → hh:mm:ss
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
