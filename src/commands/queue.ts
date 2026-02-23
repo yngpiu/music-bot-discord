@@ -16,7 +16,6 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    console.log(bot, message)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player || (!player.playing && !player.queue.current)) {
@@ -39,7 +38,7 @@ const command: Command = {
         ? `${indexStr} **\\[${formatDuration(track.info.duration ?? 0)}\\]** **[${track.info.title}](${track.info.uri})** bởi ${authorStr}`
         : `**\\[${formatDuration(track.info.duration ?? 0)}\\]** **[${track.info.title}](${track.info.uri})** bởi ${authorStr}`
 
-      return `${firstLine}\n${EMOJI.CORNER} Yêu cầu bởi: ${requesterStr}`
+      return `${firstLine}\n${EMOJI.CORNER} Y/c bởi: ${requesterStr}`
     }
 
     const totalPages = Math.ceil(tracks.length / 5) || 1
@@ -56,7 +55,7 @@ const command: Command = {
           descLines.push(buildTrackString(currentTracks[i], `${start + i + 1}.`))
         }
       } else {
-        descLines.push('Không có bài hát nào trong hàng đợi.')
+        descLines.push('Không có bài hát nào...')
       }
 
       // Always show current track at the bottom
@@ -74,7 +73,7 @@ const command: Command = {
         })
         .setDescription(descLines.join('\n'))
         .setFooter({
-          text: `Trang ${page}/${totalPages} • Yêu cầu bởi ${message.author.displayName}`
+          text: `Trang ${page}/${totalPages}`
         })
     }
 

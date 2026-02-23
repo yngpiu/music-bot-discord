@@ -18,9 +18,8 @@ const limit = process.env.NUMBER_OF_BOTS ? parseInt(process.env.NUMBER_OF_BOTS) 
 for (let i = 1; i <= limit; i++) {
   const clientId = process.env[`BOT_${i}_CLIENT_ID`]
   const token = process.env[`BOT_${i}_DISCORD_TOKEN`]
-  const ownerId = process.env[`BOT_${i}_OWNER_ID`] || process.env['OWNER_ID']
   if (clientId && token) {
-    bots.push({ clientId, token, ownerId })
+    bots.push({ clientId, token })
   }
 }
 

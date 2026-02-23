@@ -28,13 +28,13 @@ const command: Command = {
 
     if (currentMode === 'off') {
       nextMode = 'track'
-      modeText = 'Lặp lại bài hát hiện tại 🔂'
+      modeText = 'Lặp lại bài hát hiện tại'
     } else if (currentMode === 'track') {
       nextMode = 'queue'
-      modeText = 'Lặp lại toàn bộ danh sách chờ 🔁'
+      modeText = 'Lặp lại toàn bộ danh sách chờ'
     } else {
       nextMode = 'off'
-      modeText = 'Tắt chế độ lặp ➡️'
+      modeText = 'Tắt chế độ lặp'
     }
 
     await player.setRepeatMode(nextMode)

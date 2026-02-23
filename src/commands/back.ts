@@ -41,25 +41,23 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã quay lại bài hát: **${previousTrack.info.title}**.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đang phát lại bài **${previousTrack.info.title}**.`
       )
     )
 
-    let replyMessage
-    if (message.channel.isTextBased() && 'send' in message.channel) {
-      replyMessage = await message.channel
-        .send({
-          components: [container],
-          flags: ['IsComponentsV2']
-        })
-        .catch((e) => {
-          logger.error(e)
-          return null
-        })
-    }
+    const replyMessage = await message
+      .reply({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
+      .catch((e) => {
+        logger.error(e)
+        return null
+      })
 
     if (replyMessage) {
       setTimeout(() => {
+        replyMessage.delete().catch((e: Error) => logger.error(e))
         message.delete().catch((e: Error) => logger.error(e))
       }, 10000)
     }

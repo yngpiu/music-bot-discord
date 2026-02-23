@@ -90,9 +90,15 @@ const command: Command = {
       : await player.search({ query }, message.author)
 
     if (result.loadType === 'error') {
-      throw new BotError(result.exception?.message ?? 'Tớ không tìm thấy bài hát nào.')
+      throw new BotError(
+        result.exception?.message ??
+          'Tớ không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh `search`.'
+      )
     }
-    if (!result.tracks.length) throw new BotError('Tớ không tìm thấy bài hát nào.')
+    if (!result.tracks.length)
+      throw new BotError(
+        'Tớ không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh `search`.'
+      )
 
     if (result.loadType === 'playlist') {
       await player.queue.add(result.tracks, insertIndex)

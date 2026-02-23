@@ -163,7 +163,6 @@ const command: Command = {
     }
 
     const embed = new EmbedBuilder()
-      .setColor(0x2b2d31)
       .setTitle(`Kết quả tìm kiếm cho: "${query}"`)
       .setDescription(buildDescription(tracks, currentSource))
       .setFooter({ text: 'Hãy chọn bài hát hoặc đổi nguồn tìm kiếm (60s).' })
@@ -287,7 +286,9 @@ const command: Command = {
           await player.destroy()
         }
       } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(true, currentSource) }).catch((e) => logger.error(e))
+        await reply
+          .edit({ components: getComponents(true, currentSource) })
+          .catch((e) => logger.error(e))
       }
     })
   }

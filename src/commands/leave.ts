@@ -28,7 +28,7 @@ const command: Command = {
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ có người gọi tớ vào phòng (Chủ xị) mới được quyền đuổi tớ đi!')
+      throw new BotError('Chỉ có người gọi tớ vào phòng mới được quyền đuổi tớ đi.')
     }
 
     await player.destroy()

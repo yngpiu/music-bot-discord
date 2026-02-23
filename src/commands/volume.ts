@@ -22,9 +22,7 @@ const command: Command = {
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError(
-        'Chỉ Chủ xị (người mời bot) mới được quyền tinh chỉnh âm lượng chung của cả động.'
-      )
+      throw new BotError('Chỉ **Chủ xị** mới được quyền tinh chỉnh âm lượng chung của cả động.')
     }
 
     if (!args[0]) {
@@ -43,7 +41,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã điều chỉnh âm lượng thành **${vol}%** theo lệnh Chủ xị 🔊.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã điều chỉnh âm lượng thành **${vol}%** theo lệnh Chủ xị.`
       )
     )
 

@@ -61,8 +61,8 @@ plugins:
       - 'dzisrc:%ISRC%' # If ISRC available, search on deezer
       - 'ytsearch:"%ISRC%"' # If ISRC available, search on youtube
       - 'dzsearch:%QUERY%' # Search on deezer, if no results found use the next provider
-      - 'ytsearch:%QUERY%' # If no result found on music.youtube, search on www.youtube
       - 'ytmsearch:%QUERY%' # If you want music.youtube results first
+      - 'ytsearch:%QUERY%' # If no result found on music.youtube, search on www.youtube
       - 'scsearch:%QUERY%' # Last try to search on soundcloud.
     sources:
       spotify: true # Enable Spotify source

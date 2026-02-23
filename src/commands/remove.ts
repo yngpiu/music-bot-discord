@@ -46,7 +46,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã xóa **${removedTrackInfo.title}** (Vị trí #${position}) khỏi hàng đợi.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã xóa **[${removedTrackInfo.title}](${removedTrackInfo.uri})** khỏi hàng đợi.`
       )
     )
 
