@@ -8,6 +8,7 @@ import { RedisQueueStore } from '~/lib/QueueStore.js'
 
 import { logger } from '~/utils/logger.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
+import { setRedisClient } from '~/utils/rateLimiter.js'
 
 export class BotManager {
   public bots: BotClient[] = []
@@ -26,6 +27,7 @@ export class BotManager {
     // Connect Redis
     try {
       await this.redis.connect()
+      setRedisClient(this.redis)
       logger.info('[Boot] Successfully established connection to Redis Server.')
     } catch {
       logger.warn('[Boot] Failed to connect to Redis. Falling back to in-memory store.')
@@ -71,13 +73,13 @@ export class BotManager {
               let searchStr: string
               // Search for the artist name if available, otherwise fallback to the title
               if (lastPlayedTrack.info.author && lastPlayedTrack.info.author !== 'Unknown Artist') {
-                searchStr = lastPlayedTrack.info.author
+                searchStr = `${lastPlayedTrack.info.author} track`
               } else {
-                searchStr = lastPlayedTrack.info.title
+                searchStr = `${lastPlayedTrack.info.title} other track`
               }
 
               // Use ytsearch to find the track
-              const query = `ytsearch:${searchStr} mix`
+              const query = `ytmsearch:${searchStr}`
               const response = await player.search(
                 { query },
                 lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
