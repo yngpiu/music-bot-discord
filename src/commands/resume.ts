@@ -30,9 +30,18 @@ const command: Command = {
 
     await player.resume()
 
-    await message.reply(
-      `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã tiếp tục phát nhạc!`
-    )
+    const replyMessage = await message
+      .reply(
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã tiếp tục phát nhạc!`
+      )
+      .catch(() => null)
+
+    if (replyMessage) {
+      setTimeout(() => {
+        replyMessage.delete().catch(() => {})
+        message.delete().catch(() => {})
+      }, 10000)
+    }
   }
 }
 

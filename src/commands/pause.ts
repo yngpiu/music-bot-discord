@@ -34,9 +34,18 @@ const command: Command = {
 
     await player.pause()
 
-    await message.reply(
-      `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã tạm dừng bản/danh sách nhạc hiện tại. Bạn có thể dùng \`!resume\` để tiếp tục.`
-    )
+    const replyMessage = await message
+      .reply(
+        `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã tạm dừng bản/danh sách nhạc hiện tại. Bạn có thể dùng \`!resume\` để tiếp tục.`
+      )
+      .catch(() => null)
+
+    if (replyMessage) {
+      setTimeout(() => {
+        replyMessage.delete().catch(() => {})
+        message.delete().catch(() => {})
+      }, 10000)
+    }
   }
 }
 

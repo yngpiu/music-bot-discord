@@ -56,10 +56,19 @@ const command: Command = {
     )
 
     if (message.channel.isTextBased() && 'send' in message.channel) {
-      await message.channel.send({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
+      const replyMessage = await message.channel
+        .send({
+          components: [container],
+          flags: ['IsComponentsV2']
+        })
+        .catch(() => null)
+
+      if (replyMessage) {
+        setTimeout(() => {
+          replyMessage.delete().catch(() => {})
+          message.delete().catch(() => {})
+        }, 10000)
+      }
     }
   }
 }
