@@ -570,36 +570,52 @@ async function partnerQuery(
   isRetry = false
 ): Promise<unknown> {
   const token = await spotifyTokenHandler.getAccessToken(isRetry)
-  const response = await fetch(SPOTIFY_API_BASE, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token.accessToken}`,
-      'Content-Type': 'application/json',
-      'User-Agent': USER_AGENT
-    },
-    body: JSON.stringify({
-      variables,
-      operationName,
-      extensions: {
-        persistedQuery: { version: 1, sha256Hash: HASHES[operationName] }
-      }
+  try {
+    const response = await fetch(SPOTIFY_API_BASE, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.accessToken}`,
+        'Content-Type': 'application/json',
+        'User-Agent': USER_AGENT
+      },
+      body: JSON.stringify({
+        variables,
+        operationName,
+        extensions: {
+          persistedQuery: { version: 1, sha256Hash: HASHES[operationName] }
+        }
+      })
     })
-  })
 
-  if (!response.ok) {
-    if (response.status === 401 && !isRetry) {
+    if (!response.ok) {
+      if (response.status === 401 && !isRetry) {
+        logger.warn(
+          `[Spotify:API] Received 401 Unauthorized for ${operationName}. Token likely revoked early by Spotify. Triggering immediate Force Refresh...`
+        )
+        return partnerQuery(operationName, variables, true)
+      }
+
+      throw new Error(
+        `Spotify API Error [${operationName}]: ${response.status} ${response.statusText}`
+      )
+    }
+
+    return await response.json()
+  } catch (error) {
+    if (!isRetry) {
       logger.warn(
-        `[Spotify:API] Received 401 Unauthorized for ${operationName}. Token likely revoked early by Spotify. Triggering immediate Force Refresh...`
+        `[Spotify:API] Network error during ${operationName}, retrying once. Details:`,
+        error
       )
       return partnerQuery(operationName, variables, true)
     }
 
+    logger.error(`[Spotify:API] Fatal network error during ${operationName}:`, error)
     throw new Error(
-      `Spotify API Error [${operationName}]: ${response.status} ${response.statusText}`
+      `Spotify API Network Error [${operationName}]: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { cause: error }
     )
   }
-
-  return response.json()
 }
 
 // --- Service Functions ---
