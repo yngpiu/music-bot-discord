@@ -32,7 +32,7 @@ const command: Command = {
     }
 
     if (!args[0]) {
-      throw new BotError('Vui lòng nhập thời gian muốn tua. (VD: `!seek 1:30` hoặc `!seek 90`)')
+      throw new BotError('Vui lòng nhập thời gian muốn tua. (VD: `seek 1:30` hoặc `seek 90`)')
     }
 
     const currentTrack = player.queue.current
@@ -47,9 +47,7 @@ const command: Command = {
 
     const duration = currentTrack.info.duration ?? 0
     if (seekMs < 0 || seekMs > duration) {
-      throw new BotError(
-        `Thời gian tua phải nằm trong định mức 0 dây - ${formatDuration(duration)}.`
-      )
+      throw new BotError(`Thời gian tua phải nằm từ 1 đến ${formatDuration(duration)}.`)
     }
 
     await player.seek(seekMs)

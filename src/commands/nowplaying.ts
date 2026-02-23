@@ -4,21 +4,11 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration } from '~/utils/stringUtil.js'
-
-function generateProgressBar(current: number, total: number, barLength = 20): string {
-  if (total === 0) return `[${'🔘'.padEnd(barLength, '▬')}]`
-  const progress = Math.min(Math.max(current / total, 0), 1)
-  const pos = Math.round(progress * barLength)
-  const before = '▬'.repeat(pos)
-  const after = '▬'.repeat(barLength - pos)
-  return `[${before}🔘${after}]`
-}
 
 const command: Command = {
   name: 'nowplaying',
   aliases: ['np', 'current'],
-  description: 'Hiển thị bài hát đang phát cùng tiến trình nghe',
+  description: 'Hiển thị thông tin bài hát đang phát',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -30,11 +20,6 @@ const command: Command = {
     }
 
     const currentTrack = player.queue.current
-    const duration = currentTrack.info.duration ?? 0
-    const position = player.position ?? 0
-
-    const progressBar = generateProgressBar(position, duration)
-    const timeDisplay = `${formatDuration(position)} / ${currentTrack.info.isStream ? 'LIVE' : formatDuration(duration)}`
 
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
@@ -43,20 +28,13 @@ const command: Command = {
         iconURL: bot.user?.displayAvatarURL()
       })
       .setThumbnail(currentTrack.info.artworkUrl ?? null)
-      .addFields(
-        {
-          name: 'Bài hát',
-          value: `**[${currentTrack.info.title}](${currentTrack.info.uri ?? 'https://github.com/yngpiu'})**${
-            currentTrack.info.author ? ` bởi **${currentTrack.info.author}**` : ''
-          }`,
-          inline: false
-        },
-        {
-          name: 'Tiến trình',
-          value: `\`${progressBar}\`\n${timeDisplay}`,
-          inline: false
-        }
-      )
+      .addFields({
+        name: 'Bài hát',
+        value: `**[${currentTrack.info.title}](${currentTrack.info.uri ?? 'https://github.com/yngpiu'})**${
+          currentTrack.info.author ? ` bởi **${currentTrack.info.author}**` : ''
+        }`,
+        inline: false
+      })
 
     const replyMessage = await message
       .reply({

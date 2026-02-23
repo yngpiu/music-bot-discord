@@ -9,8 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'move',
   aliases: ['mv'],
-  description:
-    'Di chuyển vị trí của một bài hát trong danh sách chờ (Mặc định chèn lên đầu danh sách nếu không điền vị trí TỚI)',
+  description: 'Di chuyển vị trí của một bài hát trong danh sách chờ',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -23,7 +22,7 @@ const command: Command = {
 
     if (!args[0]) {
       throw new BotError(
-        'Cú pháp không hợp lệ. Ví dụ: `!move 5` (lên top 1) hoặc `!move 5 2` (đưa bài 5 lên vị trí 2)'
+        'Cú pháp không hợp lệ. Ví dụ: `move 5` (đưa bài 5 lên đầu) hoặc `move 5 2` (đưa bài 5 lên vị trí 2)'
       )
     }
 

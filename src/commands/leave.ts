@@ -35,7 +35,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã bị đuổi khỏi kênh...`
+        `${EMOJI.ANIMATED_CAT_BYE} Bạn đã đuổi **${bot.user?.displayName || 'tớ'}** ra khỏi kênh.`
       )
     )
 

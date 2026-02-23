@@ -6,10 +6,50 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 
+/**
+ * Parse args into a sorted, deduplicated, 1-based list of positions.
+ * Supports:
+ *   single:  "3"
+ *   multiple: "1 3 7 2"
+ *   range:    "2-7"  (or "2–7")
+ */
+function parsePositions(args: string[], maxLength: number): number[] {
+  const positions = new Set<number>()
+
+  for (const arg of args) {
+    // Range: "2-7" or "2–7"
+    const rangeMatch = arg.match(/^(\d+)[–-](\d+)$/)
+    if (rangeMatch) {
+      const from = parseInt(rangeMatch[1], 10)
+      const to = parseInt(rangeMatch[2], 10)
+      if (from > to)
+        throw new BotError(`Khoảng không hợp lệ: \`${arg}\` (số đầu phải nhỏ hơn số cuối).`)
+      for (let i = from; i <= to; i++) positions.add(i)
+      continue
+    }
+
+    // Single number
+    const n = parseInt(arg, 10)
+    if (isNaN(n)) throw new BotError(`\`${arg}\` không phải là số hợp lệ.`)
+    positions.add(n)
+  }
+
+  // Validate all positions
+  for (const pos of positions) {
+    if (pos < 1 || pos > maxLength) {
+      throw new BotError(
+        `Vị trí **${pos}** không hợp lệ, danh sách chờ hiện có **${maxLength}** bài.`
+      )
+    }
+  }
+
+  return [...positions].sort((a, b) => a - b)
+}
+
 const command: Command = {
   name: 'remove',
   aliases: ['rm', 'delete', 'del'],
-  description: 'Xóa một bài hát khỏi danh sách chờ dựa theo vị trí',
+  description: 'Xóa bài hát khỏi danh sách chờ. VD: `remove 1`, `remove 2 7 4`, `remove 2-7`',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -21,40 +61,40 @@ const command: Command = {
     }
 
     if (!args[0]) {
-      throw new BotError('Vui lòng cung cấp vị trí bài hát muốn xóa. (VD: `!remove 1`)')
-    }
-
-    const position = parseInt(args[0], 10)
-
-    if (isNaN(position) || position < 1 || position > player.queue.tracks.length) {
       throw new BotError(
-        `Vị trí bài hát không hợp lệ, vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`
+        'Vui lòng cung cấp vị trí bài hát muốn xóa.\nVD: `remove 1` · `remove 2 7 4` · `remove 2-7`'
       )
     }
 
-    // Lavalink-client `remove` expects the 0-based index of the track in the queue array.
-    const index = position - 1
+    const queueLength = player.queue.tracks.length
+    const positions = parsePositions(args, queueLength)
 
-    // `remove` returns an object with a `removed` array of tracks
-    const result = await player.queue.remove(index)
-
-    if (!result || !result.removed.length) {
-      throw new BotError('Đã xảy ra lỗi khi cố xóa bài hát này khỏi thẻ điều phối.')
+    // Remove from highest index first so earlier indexes aren't shifted
+    const removedTitles: string[] = []
+    for (const pos of [...positions].reverse()) {
+      const result = await player.queue.remove(pos - 1)
+      if (result?.removed.length) {
+        removedTitles.unshift(result.removed[0].info.title)
+      }
     }
 
-    const removedTrackInfo = result.removed[0].info
+    if (removedTitles.length === 0) {
+      throw new BotError('Đã xảy ra lỗi khi xóa bài hát.')
+    }
+
+    const isSingle = removedTitles.length === 1
+    const description = isSingle
+      ? `đã xóa **${removedTitles[0]}** khỏi hàng đợi.`
+      : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}`
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã xóa **[${removedTrackInfo.title}](${removedTrackInfo.uri})** khỏi hàng đợi.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** ${description}`
       )
     )
 
     const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
+      .reply({ components: [container], flags: ['IsComponentsV2'] })
       .catch((e) => {
         logger.error(e)
         return null

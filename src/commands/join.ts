@@ -3,6 +3,7 @@ import { ContainerBuilder, type GuildMember, type Message, type VoiceChannel } f
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+
 import { logger } from '~/utils/logger.js'
 
 const command: Command = {
@@ -52,7 +53,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã sẵn sàng phát nhạc ở kênh của bạn!`
+        `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã sẵn sàng phát nhạc ở kênh này.`
       )
     )
 
@@ -62,7 +63,10 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-        .catch((e) => { logger.error(e); return null })
+        .catch((e) => {
+          logger.error(e)
+          return null
+        })
 
       if (replyMessage) {
         setTimeout(() => {

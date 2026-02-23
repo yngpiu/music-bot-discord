@@ -41,7 +41,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã điều chỉnh âm lượng thành **${vol}%** theo lệnh Chủ xị.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
       )
     )
 

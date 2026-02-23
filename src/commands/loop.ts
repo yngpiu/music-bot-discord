@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'loop',
   aliases: ['repeat'],
-  description: 'Bật/tắt chế độ lặp lại (lặp 1 bài, lặp toàn bộ, hoặc tắt)',
+  description: 'Bật/tắt chế độ lặp lại (lặp 1 bài, lặp toàn bộ hoặc tắt)',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -24,7 +24,7 @@ const command: Command = {
     const currentMode = player.repeatMode
 
     let nextMode: 'off' | 'track' | 'queue'
-    let modeText = ''
+    let modeText: string
 
     if (currentMode === 'off') {
       nextMode = 'track'
@@ -39,10 +39,17 @@ const command: Command = {
 
     await player.setRepeatMode(nextMode)
 
+    let messageText = ''
+    if (nextMode === 'track') {
+      messageText = `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+    } else if (nextMode === 'queue') {
+      messageText = `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+    } else {
+      messageText = `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã **tắt** chế độ lặp.`
+    }
+
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã chuyển chế độ lặp thành: **${modeText}**.`
-      )
+      t.setContent(messageText)
     )
 
     const replyMessage = await message

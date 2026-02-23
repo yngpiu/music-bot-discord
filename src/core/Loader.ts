@@ -36,7 +36,7 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
       setTimeout(() => {
         reply.delete().catch(() => {})
         target.delete().catch(() => {})
-      }, 10000)
+      }, 15000)
     }
     return
   }

@@ -1,4 +1,7 @@
 import { ContainerBuilder, type Message } from 'discord.js'
+// --- Helpers ---
+
+import type { FilterManager } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -6,149 +9,125 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 
-const availableFilters = [
+// --- Config ---
+
+const FILTER_MAP = {
+  nightcore: { toggle: 'toggleNightcore', label: '🐿️ Nightcore (nhanh & cao)' },
+  vaporwave: { toggle: 'toggleVaporwave', label: '🌆 Vaporwave (chậm & vang)' },
+  karaoke: { toggle: 'toggleKaraoke', label: '🎤 Karaoke (lọc giọng)' },
+  rotation: { toggle: 'toggleRotation', label: '🌀 8D Audio (âm thanh xoay vòng)' },
+  tremolo: { toggle: 'toggleTremolo', label: '〰️ Tremolo (rung âm lượng)' },
+  vibrato: { toggle: 'toggleVibrato', label: '♒ Vibrato (rung cao độ)' },
+  lowpass: { toggle: 'toggleLowPass', label: '📻 LowPass (âm thanh qua tường)' }
+} as const
+
+type FilterKey = keyof typeof FILTER_MAP
+
+const FILTER_ALIASES: Record<string, FilterKey> = {
+  '3d': 'rotation',
+  '8d': 'rotation'
+}
+
+const RESET_ARGS = new Set(['clear', 'off'])
+
+const AVAILABLE_FILTERS = [
+  ...Object.keys(FILTER_MAP),
   'bassboost',
-  'nightcore',
-  'vaporwave',
-  'karaoke',
-  'rotation',
-  'tremolo',
-  'vibrato',
-  'lowpass',
+  ...Object.keys(FILTER_ALIASES),
   'clear',
   'off'
 ]
 
+async function resetAll(filterManager: FilterManager) {
+  await filterManager.resetFilters()
+  await filterManager.clearEQ()
+}
+
+async function applyBassboost(filterManager: FilterManager): Promise<string> {
+  const isActive = filterManager.equalizerBands.some((b) => b.band === 0 && b.gain === 0.25)
+
+  await resetAll(filterManager)
+
+  if (isActive) return '**tắt** bộ chỉnh âm (EQ).'
+
+  await filterManager.setEQ([
+    { band: 0, gain: 0.25 },
+    { band: 1, gain: 0.15 },
+    { band: 2, gain: 0.05 }
+  ])
+  return '**bật** hiệu ứng `🎧 Bassboost 🎧`'
+}
+
+async function applyFilter(filterManager: FilterManager, key: FilterKey): Promise<string> {
+  const { toggle, label } = FILTER_MAP[key]
+  const filterStateKey = key === 'lowpass' ? 'lowPass' : key
+  const isActive = !!filterManager.filters[filterStateKey]
+
+  await resetAll(filterManager)
+
+  if (isActive) return `**tắt** hiệu ứng \`${key}\``
+
+  await (filterManager[toggle] as unknown as () => Promise<void>)()
+  return `**bật** hiệu ứng ${label}`
+}
+
+// --- Command ---
+
 const command: Command = {
   name: 'filter',
   aliases: ['f', 'effects', 'fx'],
-  description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 3d, ...)',
+  description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...)',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+    if (!player) throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+
+    const input = args[0]?.toLowerCase()
+    if (!input || !AVAILABLE_FILTERS.includes(input)) {
+      throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)
     }
 
-    const filterArg = args[0]?.toLowerCase()
+    const { filterManager } = player
 
-    if (!filterArg || !availableFilters.includes(filterArg)) {
-      throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${availableFilters.join(', ')}\``)
-    }
-
-    let actionText = ''
+    let actionText: string
 
     try {
-      if (['clear', 'off'].includes(filterArg)) {
-        await player.filterManager.resetFilters()
-        await player.filterManager.clearEQ()
-        actionText = 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản bản ✨'
+      if (RESET_ARGS.has(input)) {
+        await resetAll(filterManager)
+        actionText = 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản.'
+      } else if (input === 'bassboost') {
+        actionText = await applyBassboost(filterManager)
       } else {
-        // Handle Bassboost (EQ)
-        if (filterArg === 'bassboost') {
-          const isBassboosted = player.filterManager.equalizerBands.some(
-            (b) => b.band === 0 && b.gain === 0.25
-          )
-
-          await player.filterManager.resetFilters()
-          await player.filterManager.clearEQ()
-
-          if (isBassboosted) {
-            actionText = 'tắt bộ chỉnh âm (EQ)'
-          } else {
-            await player.filterManager.setEQ([
-              { band: 0, gain: 0.25 },
-              { band: 1, gain: 0.15 },
-              { band: 2, gain: 0.05 }
-            ])
-            actionText = 'bật 🎧 **Bassboost**'
-          }
-        } else {
-          // Check if the requested filter is currently active
-          const filterKey = (
-            filterArg === 'rotation' || filterArg === '3d' || filterArg === '8d'
-              ? 'rotation'
-              : filterArg === 'lowpass'
-                ? 'lowPass'
-                : filterArg
-          ) as keyof typeof player.filterManager.filters
-
-          const isCurrentlyActive = !!player.filterManager.filters[filterKey]
-
-          // Always clear everything first so they don't stack
-          await player.filterManager.resetFilters()
-          await player.filterManager.clearEQ()
-
-          // If it was already active, we just leave it cleared (toggle OFF)
-          // If it was not active, we turn it ON
-          if (isCurrentlyActive) {
-            actionText = `tắt hiệu ứng **${filterArg}**`
-          } else {
-            switch (filterArg) {
-              case 'nightcore':
-                await player.filterManager.toggleNightcore()
-                actionText = 'bật 🐿️ **Nightcore** (nhanh & cao)'
-                break
-              case 'vaporwave':
-                await player.filterManager.toggleVaporwave()
-                actionText = 'bật 🌆 **Vaporwave** (chậm & vang)'
-                break
-              case 'karaoke':
-                await player.filterManager.toggleKaraoke()
-                actionText = 'bật 🎤 **Karaoke** (lọc giọng)'
-                break
-              case 'rotation':
-              case '3d':
-              case '8d':
-                await player.filterManager.toggleRotation()
-                actionText = 'bật 🌀 **8D Audio** (âm thanh xoay vòng)'
-                break
-              case 'tremolo':
-                await player.filterManager.toggleTremolo()
-                actionText = 'bật 〰️ **Tremolo** (rung âm lượng)'
-                break
-              case 'vibrato':
-                await player.filterManager.toggleVibrato()
-                actionText = 'bật ♒ **Vibrato** (rung cao độ)'
-                break
-              case 'lowpass':
-                await player.filterManager.toggleLowPass()
-                actionText = 'bật 📻 **LowPass** (âm thanh qua tường)'
-                break
-            }
-          }
-        }
+        const key = (FILTER_ALIASES[input] ?? input) as FilterKey
+        actionText = await applyFilter(filterManager, key)
       }
     } catch (e) {
       throw new BotError(
-        `Không thể áp dụng hiệu ứng này: ${e instanceof Error ? e.message : 'Lỗi không xác định'}`
+        `Không thể áp dụng hiệu ứng: ${e instanceof Error ? e.message : 'Lỗi không xác định'}.`
       )
     }
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã ${actionText}.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName ?? 'Tớ'}** đã ${actionText}.`
       )
     )
 
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
+    const reply = await message
+      .reply({ components: [container], flags: ['IsComponentsV2'] })
       .catch((e) => {
         logger.error(e)
         return null
       })
 
-    if (replyMessage) {
+    if (reply) {
       setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
+        reply.delete().catch((e: Error) => logger.error(e))
         message.delete().catch((e: Error) => logger.error(e))
-      }, 15000)
+      }, 15_000)
     }
   }
 }

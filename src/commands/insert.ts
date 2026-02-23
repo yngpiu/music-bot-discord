@@ -10,7 +10,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'insert',
   aliases: ['i', 'add'],
-  description: 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ',
+  description: 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -25,7 +25,7 @@ const command: Command = {
 
     if (args.length < 2) {
       throw new BotError(
-        'Vui lòng nhập vị trí và tên bài hát/đường dẫn. (VD: `!insert 1 Nơi này có anh`)'
+        'Vui lòng nhập vị trí và tên bài hát/đường dẫn. (VD: `insert 1 Nơi này có anh`)'
       )
     }
 
@@ -37,7 +37,7 @@ const command: Command = {
     }
 
     const query = args.join(' ')
-    if (!query) throw new BotError('Vui lòng nhập tên bài hát hoặc đường dẫn.')
+    if (!query) throw new BotError('Vui lòng nhập tên bài hát/đường dẫn.')
 
     // Get or create player
     const player =

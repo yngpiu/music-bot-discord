@@ -29,7 +29,7 @@ const command: Command = {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã tua lại bài hát **${currentTrack.info.title}** từ đầu 🔄.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **tua lại** bài hát **${currentTrack.info.title}** từ đầu.`
       )
     )
 
