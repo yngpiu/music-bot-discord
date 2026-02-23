@@ -1,4 +1,4 @@
-import type { GuildMember, Message } from 'discord.js'
+import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -25,24 +25,33 @@ const command: Command = {
     }
 
     if (!player.playing && !player.paused) {
-      throw new BotError('Không có bài hát nào đang được phát.')
+      return
     }
 
     if (player.paused) {
-      throw new BotError('Nhạc đang được tạm dừng rồi mà!')
+      return
     }
 
     await player.pause()
 
-    const replyMessage = await message
-      .reply(
-        `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã tạm dừng bản/danh sách nhạc hiện tại. Bạn có thể dùng \`!resume\` để tiếp tục.`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã tạm dừng phát nhạc.`
       )
-      .catch(() => null)
+    )
+
+    let replyMessage
+    if (message.channel.isTextBased() && 'send' in message.channel) {
+      replyMessage = await message.channel
+        .send({
+          components: [container],
+          flags: ['IsComponentsV2']
+        })
+        .catch(() => null)
+    }
 
     if (replyMessage) {
       setTimeout(() => {
-        replyMessage.delete().catch(() => {})
         message.delete().catch(() => {})
       }, 10000)
     }

@@ -39,10 +39,11 @@ const command: Command = {
           flags: ['IsComponentsV2']
         })
         .catch(() => null)
-      setTimeout(() => {
-        replyMessage?.delete().catch(() => {})
-        message.delete().catch(() => {})
-      }, 10000)
+      if (replyMessage) {
+        setTimeout(() => {
+          message.delete().catch(() => {})
+        }, 10000)
+      }
     }
   }
 }

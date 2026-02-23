@@ -23,7 +23,7 @@ const command: Command = {
     const existingPlayer = bot.lavalink.getPlayer(message.guild.id)
 
     if (existingPlayer && existingPlayer.voiceChannelId === vcId) {
-      throw new BotError('Tớ đang ở trong kênh thoại này rồi mà!')
+      throw new BotError('Tớ đang ở trong kênh thoại này rồi mà.')
     }
 
     if (existingPlayer && existingPlayer.voiceChannelId !== vcId) {
@@ -65,7 +65,6 @@ const command: Command = {
 
       if (replyMessage) {
         setTimeout(() => {
-          replyMessage.delete().catch(() => {})
           message.delete().catch(() => {})
         }, 10000)
       }

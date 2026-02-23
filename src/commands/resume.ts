@@ -1,4 +1,4 @@
-import type { GuildMember, Message } from 'discord.js'
+import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -25,20 +25,29 @@ const command: Command = {
     }
 
     if (!player.paused) {
-      throw new BotError('Có bài nào đang tạm dừng đâu nhỉ!')
+      return
     }
 
     await player.resume()
 
-    const replyMessage = await message
-      .reply(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã tiếp tục phát nhạc!`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** sẽ tiếp tục phát nhạc.`
       )
-      .catch(() => null)
+    )
+
+    let replyMessage
+    if (message.channel.isTextBased() && 'send' in message.channel) {
+      replyMessage = await message.channel
+        .send({
+          components: [container],
+          flags: ['IsComponentsV2']
+        })
+        .catch(() => null)
+    }
 
     if (replyMessage) {
       setTimeout(() => {
-        replyMessage.delete().catch(() => {})
         message.delete().catch(() => {})
       }, 10000)
     }
