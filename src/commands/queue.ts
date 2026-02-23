@@ -5,8 +5,8 @@ import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { formatDuration } from '~/utils/stringUtil.js'
 import { logger } from '~/utils/logger.js'
+import { formatDuration } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'queue',
@@ -68,7 +68,6 @@ const command: Command = {
       }
 
       return new EmbedBuilder()
-        .setColor(0x2b2d31)
         .setAuthor({
           name: `Danh sách chờ - ${tracks.length + (current ? 1 : 0)} bài hát`,
           iconURL: bot.user?.displayAvatarURL() || bot.user?.defaultAvatarURL
@@ -112,18 +111,15 @@ const command: Command = {
       return row
     }
 
-    let replyMessage
-    if (message.channel.isTextBased() && 'send' in message.channel) {
-      replyMessage = await message.channel
-        .send({
-          embeds: [generateEmbed(currentPage)],
-          components: totalPages > 1 ? [getRow(currentPage)] : []
-        })
-        .catch((e) => {
-          console.error('Error sending queue message:', e)
-          return null
-        })
-    }
+    const replyMessage = await message
+      .reply({
+        embeds: [generateEmbed(currentPage)],
+        components: totalPages > 1 ? [getRow(currentPage)] : []
+      })
+      .catch((e: Error) => {
+        logger.error('Error sending queue message:', e)
+        return null
+      })
 
     if (!replyMessage) return
 
@@ -150,7 +146,7 @@ const command: Command = {
           (c as ButtonBuilder).setDisabled(true)
         )
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(disabledRow)
-        replyMessage.edit({ components: [row] }).catch((e) => logger.error(e))
+        replyMessage.edit({ components: [row] }).catch((e: Error) => logger.error(e))
       })
     }
   }
