@@ -82,22 +82,22 @@ const command: Command = {
       row.addComponents(
         new ButtonBuilder()
           .setCustomId('queue_first')
-          .setEmoji('⏮️')
+          .setEmoji(EMOJI.FIRST)
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === 1),
         new ButtonBuilder()
           .setCustomId('queue_prev')
-          .setEmoji('◀️')
+          .setEmoji(EMOJI.PREV)
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === 1),
         new ButtonBuilder()
           .setCustomId('queue_next')
-          .setEmoji('▶️')
+          .setEmoji(EMOJI.NEXT)
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === totalPages),
         new ButtonBuilder()
           .setCustomId('queue_last')
-          .setEmoji('⏭️')
+          .setEmoji(EMOJI.LAST)
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(page === totalPages)
       )
