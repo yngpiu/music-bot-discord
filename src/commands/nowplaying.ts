@@ -4,6 +4,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { formatTrack } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'nowplaying',
@@ -34,9 +35,11 @@ const command: Command = {
       .setThumbnail(currentTrack.info.artworkUrl ?? null)
       .addFields({
         name: 'Bài hát',
-        value: `**[${currentTrack.info.title}](${currentTrack.info.uri ?? 'https://github.com/yngpiu'})**${
-          currentTrack.info.author ? ` bởi **${currentTrack.info.author}**` : ''
-        }`,
+        value: formatTrack({
+          title: currentTrack.info.title,
+          trackLink: currentTrack.info.uri ?? 'https://github.com/yngpiu',
+          author: currentTrack.info.author
+        }),
         inline: false
       })
 

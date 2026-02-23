@@ -5,7 +5,7 @@ import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration, lines } from '~/utils/stringUtil'
+import { formatDuration, formatTrack, lines } from '~/utils/stringUtil'
 
 export default async (bot: BotClient, player: Player, track: Track) => {
   logger.info(
@@ -18,18 +18,20 @@ export default async (bot: BotClient, player: Player, track: Track) => {
 
   if (!channel?.isTextBased() || !('send' in channel)) return
 
-  const trackLink = track?.info?.uri || 'https://github.com/yngpiu'
-  const authorLink = track?.pluginInfo?.artistUrl || null
   let stringDuration = ''
   if (track.info.duration) {
     stringDuration = formatDuration(track.info.duration)
   }
 
+  const trackDisplay = formatTrack({
+    title: track.info.title,
+    trackLink: track.info.uri,
+    author: track.info.author
+  })
+
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(
-      lines(
-        `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **[[${stringDuration}] ${track.info.title}](${trackLink})**${authorLink ? ` bởi **[${track.info.author}](${authorLink})**` : ''}`
-      )
+      lines(`${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`)
     )
   )
 
@@ -38,5 +40,8 @@ export default async (bot: BotClient, player: Player, track: Track) => {
       components: [container],
       flags: ['IsComponentsV2', 'SuppressNotifications']
     })
-    .catch((e) => { logger.error(e); return null })
+    .catch((e) => {
+      logger.error(e)
+      return null
+    })
 }

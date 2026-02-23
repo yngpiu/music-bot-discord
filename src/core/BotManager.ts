@@ -58,7 +58,7 @@ export class BotManager {
         },
         autoSkip: true,
         playerOptions: {
-          defaultSearchPlatform: 'dzsearch',
+          defaultSearchPlatform: 'ytmsearch',
           onDisconnect: {
             autoReconnect: true,
             destroyPlayer: false

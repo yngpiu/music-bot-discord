@@ -5,7 +5,7 @@ import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { lines } from '~/utils/stringUtil'
+import { formatTrack, lines } from '~/utils/stringUtil.js'
 
 export default async (
   bot: BotClient,
@@ -23,12 +23,17 @@ export default async (
   const channel = bot.channels.cache.get(player.textChannelId)
 
   if (!channel?.isTextBased() || !('send' in channel)) return
-  const trackLink = track?.info?.uri || 'https://github.com/yngpiu'
+
+  const trackDisplay = formatTrack({
+    title: track.info.title,
+    trackLink: track.info.uri,
+    author: track.info.author
+  })
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(
       lines(
-        `${EMOJI.ANIMATED_CAT_CRYING} **[${track.info.title}](${trackLink})** đã dừng do gặp sự cố, **${bot.user?.displayName || 'tớ'}** sẽ **bỏ qua** bài hát này.`
+        `${EMOJI.ANIMATED_CAT_CRYING} ${trackDisplay} đã dừng do gặp sự cố, **${bot.user?.displayName || 'tớ'}** sẽ **bỏ qua** bài hát này.`
       )
     )
   )
@@ -38,5 +43,8 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+    .catch((e) => {
+      logger.error(e)
+      return null
+    })
 }

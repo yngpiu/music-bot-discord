@@ -18,3 +18,13 @@ export const formatDuration = (ms: number): string => {
   // >= 1 hour → hh:mm:ss
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
+
+export function formatTrack(item: {
+  title: string
+  trackLink?: string | null
+  author?: string | null
+}) {
+  const label = item.author ? `${item.title} - ${item.author}` : item.title
+
+  return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
+}

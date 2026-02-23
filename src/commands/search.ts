@@ -16,7 +16,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { searchSpotify } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration, lines } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, lines } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'search',
@@ -152,13 +152,13 @@ const command: Command = {
 
       return trackList
         .map((t, i) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const authorLink = (t as any).pluginInfo?.artistUrl
-          const authorStr = authorLink
-            ? `[**${t.info.author}**](${authorLink})`
-            : `**${t.info.author}**`
+          const trackDisplay = formatTrack({
+            title: t.info.title,
+            trackLink: t.info.uri,
+            author: t.info.author
+          })
 
-          return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** **[${t.info.title}](${t.info.uri})** bởi ${authorStr}`
+          return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** ${trackDisplay}`
         })
         .join('\n')
     }

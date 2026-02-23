@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'queue',
@@ -30,17 +30,18 @@ const command: Command = {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildTrackString = (track: any, indexStr: string) => {
-      const authorLink = track.pluginInfo?.artistUrl
-      const authorStr = authorLink
-        ? `[**${track.info.author}**](${authorLink})`
-        : `**${track.info.author}**`
+      const trackDisplay = formatTrack({
+        title: track.info.title,
+        trackLink: track.info.uri,
+        author: track.info.author
+      })
 
       const requester = track.requester as User
       const requesterStr = requester?.id ? `<@${requester.id}>` : 'Không xác định'
 
       const firstLine = indexStr
-        ? `${indexStr} **\\[${formatDuration(track.info.duration ?? 0)}\\]** **[${track.info.title}](${track.info.uri})** bởi ${authorStr}`
-        : `**\\[${formatDuration(track.info.duration ?? 0)}\\]** **[${track.info.title}](${track.info.uri})** bởi ${authorStr}`
+        ? `${indexStr} **\\[${formatDuration(track.info.duration ?? 0)}\\]** ${trackDisplay}`
+        : `**\\[${formatDuration(track.info.duration ?? 0)}\\]** ${trackDisplay}`
 
       return `${firstLine}\n${EMOJI.CORNER} Y/c bởi: ${requesterStr}`
     }

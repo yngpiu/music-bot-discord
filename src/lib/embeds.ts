@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
 
-import { formatDuration } from '~/utils/stringUtil'
+import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
 function getTrackInfo(track: Track | UnresolvedTrack) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,9 +66,14 @@ export function buildAddedItemEmbed(
       inline: false
     })
   } else {
+    const content = formatTrack({
+      title: item.title,
+      trackLink: item.trackLink,
+      author: item.author
+    })
     embed.addFields({
       name: 'Bài hát',
-      value: `**[${item.title}](${item.trackLink})**${item.authorLink ? ` bởi **[${item.author}](${item.authorLink})**` : ''}`,
+      value: content,
       inline: false
     })
   }
