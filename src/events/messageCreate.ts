@@ -25,7 +25,7 @@ export default {
     // ─── Rate Limit ───────────────────────────────────────────────────────────
     const isOwner = config.ownerId && message.author.id === config.ownerId
     if (!isOwner) {
-      const { limited, remainingMs } = checkRateLimit(message.author.id, commandName)
+      const { limited, remainingMs } = checkRateLimit(message.author.id)
       if (limited) {
         const remaining = (remainingMs / 1000).toFixed(1)
         const container = new ContainerBuilder().addTextDisplayComponents((t) =>
