@@ -3,6 +3,7 @@ import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+
 import { logger } from '~/utils/logger.js'
 
 const command: Command = {
@@ -25,6 +26,11 @@ const command: Command = {
       throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
     }
 
+    const owner = player.get('owner')
+    if (owner && message.author.id !== owner) {
+      throw new BotError('Chỉ có người gọi tớ vào phòng (Chủ xị) mới được quyền đuổi tớ đi!')
+    }
+
     await player.destroy()
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
@@ -39,7 +45,10 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-        .catch((e) => { logger.error(e); return null })
+        .catch((e) => {
+          logger.error(e)
+          return null
+        })
       if (replyMessage) {
         setTimeout(() => {
           message.delete().catch((e) => logger.error(e))
