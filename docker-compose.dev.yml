@@ -1,0 +1,19 @@
+# Docker Compose override cho local development
+# Sử dụng: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Override này:
+# - Expose ports ra localhost để dev tools truy cập (pgAdmin, RedisInsight, etc.)
+# - KHÔNG bao gồm bot service (chạy bot bằng `pnpm dev` ngoài Docker)
+
+services:
+  postgres:
+    ports:
+      - '5433:5432'
+
+  redis:
+    ports:
+      - '6380:6379'
+
+  lavalink:
+    ports:
+      - '2333:2333'

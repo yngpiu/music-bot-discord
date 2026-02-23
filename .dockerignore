@@ -3,3 +3,22 @@ dist
 .git
 .env
 *.log
+
+# Dev tooling
+.agent
+.github
+eslint.config.ts
+.prettierrc
+.prettierignore
+nodemon.json
+
+# Runtime artifacts
+logs/
+lavalink/
+lavalink-client/
+.spotify-token-cache.json
+
+# Docs
+DEPLOYMENT.md
+README.md
+LICENSE
