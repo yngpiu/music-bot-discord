@@ -16,7 +16,7 @@ export default async (bot: BotClient, player: Player, delayMs: number) => {
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(`
-      ${EMOJI.ANIMATED_CAT_GUITAR_SAD} Hết nhạc rồi, **${bot.user?.displayName || 'tớ'}** sẽ rời đi trong <t:${Math.round((Date.now() + delayMs) / 1000)}:R>.
+      ${EMOJI.ANIMATED_CAT_CRYING} Hết nhạc rồi, **${bot.user?.displayName || 'tớ'}** sẽ rời đi trong <t:${Math.round((Date.now() + delayMs) / 1000)}:R>.
     `)
   )
 

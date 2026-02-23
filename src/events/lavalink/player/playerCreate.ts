@@ -18,7 +18,16 @@ export default async (bot: BotClient, player: Player) => {
 
   // Enable SponsorBlock for skipping annoying segments
   try {
-    await player.setSponsorBlock(['sponsor', 'selfpromo', 'interaction'])
+    await player.setSponsorBlock([
+      'sponsor',
+      'selfpromo',
+      'interaction',
+      'intro',
+      'outro',
+      'preview',
+      'music_offtopic',
+      'filler'
+    ])
   } catch {
     logger.warn(`[Lavalink:Player] ${player.guildId} :: Failed to set SponsorBlock segments.`)
   }

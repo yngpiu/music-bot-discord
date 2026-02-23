@@ -20,26 +20,26 @@ export default async (
   if (!channel?.isTextBased() || !('send' in channel)) return
 
   const segmentMap: Record<string, string> = {
-    sponsor: 'đoạn nhà tài trợ',
-    selfpromo: 'đoạn quảng cáo bản thân',
-    interaction: 'đoạn tương tác (nhắc like/sub)',
-    intro: 'đoạn mở đầu',
-    outro: 'đoạn kết thúc',
-    preview: 'đoạn xem trước',
-    music_offtopic: 'đoạn nhạc không liên quan',
-    filler: 'đoạn câu giờ'
+    sponsor: 'quảng cáo nhà tài trợ',
+    selfpromo: 'quảng cáo bản thân',
+    interaction: 'nhắc tương tác',
+    intro: 'mở đầu',
+    outro: 'kết thúc',
+    preview: 'xem trước',
+    music_offtopic: 'nhạc không liên quan',
+    filler: 'câu giờ'
   }
 
   const category = segmentMap[payload.segment.category] || payload.segment.category
 
-  const message = `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** vừa tự động bỏ qua **${category}** của video này để bạn nghe nhạc không bị gián đoạn nhé.`
+  const message = `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** vừa tự động bỏ qua **đoạn ${category}**.`
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 
   await channel
     .send({
       components: [container],
-      flags: ['IsComponentsV2']
+      flags: ['IsComponentsV2', 'SuppressNotifications']
     })
     .catch(() => null)
 }
