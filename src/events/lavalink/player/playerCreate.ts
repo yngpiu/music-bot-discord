@@ -15,4 +15,11 @@ export default async (bot: BotClient, player: Player) => {
     // only ignore for the first 3 seconds after joining/creation
     if (player) player.set('ignore_voice_state', false)
   }, 3000)
+
+  // Enable SponsorBlock for skipping annoying segments
+  try {
+    await player.setSponsorBlock(['sponsor', 'selfpromo', 'interaction'])
+  } catch {
+    logger.warn(`[Lavalink:Player] ${player.guildId} :: Failed to set SponsorBlock segments.`)
+  }
 }
