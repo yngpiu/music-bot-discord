@@ -142,12 +142,14 @@ const command: Command = {
       })
 
       collector.on('end', () => {
-        const disabledRow = getRow(currentPage).components.map((c) =>
-          (c as ButtonBuilder).setDisabled(true)
-        )
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(disabledRow)
-        replyMessage.edit({ components: [row] }).catch((e: Error) => logger.error(e))
+        replyMessage.delete().catch((e: Error) => logger.error(e))
+        message.delete().catch(() => {}) // Ignore errors if already deleted
       })
+    } else {
+      setTimeout(() => {
+        replyMessage.delete().catch((e: Error) => logger.error(e))
+        message.delete().catch(() => {})
+      }, 60000)
     }
   }
 }
