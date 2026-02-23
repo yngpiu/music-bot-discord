@@ -59,15 +59,17 @@ const command: Command = {
 
       // Always show current track at the bottom
       if (current) {
-        descLines.push('**0. Đang phát**')
-        descLines.push(buildTrackString(current, ''))
+        descLines.push('')
+        descLines.push(
+          `${EMOJI.ANIMATED_CAT_DANCE} **Đang phát...**\n${buildTrackString(current, '')}`
+        )
       }
 
       return new EmbedBuilder()
         .setColor(0x2b2d31)
         .setAuthor({
-          name: `Danh sách chờ của ${message.guild?.name} - [ ${tracks.length + (current ? 1 : 0)} bài hát ]`,
-          iconURL: message.guild?.iconURL() ?? undefined
+          name: `Danh sách chờ - ${tracks.length + (current ? 1 : 0)} bài hát`,
+          iconURL: bot.user?.displayAvatarURL() || bot.user?.defaultAvatarURL
         })
         .setDescription(descLines.join('\n'))
         .setFooter({
