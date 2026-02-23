@@ -62,7 +62,39 @@ export class BotManager {
             destroyPlayer: false
           },
           onEmptyQueue: {
-            destroyAfterMs: 180000
+            destroyAfterMs: 180000,
+            autoPlayFunction: async (player, lastPlayedTrack) => {
+              if (!player.get('autoplay')) return
+
+              if (!lastPlayedTrack) return
+
+              let searchStr: string
+              // Search for the artist name if available, otherwise fallback to the title
+              if (lastPlayedTrack.info.author && lastPlayedTrack.info.author !== 'Unknown Artist') {
+                searchStr = lastPlayedTrack.info.author
+              } else {
+                searchStr = lastPlayedTrack.info.title
+              }
+
+              // Use ytsearch to find the track
+              const query = `ytsearch:${searchStr} mix`
+              const response = await player.search(
+                { query },
+                lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
+              )
+
+              if (!response || !response.tracks.length) return
+
+              // Select a random track from top 5 recommendations
+              const tracks = response.tracks.slice(0, 5)
+              const randomTrack = tracks[Math.floor(Math.random() * tracks.length)]
+              if (randomTrack) {
+                await player.queue.add(randomTrack)
+                if (!player.playing) {
+                  await player.play()
+                }
+              }
+            }
           }
         },
         queueOptions: {
