@@ -5,6 +5,8 @@ import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
+import { logger } from '~/utils/logger.js'
+
 const command: Command = {
   name: 'play',
   aliases: ['p'],
@@ -94,7 +96,12 @@ const command: Command = {
       bot.user?.displayAvatarURL()
     )
 
-    await message.reply(addedEmbed)
+    const replyMessage = await message.reply(addedEmbed)
+
+    setTimeout(() => {
+      replyMessage.delete().catch((e: Error) => logger.error(e))
+      message.delete().catch((e: Error) => logger.error(e))
+    }, 20000)
 
     if (!player.playing) await player.play()
   }

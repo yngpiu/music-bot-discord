@@ -5,6 +5,8 @@ import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
+import { logger } from '~/utils/logger.js'
+
 const command: Command = {
   name: 'insert',
   aliases: ['i', 'add'],
@@ -31,7 +33,7 @@ const command: Command = {
     const position = parseInt(positionStr || '', 10)
 
     if (isNaN(position) || position < 1) {
-      throw new BotError('Vị trí chèn không hợp lệ. Vui lòng nhập số lớn hơn 0.')
+      throw new BotError('Vị trí chèn không hợp lệ, vui lòng nhập số lớn hơn 0.')
     }
 
     const query = args.join(' ')
@@ -139,7 +141,12 @@ const command: Command = {
       estimatedMsOverride
     )
 
-    await message.reply(addedEmbed)
+    const replyMessage = await message.reply(addedEmbed)
+
+    setTimeout(() => {
+      replyMessage.delete().catch((e: Error) => logger.error(e))
+      message.delete().catch((e: Error) => logger.error(e))
+    }, 20000)
 
     if (!player.playing) await player.play()
   }
