@@ -9,15 +9,19 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'skipto',
   aliases: ['st', 'nextto', 'nt'],
-  description: 'Chuyển đến một bài hát cụ thể trong danh sách chờ',
+  description: 'Chuyển đến một bài hát cụ thể trong danh sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || (!player.playing && !player.queue.current)) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (!player.playing && !player.queue.current) {
+      throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)
     }
 
     if (!args[0]) {

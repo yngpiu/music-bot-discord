@@ -20,7 +20,7 @@ import { formatDuration, lines } from '~/utils/stringUtil.js'
 
 const command: Command = {
   name: 'search',
-  description: 'Search for a song',
+  description: 'Tìm kiếm một bài hát.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -28,15 +28,16 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải vào kênh thoại trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const vc = member.voice.channel as VoiceChannel
     if (!vc.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
 
     const query = args.join(' ')
-    if (!query) throw new BotError('Vui lòng nhập tên bài hát bạn muốn tìm kiếm.')
-
-    // Block URLs
+    if (!query) {
+      throw new BotError('Vui lòng nhập tên/đường dẫn bài hát.')
+    } // Block URLs
     if (/^https?:\/\//.test(query)) {
       throw new BotError('Lệnh tìm kiếm không hỗ trợ đường dẫn, vui lòng sử dụng lệnh `play`.')
     }
@@ -55,7 +56,7 @@ const command: Command = {
       })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh thoại của tớ.')
+    if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
 
     if (!player.get('owner')) {
       player.set('owner', message.author.id)

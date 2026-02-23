@@ -9,15 +9,19 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'skip',
   aliases: ['s', 'n', 'next'],
-  description: 'Bỏ qua bài hát hiện tại để phát bài tiếp theo',
+  description: 'Bỏ qua bài hát hiện tại để phát bài tiếp theo.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || (!player.playing && !player.queue.current)) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (!player.playing && !player.queue.current) {
+      throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)
     }
 
     const currentTrack = player.queue.current

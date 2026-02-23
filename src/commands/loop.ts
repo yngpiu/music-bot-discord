@@ -17,7 +17,7 @@ const command: Command = {
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
     }
 
     // Lavalink repeat modes: 'off' | 'track' | 'queue'

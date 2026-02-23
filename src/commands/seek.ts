@@ -27,8 +27,12 @@ const command: Command = {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || !player.queue.current) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (!player.queue.current) {
+      throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
     if (!args[0]) {

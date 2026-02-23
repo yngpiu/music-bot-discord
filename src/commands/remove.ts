@@ -49,15 +49,19 @@ function parsePositions(args: string[], maxLength: number): number[] {
 const command: Command = {
   name: 'remove',
   aliases: ['rm', 'delete', 'del'],
-  description: 'Xóa bài hát khỏi danh sách chờ. VD: `remove 1`, `remove 2 7 4`, `remove 2-7`',
+  description: 'Xóa bài hát khỏi danh sách chờ (VD: `remove 1`, `remove 2 7 4`, `remove 2-7`).',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || player.queue.tracks.length === 0) {
-      throw new BotError('Danh sách chờ đang trống nên tớ không có bài nào để xóa cả.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (player.queue.tracks.length === 0) {
+      throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
     if (!args[0]) {
@@ -85,7 +89,7 @@ const command: Command = {
     const isSingle = removedTitles.length === 1
     const description = isSingle
       ? `đã xóa **${removedTitles[0]}** khỏi hàng đợi.`
-      : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}`
+      : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n\`${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}\``
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(

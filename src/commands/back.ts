@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'back',
   aliases: ['b', 'previous', 'prev'],
-  description: 'Quay lại bài hát trước đó',
+  description: 'Quay lại bài hát trước đó.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -17,7 +17,7 @@ const command: Command = {
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
     }
 
     if (!player.queue.previous || player.queue.previous.length === 0) {

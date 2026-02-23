@@ -9,15 +9,19 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'shuffle',
   aliases: ['mix', 'random'],
-  description: 'Trộn ngẫu nhiên (xào bài) các bài hát trong danh sách chờ',
+  description: 'Trộn ngẫu nhiên các bài hát trong danh sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || player.queue.tracks.length < 2) {
-      throw new BotError('Cần ít nhất 2 bài hát trong danh sách chờ để có thể xào bài.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (player.queue.tracks.length < 2) {
+      throw new BotError('Danh sách chờ cần có ít nhất 2 bài hát.')
     }
 
     await player.queue.shuffle()

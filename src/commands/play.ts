@@ -10,7 +10,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'play',
   aliases: ['p'],
-  description: 'Play a song or playlist',
+  description: 'Phát một bài hát hoặc danh sách phát.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -18,15 +18,16 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải vào kênh thoại trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const vc = member.voice.channel as VoiceChannel
     if (!vc.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
 
     const query = args.join(' ')
-    if (!query) throw new BotError('Vui lòng nhập tên bài hát/đường dẫn.')
-
-    // Get or create player
+    if (!query) {
+      throw new BotError('Vui lòng nhập tên/đường dẫn bài hát.')
+    } // Get or create player
     const player =
       bot.lavalink.getPlayer(message.guild.id) ??
       bot.lavalink.createPlayer({
@@ -40,7 +41,7 @@ const command: Command = {
       })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError('Bạn phải ở trong kênh thoại của tớ.')
+    if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
 
     if (!player.get('owner')) {
       player.set('owner', message.author.id)

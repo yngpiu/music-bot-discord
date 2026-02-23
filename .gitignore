@@ -4,6 +4,6 @@ node_modules
 
 /src/generated/prisma
 logs/
-lavalink-client-open-source/
+lavalink-client/
 .spotify-token-cache.json
 /dist

@@ -16,13 +16,17 @@ const command: Command = {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || player.queue.tracks.length === 0) {
-      throw new BotError('Danh sách chờ đang trống sẵn rồi.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (player.queue.tracks.length === 0) {
+      throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ có **Chủ xị** mới có quyền xóa toàn bộ hàng đợi.')
+      throw new BotError('Chỉ có **Chủ xị** mới có quyền dùng lệnh này.')
     }
 
     const trackCount = player.queue.tracks.length

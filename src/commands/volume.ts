@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'volume',
   aliases: ['vol', 'v'],
-  description: 'Chỉnh mức âm lượng của bot (từ 0 đến 100, yêu cầu quyền Chủ xị)',
+  description: 'Chỉnh mức âm lượng của bot.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -22,7 +22,7 @@ const command: Command = {
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ **Chủ xị** mới được quyền tinh chỉnh âm lượng chung của cả động.')
+      throw new BotError('Chỉ có **Chủ xị** mới có quyền dùng lệnh này.')
     }
 
     if (!args[0]) {

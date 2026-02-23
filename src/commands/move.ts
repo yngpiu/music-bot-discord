@@ -9,15 +9,19 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'move',
   aliases: ['mv'],
-  description: 'Di chuyển vị trí của một bài hát trong danh sách chờ',
+  description: 'Di chuyển vị trí của một bài hát trong danh sách chờ.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || player.queue.tracks.length < 2) {
-      throw new BotError('Danh sách chờ cần có ít nhất 2 bài hát để di chuyển.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (player.queue.tracks.length < 2) {
+      throw new BotError('Danh sách chờ cần có ít nhất 2 bài hát.')
     }
 
     if (!args[0]) {

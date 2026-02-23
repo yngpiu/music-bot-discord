@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'leave',
   aliases: ['l', 'dc', 'disconnect'],
-  description: 'Yêu cầu bot rời khỏi kênh thoại',
+  description: 'Yêu cầu bot rời khỏi kênh thoại hiện tại.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -17,18 +17,20 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải tham gia kênh thoại của tớ trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) throw new BotError('Tớ đang không phát nhạc ở kênh nào cả.')
-
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
     if (player.voiceChannelId !== vcId) {
       throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
     }
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ có người gọi tớ vào phòng mới được quyền đuổi tớ đi.')
+      throw new BotError('Chỉ có **Chủ xị** mới có quyền dùng lệnh này.')
     }
 
     await player.destroy()

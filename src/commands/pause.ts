@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'pause',
   aliases: ['stop'],
-  description: 'Tạm dừng bài hát hiện tại',
+  description: 'Tạm dừng bài hát hiện tại.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -17,11 +17,13 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải tham gia kênh thoại của tớ trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) throw new BotError('Tớ đang không làm việc ở kênh nào cả.')
-
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
     if (player.voiceChannelId !== vcId) {
       throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
     }
@@ -31,7 +33,7 @@ const command: Command = {
     }
 
     if (player.paused) {
-      throw new BotError('Nhạc đang được tạm dừng rồi mà?')
+      throw new BotError('Nhạc đang được tạm dừng rồi mà.')
     }
 
     await player.pause()

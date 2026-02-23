@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'join',
   aliases: ['j'],
-  description: 'Gọi bot vào kênh thoại hiện tại của bạn',
+  description: 'Gọi bot vào kênh thoại hiện tại.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -17,8 +17,9 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải vào kênh thoại trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const vc = member.voice.channel as VoiceChannel
     if (!vc.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
 

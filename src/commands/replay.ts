@@ -9,15 +9,19 @@ import { logger } from '~/utils/logger.js'
 const command: Command = {
   name: 'replay',
   aliases: ['restart', 'rp'],
-  description: 'Phát lại bài hát hiện tại từ đầu (0:00)',
+  description: 'Phát lại bài hát hiện tại từ đầu (0:00).',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player || !player.queue.current) {
-      throw new BotError('Tớ đang không phát bản nhạc nào cả.')
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    if (!player.queue.current) {
+      throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
     const currentTrack = player.queue.current

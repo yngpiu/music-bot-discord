@@ -76,15 +76,16 @@ async function applyFilter(filterManager: FilterManager, key: FilterKey): Promis
 const command: Command = {
   name: 'filter',
   aliases: ['f', 'effects', 'fx'],
-  description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...)',
+  description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...).',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
 
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) throw new BotError('Tớ đang không phát bản nhạc nào cả.')
-
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
     const input = args[0]?.toLowerCase()
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
       throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)

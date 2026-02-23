@@ -3,12 +3,13 @@ import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+
 import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'resume',
   aliases: ['unpause', 'continue'],
-  description: 'Tiếp tục phát nhạc đang tạm dừng',
+  description: 'Tiếp tục phát nhạc đang tạm dừng.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
@@ -16,17 +17,19 @@ const command: Command = {
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
-    if (!vcId) throw new BotError('Bạn phải tham gia kênh thoại của tớ trước.')
-
+    if (!vcId) {
+      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+    }
     const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) throw new BotError('Tớ đang không làm việc ở kênh nào cả.')
-
+    if (!player) {
+      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
     if (player.voiceChannelId !== vcId) {
       throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
     }
 
     if (!player.paused) {
-      throw new BotError('Nhạc có đang tạm dừng đâu nhỉ?')
+      throw new BotError('Nhạc vẫn đang phát mà.')
     }
 
     await player.resume()
@@ -44,7 +47,10 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-        .catch((e) => { logger.error(e); return null })
+        .catch((e) => {
+          logger.error(e)
+          return null
+        })
     }
 
     if (replyMessage) {
