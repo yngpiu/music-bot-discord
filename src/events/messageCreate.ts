@@ -23,7 +23,7 @@ export default {
     if (!command) return
 
     // ─── Rate Limit ───────────────────────────────────────────────────────────
-    const isOwner = config.ownerId && message.author.id === config.ownerId
+    const isOwner = message.author.id === message.guild.ownerId
     if (!isOwner) {
       const { limited, remainingMs } = checkRateLimit(message.author.id)
       if (limited) {
