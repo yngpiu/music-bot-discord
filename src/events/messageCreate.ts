@@ -25,8 +25,21 @@ export default {
     // ─── Ban check ────────────────────────────────────────────────────────────
     const banRemainingMs = await getBanRemainingMs(message.author.id)
     if (banRemainingMs > 0) {
-      // Silently delete the message and ignore — don't reply to avoid feeding spammers
-      message.delete().catch(() => {})
+      const banHours = (banRemainingMs / 3_600_000).toFixed(1)
+      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+        t.setContent(
+          `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
+        )
+      )
+      const reply = await message
+        .reply({ components: [container], flags: ['IsComponentsV2'] })
+        .catch(() => null)
+      if (reply) {
+        setTimeout(() => {
+          reply.delete().catch(() => {})
+          message.delete().catch(() => {})
+        }, 10000)
+      }
       return
     }
 
