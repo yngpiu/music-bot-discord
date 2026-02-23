@@ -11,14 +11,10 @@ RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 
 WORKDIR /app
 
-# Copy dependency files
 COPY package.json pnpm-lock.yaml ./
-
-# Copy Prisma files (needed for postinstall: prisma generate)
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 
-# Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
 # ============================================
@@ -28,11 +24,9 @@ FROM deps AS builder
 
 WORKDIR /app
 
-# Copy source code and build configs
 COPY src ./src
 COPY tsconfig.json ./
 
-# Build TypeScript → dist/
 RUN pnpm run build
 
 # ============================================
@@ -49,19 +43,19 @@ RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 
 WORKDIR /app
 
-# Copy dependency files and install production-only deps
+# Install production deps trước
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy built code
-COPY --from=builder /app/dist ./dist
-
-# Install Playwright Chromium + system dependencies
+# Cài Playwright Chromium TRƯỚC khi copy dist
+# → layer này được cache, không bị rebuild khi code thay đổi
 RUN npx playwright install --with-deps chromium
 
-# Create logs directory
+# Copy built code (layer này thay đổi mỗi lần build, nhưng Playwright đã được cache ở trên)
+COPY --from=builder /app/dist ./dist
+
 RUN mkdir -p /app/logs
 
 ENV NODE_ENV=production
