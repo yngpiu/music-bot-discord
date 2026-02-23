@@ -1,4 +1,4 @@
-import type { GuildMember, Message, VoiceChannel } from 'discord.js'
+import { ContainerBuilder, type GuildMember, type Message, type VoiceChannel } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -49,9 +49,18 @@ const command: Command = {
       player.set('owner', message.author.id)
     }
 
-    await message.reply(
-      `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã sẵn sàng phát nhạc ở kênh của bạn!`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã sẵn sàng phát nhạc ở kênh của bạn!`
+      )
     )
+
+    if (message.channel.isTextBased() && 'send' in message.channel) {
+      await message.channel.send({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
+    }
   }
 }
 

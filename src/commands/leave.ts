@@ -1,4 +1,4 @@
-import type { GuildMember, Message } from 'discord.js'
+import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -26,9 +26,18 @@ const command: Command = {
 
     await player.destroy()
 
-    await message.reply(
-      `${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã xách vali rời kênh!`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ANIMATED_CAT_BYE} **${bot.user?.displayName || 'tớ'}** đã bị đuổi khỏi kênh...`
+      )
     )
+
+    if (message.channel.isTextBased() && 'send' in message.channel) {
+      await message.channel.send({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
+    }
   }
 }
 
