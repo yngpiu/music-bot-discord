@@ -43,7 +43,6 @@ FROM node:22-slim AS runner
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     ca-certificates \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
@@ -59,16 +58,12 @@ RUN pnpm install --frozen-lockfile --prod
 # Copy built code
 COPY --from=builder /app/dist ./dist
 
-# Playwright browsers will be installed at first startup via entrypoint
-# and cached in the playwright_browsers volume
-ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright
-
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Install Playwright Chromium + system dependencies
+RUN npx playwright install --with-deps chromium
 
 # Create logs directory
-RUN mkdir -p /app/logs /app/.playwright
+RUN mkdir -p /app/logs
+
+ENV NODE_ENV=production
 
 CMD ["node", "dist/index.js"]
-ENTRYPOINT ["docker-entrypoint.sh"]

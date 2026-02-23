@@ -62,7 +62,6 @@ services:
     env_file: .env
     volumes:
       - bot_logs:/app/logs
-      - playwright_browsers:/app/.playwright
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,7 +76,6 @@ volumes:
   postgres_data:
   redis_data:
   bot_logs:
-  playwright_browsers:
 
 networks:
   music-bot-network:
