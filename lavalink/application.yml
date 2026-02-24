@@ -62,12 +62,13 @@ plugins:
     # For more details about client setup, refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#available-clients
     clients:
       - ANDROID_VR
-      - ANDROID_MUSIC
+   #   - ANDROID_MUSIC
       - IOS
       - MWEB
-      - WEB
+  #    - WEB
       - MUSIC
-      - WEBEMBEDDED
+      - TVHTML5_SIMPLY
+ #     - WEBEMBEDDED
       - TV
   lavasrc:
     providers:
