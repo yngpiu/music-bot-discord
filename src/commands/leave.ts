@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'leave',
-  aliases: ['l', 'dc', 'disconnect'],
+  aliases: ['lv', 'dc', 'disconnect', 'stop'],
   description: 'Yêu cầu bot rời khỏi kênh thoại hiện tại.',
   requiresVoice: true,
 

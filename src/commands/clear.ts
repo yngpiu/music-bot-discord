@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'clear',
-  aliases: ['c', 'empty'],
+  aliases: ['c', 'cq', 'empty'],
   description: 'Xóa toàn bộ bài hát trong sách chờ.',
   requiresVoice: true,
 

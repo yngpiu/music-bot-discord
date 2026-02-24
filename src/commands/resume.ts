@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'resume',
-  aliases: ['unpause', 'continue'],
+  aliases: ['rs', 'unpause', 'continue'],
   description: 'Tiếp tục phát nhạc đang tạm dừng.',
   requiresVoice: true,
 

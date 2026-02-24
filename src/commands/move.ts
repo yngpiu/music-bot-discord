@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'move',
-  aliases: ['mv'],
+  aliases: ['m', 'mv'],
   description: 'Di chuyển vị trí của một bài hát trong danh sách chờ.',
   requiresVoice: true,
 

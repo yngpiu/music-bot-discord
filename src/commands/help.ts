@@ -18,52 +18,98 @@ export const commandsByCategory = {
       desc: 'Phát nhạc từ tên bài hát hoặc link.'
     },
     { name: 'search', aliases: ['find'], args: '<tên bài>', desc: 'Tìm và chọn nhạc.' },
-    { name: 'pause', aliases: [], args: '', desc: 'Tạm dừng nhạc.' },
-    { name: 'resume', aliases: [], args: '', desc: 'Tiếp tục phát nhạc.' },
-    { name: 'skipto', aliases: ['st', 'jump'], args: '<vị trí>', desc: 'Bỏ qua đến bài số X.' },
-    { name: 'skip', aliases: ['s'], args: '', desc: 'Bỏ qua bài hiện tại.' },
+    { name: 'pause', aliases: ['ps'], args: '', desc: 'Tạm dừng nhạc.' },
+    {
+      name: 'resume',
+      aliases: ['rs', 'unpause', 'continue'],
+      args: '',
+      desc: 'Tiếp tục phát nhạc.'
+    },
+    {
+      name: 'skipto',
+      aliases: ['st', 'nextto', 'nt'],
+      args: '<vị trí>',
+      desc: 'Bỏ qua đến bài số X.'
+    },
+    { name: 'skip', aliases: ['s', 'n', 'next'], args: '', desc: 'Bỏ qua bài hiện tại.' },
+    { name: 'back', aliases: ['b', 'prev', 'previous'], args: '', desc: 'Phát lại bài trước đó.' },
     {
       name: 'seek',
-      aliases: [],
+      aliases: ['fw', 'rw'],
       args: '<thời gian>',
       desc: 'Tua đến thời gian cụ thể (vd: 1:20).'
     },
-    { name: 'replay', aliases: [], args: '', desc: 'Phát lại bài hiện tại từ đầu.' },
+    { name: 'replay', aliases: ['rp', 'restart'], args: '', desc: 'Phát lại bài hiện tại từ đầu.' },
     {
       name: 'volume',
       aliases: ['v', 'vol'],
       args: '[0-100]',
       desc: 'Xem hoặc điều chỉnh âm lượng.'
     },
-    { name: 'filter', aliases: [], args: '[hiệu ứng]', desc: 'Hiển thị/chọn hiệu ứng âm thanh.' },
-    { name: 'nowplaying', aliases: ['np'], args: '', desc: 'Hiển thị bài hát đang phát.' },
+    {
+      name: 'filter',
+      aliases: ['f', 'fx', 'effects'],
+      args: '[hiệu ứng]',
+      desc: 'Hiển thị/chọn hiệu ứng âm thanh.'
+    },
+    {
+      name: 'nowplaying',
+      aliases: ['np', 'current'],
+      args: '',
+      desc: 'Hiển thị bài hát đang phát.'
+    },
     { name: 'status', aliases: ['state', 'info'], args: '', desc: 'Xem trạng thái của player.' }
   ],
   Queue: [
-    { name: 'queue', aliases: ['q'], args: '[trang]', desc: 'Xem danh sách chờ.' },
-    { name: 'clear', aliases: ['c'], args: '', desc: 'Xóa toàn bộ nhạc trong hàng chờ.' },
-    { name: 'loop', aliases: ['l'], args: '[off/track/queue]', desc: 'Thiết lập chế độ lặp lại.' },
-    { name: 'shuffle', aliases: ['sh'], args: '', desc: 'Trộn bài trong hàng chờ.' },
+    { name: 'queue', aliases: ['q', 'list'], args: '[trang]', desc: 'Xem danh sách chờ.' },
+    {
+      name: 'clear',
+      aliases: ['c', 'cq', 'empty'],
+      args: '',
+      desc: 'Xóa toàn bộ nhạc trong hàng chờ.'
+    },
+    {
+      name: 'loop',
+      aliases: ['l', 'repeat'],
+      args: '[off/track/queue]',
+      desc: 'Thiết lập chế độ lặp lại.'
+    },
+    {
+      name: 'shuffle',
+      aliases: ['sh', 'mix', 'random'],
+      args: '',
+      desc: 'Trộn bài trong hàng chờ.'
+    },
     {
       name: 'move',
       aliases: ['m'],
       args: '<từ> <đến>',
       desc: 'Di chuyển một bài hát trong hàng chờ.'
     },
-    { name: 'remove', aliases: ['rm'], args: '<vị trí>', desc: 'Xóa một bài hát khỏi hàng chờ.' },
+    {
+      name: 'remove',
+      aliases: ['rm', 'del', 'delete'],
+      args: '<vị trí>',
+      desc: 'Xóa một bài hát khỏi hàng chờ.'
+    },
     {
       name: 'insert',
-      aliases: [],
+      aliases: ['i', 'add', 'playnext', 'pn'],
       args: '<tên bài/link>',
       desc: 'Chèn bài hát lên ngay sau bài hiện tại.'
     },
-    { name: 'autoplay', aliases: ['ap'], args: '', desc: 'Bật/tắt tự động phát nhạc tương tự.' }
+    {
+      name: 'autoplay',
+      aliases: ['ap', 'endless'],
+      args: '',
+      desc: 'Bật/tắt tự động phát nhạc tương tự.'
+    }
   ],
   General: [
     { name: 'join', aliases: ['j'], args: '', desc: 'Gọi bot vào kênh thoại.' },
     {
       name: 'leave',
-      aliases: ['dc', 'stop'],
+      aliases: ['lv', 'dc', 'disconnect', 'stop'],
       args: '',
       desc: 'Đuổi bot khỏi kênh thoại và dừng nhạc.'
     },
@@ -81,12 +127,11 @@ const command: Command = {
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({
-        name: 'Danh sách Hướng dẫn',
+        name: 'Danh sách hướng dẫn',
         iconURL: bot.user?.displayAvatarURL()
       })
-      .setDescription('Vui lòng chọn một danh mục lệnh ở menu bên dưới để xem chi tiết nhé!')
-      .setThumbnail(bot.user?.displayAvatarURL() || null)
-      .setFooter({ text: `Prefix hiện tại: ${config.prefix}` })
+      .setDescription('Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.')
+      .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
 
     const select = new StringSelectMenuBuilder()
       .setCustomId('help_category_select')
@@ -124,10 +169,9 @@ const command: Command = {
       const cmds = commandsByCategory[selectedCategory]
 
       const desc = cmds
-        .map((cmd) => {
-          let str = `**${config.prefix}${cmd.name}**`
-          if (cmd.aliases.length > 0)
-            str += ` (${cmd.aliases.map((a) => config.prefix + a).join(', ')})`
+        .map((cmd, index) => {
+          let str = `${index + 1}. **${cmd.name}**`
+          if (cmd.aliases.length > 0) str += ` (${cmd.aliases.map((a) => a).join(', ')})`
           if (cmd.args) str += ` ${cmd.args}`
           str += `\n> ${cmd.desc}`
           return str
@@ -137,7 +181,7 @@ const command: Command = {
       const updatedEmbed = new EmbedBuilder()
         .setColor(0x00c2e6)
         .setAuthor({
-          name: `Lệnh Danh mục: ${selectedCategory}`,
+          name: `Các lệnh thuộc danh mục ${selectedCategory}`,
           iconURL: bot.user?.displayAvatarURL()
         })
         .setDescription(desc)

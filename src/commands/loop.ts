@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'loop',
-  aliases: ['repeat'],
+  aliases: ['l', 'repeat'],
   description: 'Bật/tắt chế độ lặp lại (lặp 1 bài, lặp toàn bộ hoặc tắt)',
   requiresVoice: true,
 

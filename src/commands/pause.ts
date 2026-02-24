@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'pause',
-  aliases: ['stop'],
+  aliases: ['ps'],
   description: 'Tạm dừng bài hát hiện tại.',
   requiresVoice: true,
 

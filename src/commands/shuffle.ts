@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'shuffle',
-  aliases: ['mix', 'random'],
+  aliases: ['sh', 'mix', 'random'],
   description: 'Trộn ngẫu nhiên các bài hát trong danh sách chờ.',
   requiresVoice: true,
 

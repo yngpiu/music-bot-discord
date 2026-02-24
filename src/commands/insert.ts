@@ -9,7 +9,7 @@ import { logger } from '~/utils/logger.js'
 
 const command: Command = {
   name: 'insert',
-  aliases: ['i', 'add'],
+  aliases: ['i', 'add', 'playnext', 'pn'],
   description: 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.',
   requiresVoice: true,
 
