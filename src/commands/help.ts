@@ -7,7 +7,6 @@ import {
 } from 'discord.js'
 import { config } from '~/config/env.js'
 
-import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 export const commandsByCategory = {
@@ -81,7 +80,10 @@ const command: Command = {
   async execute(bot: BotClient, message: Message) {
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
-      .setTitle(`${EMOJI.ANIMATED_CAT_LOVE_YOU} Danh sách Hướng dẫn`)
+      .setAuthor({
+        name: 'Danh sách Hướng dẫn',
+        iconURL: bot.user?.displayAvatarURL()
+      })
       .setDescription('Vui lòng chọn một danh mục lệnh ở menu bên dưới để xem chi tiết nhé!')
       .setThumbnail(bot.user?.displayAvatarURL() || null)
       .setFooter({ text: `Prefix hiện tại: ${config.prefix}` })
@@ -110,7 +112,7 @@ const command: Command = {
 
     const collector = reply.createMessageComponentCollector({
       filter: (i) => i.user.id === message.author.id,
-      time: 60000
+      time: 120000
     })
 
     collector.on('collect', async (interaction) => {
@@ -134,7 +136,10 @@ const command: Command = {
 
       const updatedEmbed = new EmbedBuilder()
         .setColor(0x00c2e6)
-        .setTitle(`Lệnh Danh mục: ${selectedCategory}`)
+        .setAuthor({
+          name: `Lệnh Danh mục: ${selectedCategory}`,
+          iconURL: bot.user?.displayAvatarURL()
+        })
         .setDescription(desc)
         .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
 
