@@ -58,7 +58,8 @@ const command: Command = {
       embed.setDescription(
         `**Đang phát:** ${formatTrack({
           title: player.queue.current.info.title,
-          trackLink: player.queue.current.info.uri
+          trackLink: player.queue.current.info.uri,
+          author: player.queue.current.info.author
         })}`
       )
     } else {

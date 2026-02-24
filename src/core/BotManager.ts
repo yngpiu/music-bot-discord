@@ -290,7 +290,8 @@ export class BotManager {
       .map((t, i) => {
         const trackDisplay = formatTrack({
           title: t.info.title,
-          trackLink: t.info.uri
+          trackLink: t.info.uri,
+          author: t.info.author
         })
         return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** ${trackDisplay}`
       })

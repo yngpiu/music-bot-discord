@@ -32,7 +32,8 @@ const command: Command = {
     const buildTrackString = (track: any, indexStr: string) => {
       const trackDisplay = formatTrack({
         title: track.info.title,
-        trackLink: track.info.uri
+        trackLink: track.info.uri,
+        author: track.info.author
       })
 
       const requester = track.requester as User

@@ -68,7 +68,8 @@ export function buildAddedItemEmbed(
   } else {
     const content = formatTrack({
       title: item.title,
-      trackLink: item.trackLink
+      trackLink: item.trackLink,
+      author: item.author
     })
     embed.addFields({
       name: 'Bài hát',

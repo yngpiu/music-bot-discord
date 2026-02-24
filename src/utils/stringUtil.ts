@@ -19,8 +19,22 @@ export const formatDuration = (ms: number): string => {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
 
-export function formatTrack(item: { title: string; trackLink?: string | null }) {
-  const label = item.title
+export function formatTrack(item: {
+  title: string
+  trackLink?: string | null
+  author?: string | null
+}) {
+  let label = item.title
+
+  if (item.author) {
+    const isYouTubeUrl =
+      item.trackLink?.includes('youtube.com') || item.trackLink?.includes('youtu.be')
+    if (!isYouTubeUrl) {
+      if (!label.toLowerCase().includes(item.author.toLowerCase())) {
+        label = `${item.title} - ${item.author}`
+      }
+    }
+  }
 
   return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
 }
