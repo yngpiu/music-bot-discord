@@ -49,7 +49,7 @@ export const commandsByCategory = {
     {
       name: 'filter',
       aliases: ['f', 'fx', 'effects'],
-      args: '[hiệu ứng]',
+      args: '[(bassboost, 8d, echo, flanger, karaoke, nightcore, vaporwave) | (clear, off)]',
       desc: 'Hiển thị/chọn hiệu ứng âm thanh.'
     },
     {
@@ -89,7 +89,7 @@ export const commandsByCategory = {
     {
       name: 'remove',
       aliases: ['rm', 'del', 'delete'],
-      args: '<vị trí>',
+      args: '<vị trí> | <vị trí> <vị trí> ... | <từ> <đến>',
       desc: 'Xóa một bài hát khỏi hàng chờ.'
     },
     {
@@ -106,7 +106,12 @@ export const commandsByCategory = {
     }
   ],
   General: [
-    { name: 'join', aliases: ['j'], args: '', desc: 'Gọi bot vào kênh thoại.' },
+    {
+      name: 'join',
+      aliases: ['j'],
+      args: '<tag bot>',
+      desc: 'Gọi bot vào kênh thoại, nếu không tag thì tự động chọn bot.'
+    },
     {
       name: 'leave',
       aliases: ['lv', 'dc', 'disconnect', 'stop'],
