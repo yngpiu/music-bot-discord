@@ -37,7 +37,7 @@ services:
     container_name: music-bot-yt-cipher
     restart: unless-stopped
     environment:
-      - API_TOKEN=123
+      - API_TOKEN=${YT_CIPHER_PASSWORD}
     networks:
       - music-bot-network
 
