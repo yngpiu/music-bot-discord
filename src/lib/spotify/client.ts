@@ -15,7 +15,8 @@ const HASHES = {
   getAlbum: 'b9bfabef66ed756e5e13f68a942deb60bd4125ec1f1be8cc42769dc0259b4b10',
   getTrack: '612585ae06ba435ad26369870deaae23b5c8800a256cd8a57e08eddc25a37294',
   internalLinkRecommenderTrack: 'c77098ee9d6ee8ad3eb844938722db60570d040b49f41f5ec6e7be9160a7c86b',
-  searchTracks: '131fd38c13431be963a851082dca0108a4200998b886e7e9d20a21fc51a36aaf'
+  searchTracks: '131fd38c13431be963a851082dca0108a4200998b886e7e9d20a21fc51a36aaf',
+  searchPlaylists: 'af1730623dc1248b75a61a18bad1f47f1fc7eff802fb0676683de88815c958d8'
 }
 
 // --- Types ---
@@ -102,6 +103,7 @@ interface RawPlaylist {
   uri?: string
   name?: string
   description?: string
+  ownerV2?: { data?: { name?: string } }
   images?: { items: { sources: RawImage[] }[] }
   content?: {
     items: { itemV2?: { data: RawTrack }; item?: { data: RawTrack } }[]
@@ -111,8 +113,11 @@ interface RawPlaylist {
 
 interface RawSearch {
   searchV2: {
-    tracksV2: {
+    tracksV2?: {
       items: { item: { data: RawTrack } }[]
+    }
+    playlists?: {
+      items: { data: RawPlaylist }[]
     }
   }
 }
@@ -435,6 +440,8 @@ class SpotifyTokenHandler {
     }
   }
 
+  private fetchTokenPromise: Promise<SpotifyToken> | null = null
+
   public async getAccessToken(forceRefresh = false): Promise<SpotifyToken> {
     if (
       !forceRefresh &&
@@ -449,6 +456,19 @@ class SpotifyTokenHandler {
       }
     }
 
+    if (this.fetchTokenPromise && !forceRefresh) {
+      return this.fetchTokenPromise
+    }
+
+    this.fetchTokenPromise = this._getAccessTokenWithRetries()
+    try {
+      return await this.fetchTokenPromise
+    } finally {
+      this.fetchTokenPromise = null
+    }
+  }
+
+  private async _getAccessTokenWithRetries(): Promise<SpotifyToken> {
     // Retry up to 2 times — Playwright cold start on first launch can be slow
     const maxRetries = 2
     let lastError: unknown
@@ -473,13 +493,14 @@ class SpotifyTokenHandler {
     logger.info('[Spotify:Token] Forcing token refresh. Clearing cache and opening Chromium...')
     this.accessToken = null
     this.accessTokenExpirationTimestampMs = 0
-    return this.fetchNewToken()
+    return this.getAccessToken(true)
   }
 
   private async fetchNewToken(): Promise<SpotifyToken> {
     await this.launchBrowser()
     if (!this.page || !this.context) throw new Error('Browser page not initialized')
 
+    let timeout: NodeJS.Timeout | null = null
     try {
       logger.debug(
         '[Spotify:Playwright] Navigating to https://open.spotify.com/ to sniff token from network requests...'
@@ -503,7 +524,7 @@ class SpotifyTokenHandler {
       })
 
       const tokenPromise = new Promise<SpotifyToken>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Token fetch timeout')), 30000)
+        timeout = setTimeout(() => reject(new Error('Token fetch timeout')), 30000)
 
         const handler = async (response: Response) => {
           if (!response.url().includes('/api/token')) return
@@ -511,7 +532,7 @@ class SpotifyTokenHandler {
             const json = await response.json()
             if (json?.accessToken) {
               this.page?.off('response', handler)
-              clearTimeout(timeout)
+              if (timeout) clearTimeout(timeout)
               resolve(json as SpotifyToken)
             }
           } catch {
@@ -555,6 +576,7 @@ class SpotifyTokenHandler {
       )
       throw error
     } finally {
+      if (timeout) clearTimeout(timeout)
       await this.closeBrowser()
     }
   }
@@ -772,6 +794,47 @@ export async function searchSpotify(query: string, limit = 10): Promise<SpotifyT
   if (!items?.length) return []
 
   return items.map((item) => mapTrack(item.item.data)).filter((t): t is SpotifyTrack => t !== null)
+}
+
+export async function searchSpotifyPlaylists(
+  query: string,
+  limit = 10
+): Promise<SpotifyPlaylist[]> {
+  const result = (await partnerQuery('searchPlaylists', {
+    searchTerm: query,
+    offset: 0,
+    limit,
+    numberOfTopResults: limit,
+    includeAudiobooks: true,
+    includeAuthors: false,
+    includePreReleases: false
+  })) as { data: RawSearch }
+
+  const items = result.data?.searchV2?.playlists?.items
+  if (!items?.length) return []
+
+  return items
+    .map((item) => {
+      const data = item.data
+      const playlistImage = getBiggestImage(data.images?.items?.[0]?.sources || [])
+
+      let description = data.description || ''
+      if (!description && data.ownerV2?.data?.name) {
+        description = `Theo ${data.ownerV2.data.name}`
+      }
+
+      return {
+        id: data.uri?.split(':').pop() || '',
+        name: data.name || '',
+        description,
+        images: formatImage(playlistImage),
+        tracks: {
+          items: [],
+          total: 0
+        }
+      } as SpotifyPlaylist
+    })
+    .filter((p) => p.id !== '')
 }
 
 // --- Universal Dispatcher ---

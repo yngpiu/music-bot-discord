@@ -32,7 +32,7 @@ export default async (
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>
     t.setContent(
       lines(
-        `${EMOJI.ANIMATED_CAT_CRYING} ${trackDisplay} đã dừng do gặp sự cố, **${bot.user?.displayName || 'tớ'}** sẽ **bỏ qua** bài hát này.`
+        `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bỏ qua ${trackDisplay} do lỗi.`
       )
     )
   )

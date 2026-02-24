@@ -29,7 +29,7 @@ if (bots.length === 0) {
 
 export const config = {
   prefix: process.env.DEFAULT_PREFIX ?? 'm',
-  ownerId: process.env.OWNER_ID ?? '',
+  DEVELOPERS: process.env.DEVELOPERS ? process.env.DEVELOPERS.split(',') : [],
   bots,
   lavalink: {
     host: process.env.LAVALINK_HOST ?? 'localhost',

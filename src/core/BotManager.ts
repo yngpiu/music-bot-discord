@@ -40,6 +40,7 @@ export class BotManager {
     for (let i = 0; i < config.bots.length; i++) {
       const botConfig = config.bots[i]
       const bot = new BotClient(i)
+      bot.manager = this
 
       // Setup LavalinkManager for this bot
       bot.lavalink = new LavalinkManager({
@@ -61,7 +62,7 @@ export class BotManager {
         },
         autoSkip: true,
         playerOptions: {
-          defaultSearchPlatform: 'ytsearch',
+          defaultSearchPlatform: 'dzsearch',
           onDisconnect: {
             autoReconnect: true,
             destroyPlayer: false

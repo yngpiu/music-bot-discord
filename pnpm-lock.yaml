@@ -24,8 +24,8 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       lavalink-client:
-        specifier: ^2.9.1
-        version: 2.9.1
+        specifier: ^2.9.2
+        version: 2.9.2
       playwright:
         specifier: ^1.58.2
         version: 1.58.2
@@ -1086,8 +1086,8 @@ packages:
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
 
-  lavalink-client@2.9.1:
-    resolution: {integrity: sha512-pp8IRPYjThbYzd+uLX8WLkBvCJhzskk1ZQfDk1ormnrtoYPh30Q8fi1lZfhkBAvIDagVckxG5u8O8aE0Sv5Ffw==}
+  lavalink-client@2.9.2:
+    resolution: {integrity: sha512-n5nk67cVVtM85mGgneHYASisHlY675bcwLAaSWxhAuMk119MZ/U6soPLxik/R4nlRwuHY+rnY6pK4Q6urG5RIg==}
     engines: {bun: '>=1.1.27', node: '>=18.0.0'}
 
   levn@0.4.1:
@@ -2585,7 +2585,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  lavalink-client@2.9.1:
+  lavalink-client@2.9.2:
     dependencies:
       tslib: 2.8.1
       ws: 8.19.0

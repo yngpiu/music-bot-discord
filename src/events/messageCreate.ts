@@ -6,6 +6,7 @@ import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
 
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
+import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
 import { lines } from '~/utils/stringUtil'
 
@@ -70,7 +71,7 @@ export default {
     if (chosenBot.user?.id !== bot.user?.id) return
 
     // ─── Owner bypass — skip rate limit & ban checks ──────────────────────
-    const isOwner = config.ownerId && message.author.id === config.ownerId
+    const isOwner = isDeveloperOrServerOwner(message)
 
     // ─── Ban check ────────────────────────────────────────────────────────────
     if (!isOwner) {
