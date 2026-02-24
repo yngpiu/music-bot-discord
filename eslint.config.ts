@@ -11,5 +11,10 @@ export default defineConfig([
     languageOptions: { globals: globals.node }
   },
   tseslint.configs.recommended,
-  globalIgnores(['./node_modules/*', './dist/*', './lavalink-client/*'])
+  globalIgnores([
+    './node_modules/*',
+    './dist/*',
+    './lavalink-client-open-source/*',
+    './multi-distube-bots-open-source/*'
+  ])
 ])

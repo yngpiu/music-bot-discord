@@ -67,34 +67,109 @@ export class BotManager {
             destroyAfterMs: 300000,
             autoPlayFunction: async (player, lastPlayedTrack) => {
               if (!player.get('autoplay')) return
-
               if (!lastPlayedTrack) return
 
-              let searchStr: string
-              // Search for the artist name if available, otherwise fallback to the title
-              if (lastPlayedTrack.info.author && lastPlayedTrack.info.author !== 'Unknown Artist') {
-                searchStr = `${lastPlayedTrack.info.author} track`
-              } else {
-                searchStr = `${lastPlayedTrack.info.title} other track`
+              let identifier: string | undefined = undefined
+
+              // 1. If it's already a YouTube/YouTube Music track, we already have the identifier
+              if (
+                lastPlayedTrack.info.sourceName === 'youtube' ||
+                lastPlayedTrack.info.sourceName === 'youtubemusic'
+              ) {
+                identifier = lastPlayedTrack.info.identifier
+              }
+              // 2. If it's any other track (Spotify, SoundCloud, Apple Music etc), we first need to search YouTube to get a YouTube Video ID.
+              else {
+                const author = lastPlayedTrack.info.author
+                const title = lastPlayedTrack.info.title
+
+                let queryStr = title
+                if (author && author !== 'Unknown Artist') {
+                  queryStr = `${author} - ${title}`
+                }
+
+                const ytSearchRes = await player.search(
+                  {
+                    query: queryStr,
+                    source: 'ytsearch'
+                  },
+                  {
+                    requester:
+                      lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
+                  }
+                )
+
+                if (ytSearchRes.tracks.length > 0) {
+                  identifier = ytSearchRes.tracks[0].info.identifier
+                }
               }
 
-              // Use ytsearch to find the track
-              const query = `ytmsearch:${searchStr}`
-              const response = await player.search(
-                { query },
-                lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
-              )
-
-              if (!response || !response.tracks.length) return
-
-              // Select a random track from top 5 recommendations
-              const tracks = response.tracks.slice(0, 5)
-              const randomTrack = tracks[Math.floor(Math.random() * tracks.length)]
-              if (randomTrack) {
-                await player.queue.add(randomTrack)
-                if (!player.playing) {
-                  await player.play()
+              // 3. Fallback: If we couldn't get an identifier via Spotify or direct YT match, do a generic search
+              if (!identifier) {
+                let searchStr: string
+                if (
+                  lastPlayedTrack.info.author &&
+                  lastPlayedTrack.info.author !== 'Unknown Artist'
+                ) {
+                  searchStr = `${lastPlayedTrack.info.author} track`
+                } else {
+                  searchStr = `${lastPlayedTrack.info.title} other track`
                 }
+
+                const fallbackQuery = `ytmsearch:${searchStr}`
+                const fallbackResponse = await player.search(
+                  { query: fallbackQuery },
+                  lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
+                )
+
+                if (fallbackResponse && fallbackResponse.tracks.length > 0) {
+                  const tracks = fallbackResponse.tracks.slice(0, 5)
+                  const randomTrack = tracks[Math.floor(Math.random() * tracks.length)]
+                  if (randomTrack) {
+                    await player.queue.add(randomTrack)
+                    if (!player.playing) {
+                      await player.play()
+                    }
+                  }
+                }
+                return
+              }
+
+              // 4. Fetch the Youtube Mix playlist using the identifier
+              try {
+                const mixResponse = await player.search(
+                  {
+                    query: `https://www.youtube.com/watch?v=${identifier}&list=RD${identifier}`,
+                    source: 'youtube'
+                  },
+                  lastPlayedTrack.requester || player.LavalinkManager.options.client?.id
+                )
+
+                if (mixResponse && mixResponse.tracks.length > 0) {
+                  // Filter out the original track to prevent exact repetiton
+                  const filteredTracks = mixResponse.tracks.filter(
+                    (track) => track.info.identifier !== lastPlayedTrack.info.identifier
+                  )
+
+                  if (filteredTracks.length > 0) {
+                    const tracksToAdd = filteredTracks.slice(0, 5).map((track) => {
+                      // Mark tracked as autoplayed
+                      track.pluginInfo = track.pluginInfo || {}
+                      track.pluginInfo.clientData = {
+                        ...(track.pluginInfo.clientData || {}),
+                        fromAutoplay: true
+                      }
+                      return track
+                    })
+
+                    await player.queue.add(tracksToAdd)
+                    if (!player.playing) {
+                      await player.play()
+                    }
+                  }
+                }
+              } catch {
+                // Ignore search errors or warn quietly
               }
             }
           }
