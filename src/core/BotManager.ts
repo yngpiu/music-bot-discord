@@ -1,3 +1,4 @@
+import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
@@ -9,6 +10,7 @@ import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { logger } from '~/utils/logger.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
+import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
 export class BotManager {
   public bots: BotClient[] = []
@@ -130,6 +132,8 @@ export class BotManager {
                     if (!player.playing) {
                       await player.play()
                     }
+
+                    await this.sendAutoplayEmbed(bot, player, [randomTrack])
                   }
                 }
                 return
@@ -166,6 +170,8 @@ export class BotManager {
                     if (!player.playing) {
                       await player.play()
                     }
+
+                    await this.sendAutoplayEmbed(bot, player, tracksToAdd)
                   }
                 }
               } catch {
@@ -212,11 +218,17 @@ export class BotManager {
    */
   getOrAssignBot(
     guildId: string,
-    options: { vcId?: string; messageId?: string; requiresVoice: boolean }
+    options: { vcId?: string; messageId?: string; requiresVoice: boolean; targetBotId?: string }
   ): BotClient | null {
-    const { vcId, messageId, requiresVoice } = options
+    const { vcId, messageId, requiresVoice, targetBotId } = options
 
     if (requiresVoice) {
+      if (targetBotId) {
+        // Find the specific bot requested
+        const targetBot = this.bots.find((b) => b.user?.id === targetBotId)
+        if (targetBot) return targetBot // Even if busy, let the command handle the error
+        return null // Provided target not found
+      }
       // Priority 1: bot already in user's VC
       if (vcId) {
         for (const bot of this.bots) {
@@ -244,5 +256,38 @@ export class BotManager {
   isIdle(bot: BotClient, guildId: string): boolean {
     const player = bot.lavalink.getPlayer(guildId)
     return !player
+  }
+
+  /**
+   * Helper to send an embed when autoplay adds new tracks
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async sendAutoplayEmbed(bot: BotClient, player: any, tracks: any[]) {
+    const channel = (
+      player.textChannelId ? bot.channels.cache.get(player.textChannelId) : undefined
+    ) as TextChannel | undefined
+
+    if (!channel || tracks.length === 0) return
+
+    const description = tracks
+      .map((t, i) => {
+        const trackDisplay = formatTrack({
+          title: t.info.title,
+          trackLink: t.info.uri,
+          author: t.info.author
+        })
+        return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** ${trackDisplay}`
+      })
+      .join('\n')
+
+    const embed = new EmbedBuilder()
+      .setColor(0x00c2e6)
+      .setAuthor({
+        name: 'Thêm tự động',
+        iconURL: bot.user?.displayAvatarURL()
+      })
+      .setDescription(description)
+
+    await channel.send({ embeds: [embed] }).catch(() => {})
   }
 }

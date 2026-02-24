@@ -30,6 +30,10 @@ const command: Command = {
     }
 
     if (existingPlayer && existingPlayer.voiceChannelId !== vcId) {
+      const isTargeted = message.mentions.users.has(bot.user!.id)
+      if (isTargeted) {
+        throw new BotError('Tớ đang bận phục vụ ở kênh khác rồi.')
+      }
       throw new BotError('Tớ đang bận phục vụ ở kênh thoại khác mất rồi.')
     }
 

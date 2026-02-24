@@ -26,13 +26,33 @@ export default {
     const member = message.guild.members.cache.get(message.author.id)
     const vcId = member?.voice?.channelId ?? undefined
 
+    const targetBotId =
+      commandName === 'join' || commandName === 'j'
+        ? message.mentions.users.filter((u) => u.bot).first()?.id
+        : undefined
+
     const chosenBot = manager.getOrAssignBot(message.guild.id, {
       vcId,
       messageId: message.id,
-      requiresVoice: command.requiresVoice ?? false
+      requiresVoice: command.requiresVoice ?? false,
+      targetBotId
     })
 
     if (!chosenBot) {
+      if (targetBotId) {
+        // Tagged bot was busy and didn't even get returned
+        // Provide specific message (although getOrAssignBot returns the bot even if busy,
+        // this is just a safety catch).
+        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+          t.setContent(`${EMOJI.ANIMATED_CAT_NO_IDEA} Đó không phải là **bot** đâu nhé...`)
+        )
+        const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
+        if (bot.botIndex === randomBotIndex) {
+          await message.reply({ components: [container], flags: ['IsComponentsV2'] })
+        }
+        return
+      }
+
       const container = new ContainerBuilder().addTextDisplayComponents((t) =>
         t.setContent(
           lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
