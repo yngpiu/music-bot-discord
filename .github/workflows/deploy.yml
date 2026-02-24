@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: ['CI']
     types: [completed]
     branches: [master]
 
@@ -14,23 +14,29 @@ jobs:
 
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
+            set -e
+
             cd ~/music-bot
 
-            echo "==> Pulling latest code..."
-            git pull origin master
+            echo "==> Syncing code with origin/master..."
+            git fetch origin
+            git reset --hard origin/master
+
+            echo "==> Pulling latest images (if any)..."
+            docker compose pull
 
             echo "==> Building and restarting bot..."
-            docker compose up -d --build bot
+            docker compose up -d --build --remove-orphans bot
 
             echo "==> Running database migrations..."
-            docker compose exec -T bot npx prisma migrate deploy || true
+            docker compose exec -T bot npx prisma migrate deploy
 
             echo "==> Verifying services..."
             docker compose ps
