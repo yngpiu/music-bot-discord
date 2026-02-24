@@ -24,17 +24,11 @@ export function formatTrack(item: {
   trackLink?: string | null
   author?: string | null
 }) {
-  let label = item.title
+  const isYouTube =
+    item.trackLink &&
+    (item.trackLink.includes('youtube.com') || item.trackLink.includes('youtu.be'))
 
-  if (item.author) {
-    const isYouTubeUrl =
-      item.trackLink?.includes('youtube.com') || item.trackLink?.includes('youtu.be')
-    if (!isYouTubeUrl) {
-      if (!label.toLowerCase().includes(item.author.toLowerCase())) {
-        label = `${item.title} - ${item.author}`
-      }
-    }
-  }
+  const label = item.author && !isYouTube ? `${item.title} - ${item.author}` : item.title
 
   return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
 }

@@ -43,7 +43,7 @@ const command: Command = {
         ? `${indexStr} **\\[${formatDuration(track.info.duration ?? 0)}\\]** ${trackDisplay}`
         : `**\\[${formatDuration(track.info.duration ?? 0)}\\]** ${trackDisplay}`
 
-      return `${firstLine}\n${EMOJI.CORNER} Y/c bởi: ${requesterStr}`
+      return `${firstLine}\n${EMOJI.CORNER} ${requesterStr}`
     }
 
     const totalPages = Math.ceil(tracks.length / 5) || 1
