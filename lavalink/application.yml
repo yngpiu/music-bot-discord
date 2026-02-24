@@ -61,36 +61,14 @@ plugins:
     allowDirectPlaylistIds: true
     # For more details about client setup, refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#available-clients
     clients:
-      - 'ANDROID_MUSIC'
-      - 'MUSIC'
-      - 'WEB'
-      - 'WEBEMBEDDED'
-      - 'TVHTML5_SIMPLY'
-    ANDROID_MUSIC:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    MUSIC:
-      playlistLoading: false
-      videoLoading: false
-      searching: true
-      playback: false
-    WEB:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    WEBEMBEDDED:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
-    TVHTML5_SIMPLY:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
+      - ANDROID_VR
+      - ANDROID_MUSIC
+      - IOS
+      - MWEB
+      - WEB
+      - MUSIC
+      - WEBEMBEDDED
+      - TV
   lavasrc:
     providers:
       - 'ytsearch:"%ISRC%"'
