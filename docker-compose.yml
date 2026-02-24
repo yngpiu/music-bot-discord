@@ -32,6 +32,21 @@ services:
     networks:
       - music-bot-network
 
+  yt-cipher:
+    image: ghcr.io/kikkia/yt-cipher:latest
+    container_name: music-bot-yt-cipher
+    restart: unless-stopped
+    environment:
+      - API_TOKEN=${YT_CIPHER_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8001/ || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - music-bot-network
+
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4-alpine
     container_name: music-bot-lavalink
@@ -51,6 +66,10 @@ services:
       - GENIUS_API_KEY=${GENIUS_API_KEY}
       # YouTube
       - YOUTUBE_REFRESH_TOKEN=${YOUTUBE_REFRESH_TOKEN}
+      - YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD}
+    depends_on:
+      yt-cipher:
+        condition: service_healthy
     volumes:
       - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
       - lavalink_plugins:/opt/Lavalink/plugins

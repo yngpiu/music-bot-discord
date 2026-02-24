@@ -49,10 +49,10 @@ plugins:
     enabled: true
     # YouTube's cipher changes are becoming more frequent and complex, making it harder to keep up.
     # To simplify signature deciphering, you can use a remote cipher server like yt-cipher, a lightweight Deno server with a REST API. More details are available at https://github.com/kikkia/yt-cipher
-    # remoteCipher:
-    #   userAgent: 'your_service_name'
-    #   url: 'http://localhost:8001' # The base URL of your remote cipher server.
-    #   password: 'your_secret_password' # The password to authenticate with your remote cipher server.
+    remoteCipher:
+      userAgent: 'music-bot'
+      url: 'http://yt-cipher:8001'
+      password: ${YT_CIPHER_PASSWORD}
     oauth:
       enabled: true
       refreshToken: ${YOUTUBE_REFRESH_TOKEN}
