@@ -33,7 +33,7 @@ services:
       - music-bot-network
 
   yt-cipher:
-    image: ghcr.io/kikkia/yt-cipher:latest
+    image: ghcr.io/kikkia/yt-cipher:master
     container_name: music-bot-yt-cipher
     restart: unless-stopped
     environment:
