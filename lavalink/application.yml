@@ -93,14 +93,13 @@ plugins:
       playback: true
   lavasrc:
     providers:
-      - 'dzisrc:%ISRC%'
       - 'ytsearch:"%ISRC%"'
-
+      - 'dzisrc:%ISRC%'
       - 'ytsearch:%QUERY%'
       - 'dzsearch:%QUERY%'
+      - 'scsearch:%QUERY%'
       # - 'jssearch:%QUERY%'
       # - 'pdsearch:%QUERY%'
-      - 'scsearch:%QUERY%'
       # - 'tdsearch:%QUERY%'
     sources:
       spotify: true # Enable Spotify source
