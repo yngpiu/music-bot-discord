@@ -23,7 +23,7 @@ jobs:
           script: |
             set -e
 
-            cd ~/music-bot
+            cd ~/music-bot-discord
 
             echo "==> Syncing code with origin/master..."
             git fetch origin
