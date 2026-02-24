@@ -32,6 +32,8 @@ lavalink:
       repository: 'https://maven.lavalink.dev/releases'
     - dependency: 'me.duncte123:java-lyrics-plugin:1.6.6' # https://github.com/DuncteBot/java-timed-lyrics
       repository: 'https://maven.lavalink.dev/releases'
+    - dependency: 'com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.1'
+      repository: 'https://maven.lavalink.dev/releases'
 plugins:
   lyrics:
     countryCode: VN
@@ -47,13 +49,13 @@ plugins:
     enabled: true
     # YouTube's cipher changes are becoming more frequent and complex, making it harder to keep up.
     # To simplify signature deciphering, you can use a remote cipher server like yt-cipher, a lightweight Deno server with a REST API. More details are available at https://github.com/kikkia/yt-cipher
-    remoteCipher:
-      userAgent: 'your_service_name'
-      url: 'http://localhost:8001' # The base URL of your remote cipher server.
-      password: 'your_secret_password' # The password to authenticate with your remote cipher server.
+    # remoteCipher:
+    #   userAgent: 'your_service_name'
+    #   url: 'http://localhost:8001' # The base URL of your remote cipher server.
+    #   password: 'your_secret_password' # The password to authenticate with your remote cipher server.
     oauth:
-      enabled: false
-      # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
+      enabled: true
+      refreshToken: ${YOUTUBE_REFRESH_TOKEN}
     allowSearch: true
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
@@ -96,29 +98,29 @@ plugins:
 
       - 'ytsearch:%QUERY%'
       - 'dzsearch:%QUERY%'
-      - 'jssearch:%QUERY%'
-      - 'pdsearch:%QUERY%'
+      # - 'jssearch:%QUERY%'
+      # - 'pdsearch:%QUERY%'
       - 'scsearch:%QUERY%'
-      - 'tdsearch:%QUERY%'
+      # - 'tdsearch:%QUERY%'
     sources:
       spotify: true # Enable Spotify source
       applemusic: true # Enable Apple Music source
       deezer: true # Enable Deezer source
-      jiosaavn: true # Enabled JioSaavn source
-      pandora: true # Enable Pandora source
+      jiosaavn: false # Enabled JioSaavn source
+      pandora: false # Enable Pandora source
       yandexmusic: true # Enable Yandex Music source
       flowerytts: true # Enable Flowery TTS source
       youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
-      tidal: true # Enable Tidal source
-      vkmusic: true # Enable Vk Music source
-      qobuz: true # Enabled qobuz source
-      ytdlp: true # Enable yt-dlp source
+      tidal: false # Enable Tidal source
+      vkmusic: false # Enable Vk Music source
+      qobuz: false # Enabled qobuz source
+      ytdlp: false # Enable yt-dlp source
     lyrics-sources:
       spotify: true # Enable Spotify lyrics source
       deezer: true # Enable Deezer lyrics source
       youtube: true # Enable YouTube lyrics source
       yandexmusic: true # Enable Yandex Music lyrics source
-      vkmusic: true # Enable Vk Music lyrics source
+      vkmusic: false # Enable Vk Music lyrics source
       lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
     spotify:
       # clientId & clientSecret are required for using spsearch
@@ -132,80 +134,98 @@ plugins:
       countryCode: 'VN'
       playlistLoadLimit: 1 # The number of pages at 100 tracks each
       localFiles: true
-
-plugins:
-  lavasrc:
-    providers: # Custom providers for track loading. This is the default
-      - 'dzisrc:%ISRC%' # If ISRC available, search on deezer
-      - 'ytsearch:"%ISRC%"' # If ISRC available, search on youtube
-      - 'dzsearch:%QUERY%' # Search on deezer, if no results found use the next provider
-      - 'ytmsearch:%QUERY%' # If you want music.youtube results first
-      - 'ytsearch:%QUERY%' # If no result found on music.youtube, search on www.youtube
-      - 'scsearch:%QUERY%' # Last try to search on soundcloud.
-    sources:
-      spotify: true # Enable Spotify source
-      applemusic: true # Enable Apple Music source
-      deezer: true # Enable Deezer source
-      yandexmusic: false # Enable Yandex Music source
-      flowerytts: false # Enable Flowery TTS source
-      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
-      vkmusic: false # Enable Vk Music source
-      tidal: false # Enable Tidal source
-      qobuz: false # Enabled qobuz source
-      ytdlp: false # Enable yt-dlp source
-      jiosaavn: false # Enable JioSaavn source
-    lyrics-sources:
-      spotify: false # Enable Spotify lyrics source
-      deezer: true # Enable Deezer lyrics source
-      youtube: true # Enable YouTube lyrics source
-      yandexmusic: false # Enable Yandex Music lyrics source
-      vkmusic: false # Enable Vk Music lyrics source
-      lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
-    spotify:
-      # clientId: ${LAVASRC_SPOTIFY_CLIENT_ID}
-      # clientSecret: ${LAVASRC_SPOTIFY_CLIENT_SECRET}
-      # spDc: "your sp dc cookie" # the sp dc cookie used for accessing the spotify lyrics api
-      countryCode: 'VN' # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-      playlistLoadLimit: 1 # The number of pages at 100 tracks each
-      albumLoadLimit: 1 # The number of pages at 50 tracks each
-      resolveArtistsInSearch: true # Whether to resolve artists in track search results (can be slow)
-      localFiles: false # Enable local files support with Spotify playlists. Please note `uri` & `isrc` will be `null` & `identifier` will be `"local"`
-      preferAnonymousToken: false # Whether to use the anonymous token for resolving tracks, artists and albums. Spotify generated playlists are always resolved with the anonymous tokens since they do not work otherwise. This requires the customTokenEndpoint to be set.
-      # customTokenEndpoint: 'http://192.168.0.106:3012/api/token' # Optional custom endpoint for getting the anonymous token. If not set, spotify's default endpoint will be used which might not work. The response must match spotify's anonymous token response format.
     applemusic:
-      countryCode: 'VN' # the country code you want to use for filtering the artists top tracks and language. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-      mediaAPIToken: ${LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN} # apple music api token
-      playlistLoadLimit: 6 # The number of pages at 300 tracks each
-      albumLoadLimit: 6 # The number of pages at 300 tracks each
+      countryCode: 'VN'
+      mediaAPIToken: ${APPLEMUSIC_MEDIA_API_TOKEN}
+      playlistLoadLimit: 1 # The number of pages at 300 tracks each
+      albumLoadLimit: 1 # The number of pages at 300 tracks each
     deezer:
-      masterDecryptionKey: ${LAVASRC_DEEZER_MASTER_DECRYPTION_KEY} # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
-      arl: ${LAVASRC_DEEZER_ARL} # the arl cookie used for accessing the deezer api this is not optional anymore
+      masterDecryptionKey: ${DEEZER_MASTER_DECRYPTION_KEY} # the master key used for decrypting the deezer tracks. (you need to get it from somewhere)
+      arl: ${DEEZER_ARL} # the arl cookie used for accessing the deezer api this is not optional anymore
       formats: ['MP3_128', 'MP3_64'] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
     youtube:
-      countryCode: 'VN' # the country code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-      language: 'vi' # the language code you want to use for searching & lyrics. See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
-
-youtube:
-  clients:
-    - TVHTML5EMBEDDED
-    - ANDROID_VR
-    - WEB_REMIX
-    - WEB
-
+      countryCode: 'VN'
+      playlistLoadLimit: 1 # The number of pages at 100 tracks each
+      albumLoadLimit: 1 # The number of pages at 50 tracks each
+      artistLoadLimit: 1 # The number of pages at 10 tracks each
+    yandexmusic:
+      accessToken: ${YANDEX_MUSIC_ACCESS_TOKEN}
+    # tidal:
+    #   countryCode: 'VN' # the country code for accessing region-specific content on Tidal (ISO 3166-1 alpha-2).
+    #   searchLimit: 6 # How many search results should be returned
+    #   token: 'your tidal token' # the token used for accessing the tidal api. See https://github.com/topi314/LavaSrc#tidal
+    # qobuz:
+    #   userOauthToken: 'your user oauth token' # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
+    #   #      appId : optional (Only pass it when you are using an old userOauthToken)
+    #   #      appSecret : optional (Only pass it when you are using an old userOauthToken)
+    ytdlp:
+      path: 'yt-dlp' # the path to the yt-dlp executable.
+      searchLimit: 10 # How many search results should be returned
+      # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
+      # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
+    # jiosaavn:
+    #   decryption: # The decryption configuration for the JioSaavn tracks
+    #     secretKey: 'your_key' # The required secret key used for decryption (Find your own secret key)
+    #     algorithm: 'DES' # The algorithm used for decryption (Default "DES")
+    #     transformation: 'DES/ECB/PKCS5Padding' # The transformation used for decryption (Default "DES/ECB/PKCS5Padding")
+    #   # proxy: # If defined, JioSaavn HTTP requests will be proxied through here. JioSaavn uses region blocking
+    #   #   url: "https://example.org" # The HTTP proxy to use
+    #   #   username: "my-bot" # Optional username to authenticate with the proxy
+    #   #   password: "youshallpass" # Optional password to authenticate with the proxy
+    # pandora:
+    #   csrfToken: 'your csrf token' # X-CsrfToken header from your browser session to pandora.com
+    #   searchLimit: 6 # How many search results should be returned
+    # vkmusic:
+    #   userToken: 'your user token' # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
+    #   playlistLoadLimit: 1 # The number of pages at 50 tracks each
+    #   artistLoadLimit: 1 # The number of pages at 10 tracks each
+    #   recommendationsLoadLimit: 10 # Number of tracks
+    flowerytts:
+      voice: 'Hoai' # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
+      translate: false # whether to translate the text to the native language of voice
+      silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
+      speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
+      audioFormat: 'mp3' # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
+    dunctebot:
+      ttsLanguage: 'vi-VN'
+      sources:
+        getyarn: false # www.getyarn.io
+        clypit: false # www.clyp.it
+        tts: true # speak:Words to speak
+        pornhub: false # should be self-explanatory
+        reddit: true # should be self-explanatory
+        ocremix: true # www.ocremix.org
+        tiktok: true # tiktok.com
+        mixcloud: true # mixcloud.com
+        soundgasm: false # soundgasm.net
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+# sentry:
+#   dsn: ${SENTRY_DSN}
+#   environment: ${SENTRY_ENVIRONMENT}
 logging:
   file:
-    max-history: 30
-    max-size: 1GB
-
+    max-history: 5
+    max-size: 10MB
+  path: ./logs/
   level:
-    root: INFO
-    lavalink: INFO
-    com.github.topi314.lavasrc: DEBUG
-
+    root: DEBUG
+    lavalink: DEBUG
+    lavalink.server.io.SocketContext: TRACE
+    # Log all track exceptions (COMMON, SUSPICIOUS & FAULT)
+    com.sedmelluq.discord.lavaplayer.tools.ExceptionTools: DEBUG
+    # Log YouTube Plugin stuff (only needed if you have issues with YouTube)
+    dev.lavalink.youtube: DEBUG
   request:
     enabled: true
     includeClientInfo: true
-    includeHeaders: false
+    includeHeaders: true
     includeQueryString: true
     includePayload: true
     maxPayloadLength: 10000
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5

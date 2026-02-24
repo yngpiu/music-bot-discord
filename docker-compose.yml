@@ -36,20 +36,35 @@ services:
     image: ghcr.io/lavalink-devs/lavalink:4-alpine
     container_name: music-bot-lavalink
     restart: unless-stopped
+    user: '0:0'
     environment:
       - SERVER_PORT=2333
       - LAVALINK_SERVER_PASSWORD=${LAVALINK_SERVER_PASSWORD}
-      # LavaSrc - Spotify
-      - LAVASRC_SPOTIFY_CLIENT_ID=${LAVASRC_SPOTIFY_CLIENT_ID}
-      - LAVASRC_SPOTIFY_CLIENT_SECRET=${LAVASRC_SPOTIFY_CLIENT_SECRET}
       # LavaSrc - Apple Music
-      - LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN=${LAVASRC_APPLEMUSIC_MEDIA_API_TOKEN}
+      - APPLEMUSIC_MEDIA_API_TOKEN=${APPLEMUSIC_MEDIA_API_TOKEN}
       # LavaSrc - Deezer
-      - LAVASRC_DEEZER_MASTER_DECRYPTION_KEY=${LAVASRC_DEEZER_MASTER_DECRYPTION_KEY}
-      - LAVASRC_DEEZER_ARL=${LAVASRC_DEEZER_ARL}
+      - DEEZER_MASTER_DECRYPTION_KEY=${DEEZER_MASTER_DECRYPTION_KEY}
+      - DEEZER_ARL=${DEEZER_ARL}
+      # LavaSrc - Yandex Music
+      - YANDEX_MUSIC_ACCESS_TOKEN=${YANDEX_MUSIC_ACCESS_TOKEN}
+      # Genius Lyrics
+      - GENIUS_API_KEY=${GENIUS_API_KEY}
+      # YouTube
+      - YOUTUBE_REFRESH_TOKEN=${YOUTUBE_REFRESH_TOKEN}
     volumes:
       - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
-      - ./lavalink/plugins:/opt/Lavalink/plugins
+      - lavalink_plugins:/opt/Lavalink/plugins
+      - lavalink_logs:/opt/Lavalink/logs
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- --header="Authorization: ${LAVALINK_SERVER_PASSWORD}" http://localhost:2333/version || exit 1'
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - music-bot-network
 
@@ -72,7 +87,7 @@ services:
       redis:
         condition: service_healthy
       lavalink:
-        condition: service_started
+        condition: service_healthy
     networks:
       - music-bot-network
 
@@ -80,6 +95,8 @@ volumes:
   postgres_data:
   redis_data:
   bot_logs:
+  lavalink_plugins:
+  lavalink_logs:
 
 networks:
   music-bot-network:
