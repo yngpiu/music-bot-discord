@@ -37,8 +37,7 @@ const command: Command = {
         name: 'Bài hát',
         value: formatTrack({
           title: currentTrack.info.title,
-          trackLink: currentTrack.info.uri ?? 'https://github.com/yngpiu',
-          author: currentTrack.info.author
+          trackLink: currentTrack.info.uri ?? 'https://github.com/yngpiu'
         }),
         inline: false
       })

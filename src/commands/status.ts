@@ -55,7 +55,12 @@ const command: Command = {
       )
 
     if (player.queue.current) {
-      embed.setDescription(`**Đang phát:** ${formatTrack(player.queue.current.info)}`)
+      embed.setDescription(
+        `**Đang phát:** ${formatTrack({
+          title: player.queue.current.info.title,
+          trackLink: player.queue.current.info.uri
+        })}`
+      )
     } else {
       embed.setDescription('Không có bài hát nào đang phát.')
     }

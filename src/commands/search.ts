@@ -154,8 +154,7 @@ const command: Command = {
         .map((t, i) => {
           const trackDisplay = formatTrack({
             title: t.info.title,
-            trackLink: t.info.uri,
-            author: t.info.author
+            trackLink: t.info.uri
           })
 
           return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** ${trackDisplay}`

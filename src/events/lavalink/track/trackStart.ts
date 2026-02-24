@@ -25,8 +25,7 @@ export default async (bot: BotClient, player: Player, track: Track) => {
 
   const trackDisplay = formatTrack({
     title: track.info.title,
-    trackLink: track.info.uri,
-    author: track.info.author
+    trackLink: track.info.uri
   })
 
   const container = new ContainerBuilder().addTextDisplayComponents((t) =>

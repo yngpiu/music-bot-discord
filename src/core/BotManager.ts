@@ -15,6 +15,7 @@ import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 export class BotManager {
   public bots: BotClient[] = []
   private redis: Redis
+  private messageDestinations = new Map<string, string>()
 
   constructor() {
     this.redis = new Redis({
@@ -129,9 +130,6 @@ export class BotManager {
                   const randomTrack = tracks[Math.floor(Math.random() * tracks.length)]
                   if (randomTrack) {
                     await player.queue.add(randomTrack)
-                    if (!player.playing) {
-                      await player.play()
-                    }
 
                     await this.sendAutoplayEmbed(bot, player, [randomTrack])
                   }
@@ -167,9 +165,6 @@ export class BotManager {
                     })
 
                     await player.queue.add(tracksToAdd)
-                    if (!player.playing) {
-                      await player.play()
-                    }
 
                     await this.sendAutoplayEmbed(bot, player, tracksToAdd)
                   }
@@ -222,32 +217,53 @@ export class BotManager {
   ): BotClient | null {
     const { vcId, messageId, requiresVoice, targetBotId } = options
 
+    // Check cache first to avoid race conditions across different bot instances
+    if (messageId && this.messageDestinations.has(messageId)) {
+      const cachedBotId = this.messageDestinations.get(messageId)
+      return this.bots.find((b) => b.user?.id === cachedBotId) ?? null
+    }
+
+    let chosenBot: BotClient | null = null
+
     if (requiresVoice) {
       if (targetBotId) {
         // Find the specific bot requested
-        const targetBot = this.bots.find((b) => b.user?.id === targetBotId)
-        if (targetBot) return targetBot // Even if busy, let the command handle the error
-        return null // Provided target not found
+        chosenBot = this.bots.find((b) => b.user?.id === targetBotId) ?? null
       }
+
       // Priority 1: bot already in user's VC
-      if (vcId) {
+      if (!chosenBot && vcId) {
         for (const bot of this.bots) {
           const botVcId = bot.guilds.cache.get(guildId)?.members.me?.voice?.channelId
-          if (botVcId && botVcId === vcId) return bot
+          if (botVcId && botVcId === vcId) {
+            chosenBot = bot
+            break
+          }
         }
       }
 
       // Priority 2: any idle bot
-      for (const bot of this.bots) {
-        if (this.isIdle(bot, guildId)) return bot
+      if (!chosenBot) {
+        for (const bot of this.bots) {
+          if (this.isIdle(bot, guildId)) {
+            chosenBot = bot
+            break
+          }
+        }
       }
-
-      return null // all bots busy
+    } else {
+      // Non-voice: distribute using message ID hash
+      const idx = getDeterministicIndexFromId(messageId, this.bots.length)
+      chosenBot = this.bots[idx] ?? this.bots[0] ?? null
     }
 
-    // Non-voice: distribute using message ID hash
-    const idx = getDeterministicIndexFromId(messageId, this.bots.length)
-    return this.bots[idx] ?? this.bots[0] ?? null
+    // Cache the decision to prevent duplicate bot replies
+    if (chosenBot && messageId && chosenBot.user?.id) {
+      this.messageDestinations.set(messageId, chosenBot.user.id)
+      setTimeout(() => this.messageDestinations.delete(messageId), 30_000)
+    }
+
+    return chosenBot
   }
 
   /**
@@ -273,8 +289,7 @@ export class BotManager {
       .map((t, i) => {
         const trackDisplay = formatTrack({
           title: t.info.title,
-          trackLink: t.info.uri,
-          author: t.info.author
+          trackLink: t.info.uri
         })
         return `${i + 1}. **\\[${formatDuration(t.info.duration ?? 0)}\\]** ${trackDisplay}`
       })

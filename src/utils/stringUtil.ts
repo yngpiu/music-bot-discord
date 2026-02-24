@@ -19,12 +19,8 @@ export const formatDuration = (ms: number): string => {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
 
-export function formatTrack(item: {
-  title: string
-  trackLink?: string | null
-  author?: string | null
-}) {
-  const label = item.author ? `${item.title} - ${item.author}` : item.title
+export function formatTrack(item: { title: string; trackLink?: string | null }) {
+  const label = item.title
 
   return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
 }
