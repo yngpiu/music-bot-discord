@@ -60,6 +60,10 @@ services:
     container_name: music-bot-app
     restart: unless-stopped
     env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      - REDIS_URL=redis://redis:6379
+      - LAVALINK_HOST=lavalink
     volumes:
       - bot_logs:/app/logs
     depends_on:

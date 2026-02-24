@@ -114,11 +114,6 @@ DB_PASSWORD=<password-postgres-mạnh>
 REDIS_PASSWORD=<password-redis-mạnh>
 LAVALINK_SERVER_PASSWORD=<password-lavalink-mạnh>
 
-# Đảm bảo dùng hostname Docker (KHÔNG phải localhost)
-DATABASE_URL=postgresql://discordbot:<password>@postgres:5432/discord_db
-REDIS_URL=redis://default:<password>@redis:6379
-LAVALINK_HOST=lavalink
-
 # Điền token Discord bot
 NUMBER_OF_BOTS=1
 BOT_1_CLIENT_ID=<client-id>
@@ -129,8 +124,8 @@ LAVASRC_SPOTIFY_CLIENT_ID=...
 LAVASRC_SPOTIFY_CLIENT_SECRET=...
 ```
 
-> [!CAUTION]
-> **KHÔNG** dùng `localhost` cho `DATABASE_URL`, `REDIS_URL`, hay `LAVALINK_HOST` khi chạy trong Docker. Dùng tên service (`postgres`, `redis`, `lavalink`).
+> [!NOTE]
+> File `.env` dùng `localhost` cho `DATABASE_URL`, `REDIS_URL`, `LAVALINK_HOST` — phục vụ local development. Khi chạy production qua `docker compose up`, các giá trị này được tự động ghi đè sang container names (`postgres`, `redis`, `lavalink`) trong `docker-compose.yml`.
 
 ### 2.6. Cấu hình Firewall (optional nhưng khuyến nghị)
 
@@ -332,9 +327,9 @@ docker builder prune
 docker compose logs bot
 
 # Trường hợp phổ biến:
-# 1. Sai DATABASE_URL → check hostname phải là "postgres" không phải "localhost"
-# 2. Sai REDIS_URL → check hostname phải là "redis"
-# 3. Sai Discord token → kiểm tra BOT_x_DISCORD_TOKEN
+# 1. Sai Discord token → kiểm tra BOT_x_DISCORD_TOKEN
+# 2. Database chưa ready → kiểm tra docker compose ps postgres
+# 3. Sai password → kiểm tra DB_PASSWORD, REDIS_PASSWORD
 ```
 
 ### Lavalink không connect
@@ -343,9 +338,8 @@ docker compose logs bot
 docker compose logs lavalink
 
 # Kiểm tra:
-# 1. LAVALINK_HOST phải là "lavalink" (không phải "localhost")
-# 2. LAVALINK_SERVER_PASSWORD phải khớp giữa .env và application.yml
-# 3. Plugins đã được tải đúng: ls -la lavalink/plugins/
+# 1. LAVALINK_SERVER_PASSWORD phải khớp giữa .env và application.yml
+# 2. Plugins đã được tải đúng: ls -la lavalink/plugins/
 ```
 
 ### Database connection refused
