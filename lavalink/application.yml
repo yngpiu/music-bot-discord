@@ -11,7 +11,7 @@ lavalink:
     youtubePlaylistLoadLimit: 3
     opusEncodingQuality: 5
     resamplingQuality: MEDIUM
-    trackStuckThresholdMs: 5000
+    trackStuckThresholdMs: 15000
     playerUpdateInterval: 3
     useSeekGhosting: true
     youtubeSearchEnabled: true
@@ -70,31 +70,31 @@ plugins:
       # - WEB
       # - WEBEMBEDDED
       # - ANDROID_MUSIC
-    ANDROID_MUSIC:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    MUSIC:
-      playlistLoading: false
-      videoLoading: false
-      searching: true
-      playback: false
-    WEB:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    WEBEMBEDDED:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
-    TVHTML5_SIMPLY:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
+    # ANDROID_MUSIC:
+    #   playlistLoading: false
+    #   videoLoading: true
+    #   searching: true
+    #   playback: true
+    # MUSIC:
+    #   playlistLoading: false
+    #   videoLoading: false
+    #   searching: true
+    #   playback: false
+    # WEB:
+    #   playlistLoading: false
+    #   videoLoading: true
+    #   searching: true
+    #   playback: true
+    # WEBEMBEDDED:
+    #   playlistLoading: false
+    #   videoLoading: false
+    #   searching: false
+    #   playback: true
+    # TVHTML5_SIMPLY:
+    #   playlistLoading: false
+    #   videoLoading: false
+    #   searching: false
+    #   playback: true
   lavasrc:
     providers:
       - 'dzisrc:%ISRC%'
