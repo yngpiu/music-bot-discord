@@ -1,4 +1,4 @@
-import type { Message } from 'discord.js'
+import type { Guild, Message } from 'discord.js'
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -16,7 +16,7 @@ import { formatTrack } from '~/utils/stringUtil.js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type LeaderboardView = 'tracks' | 'bots'
+type LeaderboardView = 'personal' | 'tracks' | 'bots'
 
 interface TrackEntry {
   title: string
@@ -33,13 +33,18 @@ interface BotEntry {
 
 // ─── DB Queries ───────────────────────────────────────────────────────────────
 
-async function getTopTracks(limit: number): Promise<TrackEntry[]> {
+async function getPersonalTopTracks(
+  limit: number,
+  guildId: string,
+  userId: string
+): Promise<TrackEntry[]> {
   const results = await prisma.$queryRaw<
     { title: string; artist: string; uri: string | null; playCount: bigint }[]
   >`
     SELECT t."title", t."artist", t."uri", COUNT(ph."id")::bigint AS "playCount"
     FROM "PlayHistory" ph
     JOIN "Track" t ON t."id" = ph."trackId"
+    WHERE ph."guildId" = ${guildId} AND ph."userId" = ${userId}
     GROUP BY t."id", t."title", t."artist", t."uri"
     ORDER BY "playCount" DESC
     LIMIT ${limit}
@@ -53,10 +58,35 @@ async function getTopTracks(limit: number): Promise<TrackEntry[]> {
   }))
 }
 
-async function getTopBots(limit: number): Promise<{ botId: string; playCount: number }[]> {
+async function getTopTracks(limit: number, guildId: string): Promise<TrackEntry[]> {
+  const results = await prisma.$queryRaw<
+    { title: string; artist: string; uri: string | null; playCount: bigint }[]
+  >`
+    SELECT t."title", t."artist", t."uri", COUNT(ph."id")::bigint AS "playCount"
+    FROM "PlayHistory" ph
+    JOIN "Track" t ON t."id" = ph."trackId"
+    WHERE ph."guildId" = ${guildId}
+    GROUP BY t."id", t."title", t."artist", t."uri"
+    ORDER BY "playCount" DESC
+    LIMIT ${limit}
+  `
+
+  return results.map((r) => ({
+    title: r.title,
+    artist: r.artist,
+    uri: r.uri,
+    playCount: Number(r.playCount)
+  }))
+}
+
+async function getTopBots(
+  limit: number,
+  guildId: string
+): Promise<{ botId: string; playCount: number }[]> {
   const results = await prisma.$queryRaw<{ botId: string; playCount: bigint }[]>`
     SELECT "botId", COUNT("id")::bigint AS "playCount"
     FROM "PlayHistory"
+    WHERE "guildId" = ${guildId}
     GROUP BY "botId"
     ORDER BY "playCount" DESC
     LIMIT ${limit}
@@ -105,12 +135,17 @@ function buildViewSelect(currentView: LeaderboardView, disabled = false) {
     .setDisabled(disabled)
     .addOptions(
       new StringSelectMenuOptionBuilder()
-        .setLabel('Bài hát được nghe nhiều nhất')
+        .setLabel('BXH bài hát bạn nghe nhiều nhất')
+        .setValue('personal')
+        .setEmoji('👤')
+        .setDefault(currentView === 'personal'),
+      new StringSelectMenuOptionBuilder()
+        .setLabel('BXH bài hát được phát nhiều nhất')
         .setValue('tracks')
         .setEmoji('🎵')
         .setDefault(currentView === 'tracks'),
       new StringSelectMenuOptionBuilder()
-        .setLabel('Bot có nhiều lượt phát nhất')
+        .setLabel('BXH bot có số lần phát nhiều nhất')
         .setValue('bots')
         .setEmoji('🤖')
         .setDefault(currentView === 'bots')
@@ -119,7 +154,13 @@ function buildViewSelect(currentView: LeaderboardView, disabled = false) {
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
 }
 
-function buildTrackEmbed(entries: TrackEntry[], page: number, totalPages: number, bot: BotClient) {
+function buildTrackEmbed(
+  entries: TrackEntry[],
+  page: number,
+  totalPages: number,
+  guild: Guild,
+  title: string
+) {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -137,15 +178,15 @@ function buildTrackEmbed(entries: TrackEntry[], page: number, totalPages: number
 
   return new EmbedBuilder()
     .setAuthor({
-      name: 'Bài hát được nghe nhiều nhất',
-      iconURL: bot.user?.displayAvatarURL()
+      name: title,
+      iconURL: guild.iconURL() ?? undefined
     })
     .setDescription(description)
     .setColor(0xffd700)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, bot: BotClient) {
+function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, guild: Guild) {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -162,8 +203,8 @@ function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, bo
 
   return new EmbedBuilder()
     .setAuthor({
-      name: 'Bot có nhiều lượt phát nhất',
-      iconURL: bot.user?.displayAvatarURL()
+      name: `BXH bot có số lần phát nhiều nhất ở ${guild.name}`,
+      iconURL: guild.iconURL() ?? undefined
     })
     .setDescription(description)
     .setColor(0x00c2e6)
@@ -176,38 +217,58 @@ const command: Command = {
   name: 'leaderboard',
   aliases: ['lb', 'top'],
   description: 'Xem bảng xếp hạng bài hát và bot.',
+  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
-    let currentView: LeaderboardView = 'tracks'
+    let currentView: LeaderboardView = 'personal' // default: cá nhân
     let currentPage = 0
 
-    // Cache data
+    const guild = message.guild!
+    const userId = message.author.id
+
+    // Cache data per view
+    let personalEntries: TrackEntry[] = []
     let trackEntries: TrackEntry[] = []
     let botEntries: BotEntry[] = []
 
-    // Fetch tracks data
-    trackEntries = await getTopTracks(MAX_ITEMS)
+    // Fetch personal data upfront (default view)
+    personalEntries = await getPersonalTopTracks(MAX_ITEMS, guild.id, userId)
 
-    const getTotalPages = () => {
-      const entries = currentView === 'tracks' ? trackEntries : botEntries
-      return Math.max(1, Math.ceil(entries.length / ITEMS_PER_PAGE))
+    const getEntries = () => {
+      if (currentView === 'personal') return personalEntries
+      if (currentView === 'tracks') return trackEntries
+      return botEntries
     }
+
+    const getTotalPages = () => Math.max(1, Math.ceil(getEntries().length / ITEMS_PER_PAGE))
 
     const getEmbed = () => {
       const totalPages = getTotalPages()
-      if (currentView === 'tracks') {
-        return buildTrackEmbed(trackEntries, currentPage, totalPages, bot)
+      if (currentView === 'personal') {
+        return buildTrackEmbed(
+          personalEntries,
+          currentPage,
+          totalPages,
+          guild,
+          `BXH bài hát bạn nghe nhiều nhất ở ${guild.name}`
+        )
       }
-      return buildBotEmbed(botEntries, currentPage, totalPages, bot)
+      if (currentView === 'tracks') {
+        return buildTrackEmbed(
+          trackEntries,
+          currentPage,
+          totalPages,
+          guild,
+          `BXH bài hát được phát nhiều nhất ở ${guild.name}`
+        )
+      }
+      return buildBotEmbed(botEntries, currentPage, totalPages, guild)
     }
 
-    const getComponents = (disabled = false) => {
-      const totalPages = getTotalPages()
-      return [
-        buildNavButtons(currentPage, totalPages, disabled),
-        buildViewSelect(currentView, disabled)
-      ]
-    }
+    const getComponents = (disabled = false) => [
+      buildNavButtons(currentPage, getTotalPages(), disabled),
+      buildViewSelect(currentView, disabled)
+    ]
 
     const reply = await message.reply({
       embeds: [getEmbed()],
@@ -216,7 +277,7 @@ const command: Command = {
 
     const collector = reply.createMessageComponentCollector({
       time: 120_000,
-      filter: (i) => i.user.id === message.author.id
+      filter: (i) => i.user.id === userId
     })
 
     collector.on('collect', async (interaction) => {
@@ -226,7 +287,6 @@ const command: Command = {
       // Navigation buttons
       if (interaction.isButton()) {
         const totalPages = getTotalPages()
-
         switch (interaction.customId) {
           case 'lb_first':
             currentPage = 0
@@ -250,9 +310,13 @@ const command: Command = {
           currentView = newView
           currentPage = 0
 
-          // Lazy-load bots data on first switch
+          // Lazy-load on first switch
+          if (currentView === 'tracks' && trackEntries.length === 0) {
+            trackEntries = await getTopTracks(MAX_ITEMS, guild.id)
+          }
+
           if (currentView === 'bots' && botEntries.length === 0) {
-            const rawBots = await getTopBots(MAX_ITEMS)
+            const rawBots = await getTopBots(MAX_ITEMS, guild.id)
             botEntries = await Promise.all(
               rawBots.map(async (entry) => {
                 let botName = `Bot (${entry.botId})`
