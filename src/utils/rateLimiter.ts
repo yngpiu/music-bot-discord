@@ -1,7 +1,7 @@
 /**
  * Redis-backed sliding-window rate limiter with progressive ban.
  *
- * Rate limit: 3 commands per 10 seconds (per user).
+ * Rate limit: 1 command per 2 seconds (per user).
  * Progressive ban (applied when user spams while already rate-limited):
  *   > 10 violations → banned 1 hour
  *   > 20 violations → banned 6 hours
@@ -14,8 +14,8 @@
  */
 import type { Redis } from 'ioredis'
 
-const WINDOW_MS = 10_000 // 10 seconds
-const MAX_USES = 3 // max commands per window
+const WINDOW_MS = 2_000 // 2 seconds
+const MAX_USES = 1 // max commands per window
 
 // Progressive ban thresholds (violation count → ban duration in ms)
 const BAN_TIERS: [number, number][] = [

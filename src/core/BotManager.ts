@@ -6,6 +6,7 @@ import { config } from '~/config/env.js'
 import { BotClient } from '~/core/BotClient.js'
 import { Loader } from '~/core/Loader.js'
 import { RedisQueueStore } from '~/lib/QueueStore.js'
+import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
@@ -31,6 +32,8 @@ export class BotManager {
     try {
       await this.redis.connect()
       setRedisClient(this.redis)
+      setSpotifyRedisClient(this.redis)
+      await initSpotifyToken()
       logger.info('[Boot] Successfully established connection to Redis Server.')
     } catch {
       logger.warn('[Boot] Failed to connect to Redis. Falling back to in-memory store.')

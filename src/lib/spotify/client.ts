@@ -1,5 +1,4 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import type { Redis } from 'ioredis'
 import { type Browser, type BrowserContext, type Page, type Response, chromium } from 'playwright'
 
 import { logger } from '~/utils/logger.js'
@@ -349,8 +348,15 @@ function transformRecommendationsResponse(
 
 // --- Token Handler ---
 
+let redisClient: Redis | null = null
+
+export function setSpotifyRedisClient(client: Redis) {
+  redisClient = client
+}
+
+const REDIS_KEY = 'spotify:token'
+
 class SpotifyTokenHandler {
-  private cacheFile = path.join(process.cwd(), '.spotify-token-cache.json')
   private accessToken: string | null = null
   private clientId: string | null = null
   private accessTokenExpirationTimestampMs = 0
@@ -362,51 +368,56 @@ class SpotifyTokenHandler {
   private refreshTimeout: NodeJS.Timeout | null = null
 
   constructor() {
-    this.loadCache()
+    // loadCache is async — called explicitly via init()
   }
 
-  private loadCache() {
-    if (!fs.existsSync(this.cacheFile)) return
+  async init() {
+    await this.loadCache()
+  }
+
+  private async loadCache() {
+    if (!redisClient) return
     try {
-      const data = JSON.parse(fs.readFileSync(this.cacheFile, 'utf8'))
+      const raw = await redisClient.get(REDIS_KEY)
+      if (!raw) return
+      const data = JSON.parse(raw)
       if (data.accessToken && data.accessTokenExpirationTimestampMs > Date.now()) {
         this.accessToken = data.accessToken
         this.clientId = data.clientId
         this.accessTokenExpirationTimestampMs = data.accessTokenExpirationTimestampMs
         this.isAnonymous = data.isAnonymous
-        logger.info(
-          `[Spotify:Token] Successfully restored valid token from local cache (.spotify-token-cache.json)`
-        )
+        logger.info('[Spotify:Token] Successfully restored valid token from Redis cache.')
         this.scheduleRefresh()
       } else {
-        logger.debug(`[Spotify:Token] Local token cache is empty or expired.`)
+        logger.debug('[Spotify:Token] Redis token cache is empty or expired.')
       }
     } catch (e) {
       logger.error(
-        '[Spotify:Token] Failed to parse local token cache file. Proceeding without cache.',
+        '[Spotify:Token] Failed to parse Redis token cache. Proceeding without cache.',
         e
       )
     }
   }
 
-  private saveCache() {
+  private async saveCache() {
+    if (!redisClient) return
     try {
-      fs.writeFileSync(
-        this.cacheFile,
-        JSON.stringify(
-          {
-            accessToken: this.accessToken,
-            clientId: this.clientId,
-            accessTokenExpirationTimestampMs: this.accessTokenExpirationTimestampMs,
-            isAnonymous: this.isAnonymous
-          },
-          null,
-          2
-        )
+      const ttlMs = this.accessTokenExpirationTimestampMs - Date.now()
+      if (ttlMs <= 0) return
+      await redisClient.set(
+        REDIS_KEY,
+        JSON.stringify({
+          accessToken: this.accessToken,
+          clientId: this.clientId,
+          accessTokenExpirationTimestampMs: this.accessTokenExpirationTimestampMs,
+          isAnonymous: this.isAnonymous
+        }),
+        'PX',
+        ttlMs
       )
-      logger.debug(`[Spotify:Token] Saved newly generated access token to cache.`)
+      logger.debug('[Spotify:Token] Saved newly generated access token to Redis cache.')
     } catch (e) {
-      logger.error('[Spotify:Token] Failed to write token cache file to disk.', e)
+      logger.error('[Spotify:Token] Failed to write token cache to Redis.', e)
     }
   }
 
@@ -589,7 +600,7 @@ class SpotifyTokenHandler {
       logger.info(
         `[Spotify:Playwright] Token successfully sniffed and retrieved. (Expires in: ${Math.round((this.accessTokenExpirationTimestampMs - Date.now()) / 1000)}s)`
       )
-      this.saveCache()
+      await this.saveCache()
       this.scheduleRefresh()
 
       return {
@@ -612,6 +623,10 @@ class SpotifyTokenHandler {
 }
 
 const spotifyTokenHandler = new SpotifyTokenHandler()
+
+export async function initSpotifyToken() {
+  await spotifyTokenHandler.init()
+}
 
 // --- API Helper ---
 
