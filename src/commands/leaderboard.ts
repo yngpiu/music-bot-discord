@@ -17,7 +17,7 @@ import { formatTrack } from '~/utils/stringUtil.js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type LeaderboardView = 'personal' | 'tracks' | 'bots'
+type LeaderboardView = 'personal' | 'tracks' | 'listeners' | 'bots'
 
 interface TrackEntry {
   title: string
@@ -29,6 +29,12 @@ interface TrackEntry {
 interface BotEntry {
   botId: string
   botName: string
+  playCount: number
+}
+
+interface UserEntry {
+  userId: string
+  userName: string
   playCount: number
 }
 
@@ -99,6 +105,24 @@ async function getTopBots(
   }))
 }
 
+async function getTopListeners(
+  limit: number,
+  guildId: string
+): Promise<{ userId: string; playCount: number }[]> {
+  const results = await prisma.$queryRaw<{ userId: string; playCount: bigint }[]>`
+    SELECT "userId", COUNT("id")::bigint AS "playCount"
+    FROM "PlayHistory"
+    WHERE "guildId" = ${guildId}
+    GROUP BY "userId"
+    ORDER BY "playCount" DESC
+    LIMIT ${limit}
+  `
+  return results.map((r) => ({
+    userId: r.userId,
+    playCount: Number(r.playCount)
+  }))
+}
+
 // ─── UI Builders ──────────────────────────────────────────────────────────────
 
 const ITEMS_PER_PAGE = 10
@@ -136,17 +160,22 @@ function buildViewSelect(currentView: LeaderboardView, disabled = false) {
     .setDisabled(disabled)
     .addOptions(
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH cá nhân theo tổng lượt phát')
+        .setLabel('BXH bài hát bạn nghe nhiều nhất')
         .setValue('personal')
         .setEmoji('👤')
         .setDefault(currentView === 'personal'),
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH bài hát theo tổng lượt phát')
+        .setLabel('BXH bài hát được phát nhiều nhất')
         .setValue('tracks')
         .setEmoji('🎵')
         .setDefault(currentView === 'tracks'),
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH bot theo tổng lượt phát')
+        .setLabel('BXH người nghe nhiều nhất')
+        .setValue('listeners')
+        .setEmoji('👥')
+        .setDefault(currentView === 'listeners'),
+      new StringSelectMenuOptionBuilder()
+        .setLabel('BXH bot có số lần phát nhiều nhất')
         .setValue('bots')
         .setEmoji('🤖')
         .setDefault(currentView === 'bots')
@@ -212,7 +241,30 @@ function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, gu
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-// ─── Command ──────────────────────────────────────────────────────────────────
+function buildUserEmbed(entries: UserEntry[], page: number, totalPages: number, guild: Guild) {
+  const start = page * ITEMS_PER_PAGE
+  const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
+
+  const description =
+    pageEntries.length > 0
+      ? pageEntries
+          .map((e, i) => {
+            const rank = start + i + 1
+            const medal = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : `${rank}.`
+            return `${medal} **${e.userName}** • \`${e.playCount} lần\``
+          })
+          .join('\n')
+      : '*Chưa có dữ liệu nào.*'
+
+  return new EmbedBuilder()
+    .setAuthor({
+      name: `BXH người nghe nhiều nhất ở ${guild.name}`,
+      iconURL: guild.iconURL() ?? undefined
+    })
+    .setDescription(description)
+    .setColor(0x9b59b6)
+    .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
+}
 
 const command: Command = {
   name: 'leaderboard',
@@ -232,6 +284,7 @@ const command: Command = {
     // Cache data per view
     let personalEntries: TrackEntry[] = []
     let trackEntries: TrackEntry[] = []
+    let listenerEntries: UserEntry[] = []
     let botEntries: BotEntry[] = []
 
     // Fetch personal data upfront (default view)
@@ -240,6 +293,7 @@ const command: Command = {
     const getEntries = () => {
       if (currentView === 'personal') return personalEntries
       if (currentView === 'tracks') return trackEntries
+      if (currentView === 'listeners') return listenerEntries
       return botEntries
     }
 
@@ -262,8 +316,11 @@ const command: Command = {
           currentPage,
           totalPages,
           guild,
-          `BXH bài hát theo tổng lượt phát ở ${guild.name}`
+          `BXH bài hát được phát nhiều nhất ở ${guild.name}`
         )
+      }
+      if (currentView === 'listeners') {
+        return buildUserEmbed(listenerEntries, currentPage, totalPages, guild)
       }
       return buildBotEmbed(botEntries, currentPage, totalPages, guild)
     }
@@ -316,6 +373,22 @@ const command: Command = {
           // Lazy-load on first switch
           if (currentView === 'tracks' && trackEntries.length === 0) {
             trackEntries = await getTopTracks(MAX_ITEMS, guild.id)
+          }
+
+          if (currentView === 'listeners' && listenerEntries.length === 0) {
+            const rawListeners = await getTopListeners(MAX_ITEMS, guild.id)
+            listenerEntries = await Promise.all(
+              rawListeners.map(async (entry) => {
+                let userName = `User (${entry.userId})`
+                try {
+                  const member = await guild.members.fetch(entry.userId)
+                  userName = member.displayName || member.user.username
+                } catch {
+                  // Fallback to ID
+                }
+                return { ...entry, userName }
+              })
+            )
           }
 
           if (currentView === 'bots' && botEntries.length === 0) {
