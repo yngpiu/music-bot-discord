@@ -32,11 +32,11 @@ jobs:
             echo "==> Pulling latest images (if any)..."
             docker compose pull
 
+            echo "==> Running database migrations..."
+            docker compose run --rm bot npx prisma migrate deploy
+
             echo "==> Building and restarting bot..."
             docker compose up -d --build --remove-orphans bot
-
-            echo "==> Running database migrations..."
-            docker compose exec -T bot npx prisma migrate deploy
 
             echo "==> Verifying services..."
             docker compose ps
