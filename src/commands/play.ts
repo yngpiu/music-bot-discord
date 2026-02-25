@@ -1,11 +1,13 @@
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
 
 const command: Command = {
   name: 'play',
@@ -105,12 +107,10 @@ const command: Command = {
 
     const replyMessage = await message.reply(addedEmbed)
 
-    setTimeout(() => {
-      replyMessage.delete().catch((e: Error) => logger.error(e))
-      message.delete().catch((e: Error) => logger.error(e))
-    }, 20000)
+    deleteMessage([replyMessage, message], TIME.MEDIUM)
 
-    if (!player.playing) await player.play()
+    if (!player.playing)
+      await player.play().catch((e: Error | unknown) => logger.warn('player.play() error:', e))
   }
 }
 

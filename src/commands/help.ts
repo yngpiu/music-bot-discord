@@ -8,6 +8,8 @@ import {
 import { config } from '~/config/env.js'
 
 import type { BotClient } from '~/core/BotClient.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 export const commandsByCategory = {
   Track: [
@@ -203,10 +205,7 @@ const command: Command = {
         })
         .catch(() => {})
 
-      setTimeout(() => {
-        reply.delete().catch(() => {})
-        message.delete().catch(() => {})
-      }, 10000)
+      deleteMessage([reply, message], TIME.SHORT)
     })
   }
 }

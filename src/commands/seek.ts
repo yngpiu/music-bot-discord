@@ -6,6 +6,8 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatDuration } from '~/utils/stringUtil.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 function parseTime(timeStr: string): number {
   if (timeStr.includes(':')) {
@@ -73,10 +75,7 @@ const command: Command = {
       })
 
     if (replyMessage) {
-      setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
-      }, 10000)
+      deleteMessage([replyMessage, message], TIME.SHORT)
     }
   }
 }

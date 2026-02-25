@@ -2,10 +2,12 @@ import type { Message, User } from 'discord.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
 const command: Command = {
@@ -152,10 +154,7 @@ const command: Command = {
         }
       })
     } else {
-      setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
-      }, 60000)
+      deleteMessage([replyMessage, message], TIME.VERY_LONG)
     }
   }
 }

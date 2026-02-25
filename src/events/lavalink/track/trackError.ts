@@ -11,11 +11,18 @@ export default async (
   bot: BotClient,
   player: Player,
   track: Track | UnresolvedTrack | null,
-  payload: TrackExceptionEvent
+  payload: TrackExceptionEvent | Error
 ) => {
-  logger.error(
-    `[Lavalink:Player] ${player.guildId} :: ERROR: Encountered a fatal exception while playing track. Details: ${JSON.stringify(payload)}`
-  )
+  if (payload instanceof Error && payload.message === 'No closest Track found') {
+    logger.warn(
+      `[Lavalink:Player] ${player.guildId} :: Bỏ qua bài hát do không thể phân giải (không tìm thấy nguồn): ${track?.info.title}`
+    )
+  } else {
+    logger.error(
+      `[Lavalink:Player] ${player.guildId} :: ERROR: Encountered a fatal exception while playing track. Details:`,
+      payload
+    )
+  }
 
   if (!track || !player.textChannelId) return
 

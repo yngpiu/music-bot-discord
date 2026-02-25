@@ -5,6 +5,8 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatTrack } from '~/utils/stringUtil.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'nowplaying',
@@ -54,10 +56,7 @@ const command: Command = {
 
     if (replyMessage) {
       // Cho thời gian đọc board dài hơn (20s) trước khi xóa
-      setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
-      }, 20000)
+      deleteMessage([replyMessage, message], TIME.MEDIUM)
     }
   }
 }

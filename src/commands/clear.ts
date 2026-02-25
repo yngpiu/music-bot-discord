@@ -5,6 +5,8 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'clear',
@@ -50,10 +52,7 @@ const command: Command = {
       })
 
     if (replyMessage) {
-      setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
-      }, 10000)
+      deleteMessage([replyMessage, message], TIME.SHORT)
     }
   }
 }

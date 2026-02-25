@@ -13,13 +13,13 @@ import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
-import { fetchPlaylist, searchSpotifyPlaylists } from '~/lib/spotify/client.js'
+import { fetchAlbum, searchSpotifyAlbums } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
 
 const command: Command = {
-  name: 'playlist',
-  description: 'Tìm kiếm một playlist nhạc từ Spotify.',
+  name: 'album',
+  description: 'Tìm kiếm một album nhạc từ Spotify.',
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
@@ -35,11 +35,11 @@ const command: Command = {
 
     const query = args.join(' ')
     if (!query) {
-      throw new BotError('Vui lòng nhập tên danh sách phát bạn muốn tìm.')
+      throw new BotError('Vui lòng nhập tên album bạn muốn tìm.')
     }
     if (/^https?:\/\//.test(query)) {
       throw new BotError(
-        'Lệnh tìm kiếm danh sách phát không hỗ trợ đường dẫn, vui lòng sử dụng lệnh `play`.'
+        'Lệnh tìm kiếm album không hỗ trợ đường dẫn, vui lòng sử dụng lệnh `play`.'
       )
     }
 
@@ -59,56 +59,59 @@ const command: Command = {
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
 
-    // Lấy playlist từ Spotify Client
+    // Lấy album từ Spotify Client
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let playlists: any[] = []
+    let albums: any[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pageCache = new Map<number, any[]>()
 
     const fetchPage = async (page: number) => {
       if (pageCache.has(page)) {
-        playlists = pageCache.get(page)!
+        albums = pageCache.get(page)!
         return
       }
 
       try {
-        playlists = await searchSpotifyPlaylists(query, 10, page * 10)
-        pageCache.set(page, playlists)
+        albums = await searchSpotifyAlbums(query, 10, page * 10)
+        pageCache.set(page, albums)
       } catch (error) {
-        logger.error('Error fetching spotify playlists:', error)
+        logger.error('Error fetching spotify albums:', error)
         throw new BotError(
-          'Đã có lỗi xảy ra khi lấy danh sách phát, vui lòng liên hệ **Ban quản lý**.'
+          'Đã có lỗi xảy ra khi lấy danh sách album, vui lòng liên hệ **Ban quản lý**.'
         )
       }
     }
 
     await fetchPage(0)
 
-    // Nếu không có playlist nào
-    if (playlists.length === 0) {
-      throw new BotError('Không tìm thấy danh sách phát nào.')
+    // Nếu không có album nào
+    if (albums.length === 0) {
+      throw new BotError('Không tìm thấy album nào.')
     }
 
     let currentPage = 0
     const itemsPerPage = 10
 
-    // Helper tạo select menu hiển thị playlist
+    // Helper tạo select menu hiển thị album
     const getComponents = (page: number, disabled = false) => {
       const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('search_playlist_select')
-        .setPlaceholder('Chọn danh sách phát...')
+        .setCustomId('search_album_select')
+        .setPlaceholder('Chọn album...')
 
       selectMenu.addOptions(
-        playlists.map((playlist, index) => {
-          const label = playlist.name.substring(0, 100)
+        albums.map((album, index) => {
+          const label = album.name.substring(0, 100)
+          const description = // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (album.artists.map((a: any) => a.name).join(', ') || 'Vô danh').substring(0, 100)
           return new StringSelectMenuOptionBuilder()
             .setLabel(label)
+            .setDescription(description)
             .setValue(index.toString())
             .setEmoji('💽')
         })
       )
 
-      selectMenu.setDisabled(disabled || playlists.length === 0)
+      selectMenu.setDisabled(disabled || albums.length === 0)
 
       const btnPrev = new ButtonBuilder()
         .setCustomId('prev_page')
@@ -120,7 +123,7 @@ const command: Command = {
         .setCustomId('next_page')
         .setEmoji(EMOJI.NEXT.trim() || '▶️')
         .setStyle(ButtonStyle.Secondary)
-        .setDisabled(disabled || playlists.length < itemsPerPage)
+        .setDisabled(disabled || albums.length < itemsPerPage)
 
       return [
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu),
@@ -128,26 +131,28 @@ const command: Command = {
       ]
     }
 
-    // Xây dựng đoạn giới thiệu về các playlist
+    // Xây dựng đoạn giới thiệu về các album
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const buildDescription = (playlistList: any[], page: number) => {
+    const buildDescription = (albumList: any[], page: number) => {
       const start = page * itemsPerPage
 
-      return playlistList
-        .map((p, i) => {
-          const playlistLink = `[${p.name.replace(/([[\]])/g, '\\$1')}](https://open.spotify.com/playlist/${p.id})`
-          return `${start + i + 1}. **${playlistLink}**`
+      return albumList
+        .map((a, i) => {
+          const albumLink = `[${a.name.replace(/([[\]])/g, '\\$1')}](https://open.spotify.com/album/${a.id})`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const artists = a.artists.map((art: any) => art.name).join(', ') || 'Vô danh'
+          return `${start + i + 1}. **💽 ${albumLink}** - ${artists}`
         })
         .join('\n')
     }
 
     const buildEmbed = (page: number) => {
       return new EmbedBuilder()
-        .setTitle(`Playlist tìm kiếm: "${query}" - Trang ${page + 1}`)
-        .setThumbnail(playlists[0]?.images[0]?.url || null)
-        .setDescription(buildDescription(playlists, page))
+        .setTitle(`Album tìm kiếm: "${query}" - Trang ${page + 1}`)
+        .setThumbnail(albums[0]?.images[0]?.url || null)
+        .setDescription(buildDescription(albums, page))
         .setColor('#1DB954')
-        .setFooter({ text: 'Hãy chọn danh sách phát bạn muốn nghe trong vòng 60s.' })
+        .setFooter({ text: 'Hãy chọn album bạn muốn nghe trong vòng 60s.' })
     }
 
     const reply = await message.reply({
@@ -168,7 +173,7 @@ const command: Command = {
         if (interaction.customId === 'prev_page' && currentPage > 0) {
           currentPage--
           await fetchPage(currentPage)
-        } else if (interaction.customId === 'next_page' && playlists.length === itemsPerPage) {
+        } else if (interaction.customId === 'next_page' && albums.length === itemsPerPage) {
           currentPage++
           await fetchPage(currentPage)
         }
@@ -182,30 +187,28 @@ const command: Command = {
 
       if (interaction.isStringSelectMenu()) {
         const index = parseInt(interaction.values[0])
-        const playlist = playlists[index]
+        const album = albums[index]
 
-        if (!playlist) return
+        if (!album) return
 
         await interaction.deferUpdate().catch((e) => logger.error(e))
         await interaction.message.delete().catch((e) => logger.error(e))
 
         // Tạo tin nhắn "đang tải"
-        const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
-        const loadingMessage = await message.reply(
-          `⏳ Đang tải danh sách phát **${playlist.name}**...`
-        )
+        const loadingQuery = `https://open.spotify.com/album/${album.id}`
+        const loadingMessage = await message.reply(`⏳ Đang tải album **${album.name}**...`)
 
         try {
-          const spotifyPlaylist = await fetchPlaylist(playlist.id)
+          const spotifyAlbum = await fetchAlbum(album.id)
 
-          if (!spotifyPlaylist.tracks.items.length) {
+          if (!spotifyAlbum.tracks.items.length) {
             await loadingMessage.edit(
-              `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
+              `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
             )
             return
           }
 
-          const tracks = spotifyPlaylist.tracks.items.map(
+          const tracks = spotifyAlbum.tracks.items.map(
             (t) =>
               player.LavalinkManager.utils.buildUnresolvedTrack(
                 {
@@ -213,7 +216,7 @@ const command: Command = {
                   author: t.artists.map((a) => a.name).join(', '),
                   uri: `https://open.spotify.com/track/${t.id}`,
                   identifier: t.id,
-                  artworkUrl: t.album?.images[0]?.url ?? null,
+                  artworkUrl: t.album?.images[0]?.url ?? album.images[0]?.url ?? null,
                   duration: t.duration_ms,
                   isrc: t.isrc ?? null
                 },
@@ -224,12 +227,13 @@ const command: Command = {
           await player.queue.add(tracks)
 
           const addedEmbed = buildAddedItemEmbed(
-            'playlist',
+            'playlist', // Lavalink uses playlist type for albums anyway inside buildAddedItemEmbed
             {
-              title: spotifyPlaylist.name || playlist.name,
+              title: spotifyAlbum.name || album.name,
               tracks: tracks,
-              thumbnailUrl: spotifyPlaylist.images[0]?.url ?? playlist.images[0]?.url ?? null,
-              author: undefined, // Mặc định không có owner authorLink ở loadType playlist
+              thumbnailUrl: spotifyAlbum.images[0]?.url ?? album.images[0]?.url ?? null,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              author: album.artists.map((a: any) => a.name).join(', ') || undefined,
               trackLink: loadingQuery
             },
             player,
@@ -245,8 +249,8 @@ const command: Command = {
               .catch((e: Error | unknown) => logger.warn('player.play() error:', e))
           collector.stop('selected')
         } catch (error) {
-          logger.error('Error fetching playlist tracks: ', error)
-          await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
+          logger.error('Error fetching album tracks: ', error)
+          await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải album.`)
         }
       }
     })

@@ -97,10 +97,10 @@ plugins:
       playback: true
   lavasrc:
     providers:
-      - 'ytsearch:"%ISRC%"'
       - 'dzisrc:%ISRC%'
-      - 'ytsearch:%QUERY%'
+      - 'ytsearch:"%ISRC%"'
       - 'dzsearch:%QUERY%'
+      - 'ytsearch:%QUERY%'
       - 'scsearch:%QUERY%'
       # - 'jssearch:%QUERY%'
       # - 'pdsearch:%QUERY%'
@@ -127,10 +127,10 @@ plugins:
       lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
     spotify:
       # clientId & clientSecret are required for using spsearch
-      # clientId: "<insert>"
-      # clientSecret: "<insert>"
+      # clientId: '${SPOTIFY_CLIENT_ID}'
+      # clientSecret: '${SPOTIFY_CLIENT_SECRET}'
       # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
-      preferAnonymousToken: true # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
+      preferAnonymousToken: false # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
       customTokenEndpoint: 'http://localhost:8080/api/token' # For more details, please refer to https://github.com/topi314/spotify-tokener
       resolveArtistsInSearch: true
       albumLoadLimit: 1 # The number of pages at 50 tracks each

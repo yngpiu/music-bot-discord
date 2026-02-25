@@ -16,7 +16,8 @@ const HASHES = {
   getTrack: '612585ae06ba435ad26369870deaae23b5c8800a256cd8a57e08eddc25a37294',
   internalLinkRecommenderTrack: 'c77098ee9d6ee8ad3eb844938722db60570d040b49f41f5ec6e7be9160a7c86b',
   searchTracks: '131fd38c13431be963a851082dca0108a4200998b886e7e9d20a21fc51a36aaf',
-  searchPlaylists: 'af1730623dc1248b75a61a18bad1f47f1fc7eff802fb0676683de88815c958d8'
+  searchPlaylists: 'af1730623dc1248b75a61a18bad1f47f1fc7eff802fb0676683de88815c958d8',
+  searchAlbums: '5e7d2724fbef31a25f714844bf1313ffc748ebd4bd199eaad50628a4f246a7ab'
 }
 
 // --- Types ---
@@ -55,6 +56,29 @@ export interface SpotifyPlaylist {
   }
 }
 
+export interface SpotifyPlaylist {
+  id: string
+  name: string
+  description: string
+  images: { url: string; height?: number; width?: number }[]
+  tracks: {
+    items: SpotifyTrack[]
+    total: number
+  }
+}
+
+export interface SpotifyAlbum {
+  id: string
+  name: string
+  artists: { id: string; name: string }[]
+  images: { url: string; height?: number; width?: number }[]
+  year: number
+  tracks: {
+    items: SpotifyTrack[]
+    total: number
+  }
+}
+
 export interface SpotifyRecommendations {
   seeds: { id: string; type: string; href: null }[]
   tracks: SpotifyTrack[]
@@ -62,7 +86,7 @@ export interface SpotifyRecommendations {
 
 export type SpotifyType = 'track' | 'album' | 'playlist'
 
-export type SpotifyResult = SpotifyTrack | SpotifyPlaylist
+export type SpotifyResult = SpotifyTrack | SpotifyPlaylist | SpotifyAlbum
 
 // --- Types: Internal Raw Spotify Data ---
 
@@ -97,6 +121,8 @@ interface RawAlbum {
   coverArt?: { sources: RawImage[] }
   tracksV2?: { items: { track: RawTrack }[]; totalCount: number }
   tracks?: { items: RawTrack[]; totalCount: number }
+  artists?: { items: RawArtist[] }
+  date?: { year: number }
 }
 
 interface RawPlaylist {
@@ -118,6 +144,9 @@ interface RawSearch {
     }
     playlists?: {
       items: { data: RawPlaylist }[]
+    }
+    albumsV2?: {
+      items: { data: RawAlbum }[]
     }
   }
 }
@@ -586,7 +615,7 @@ const spotifyTokenHandler = new SpotifyTokenHandler()
 
 // --- API Helper ---
 
-async function partnerQuery(
+export async function partnerQuery(
   operationName: keyof typeof HASHES,
   variables: Record<string, unknown>,
   isRetry = false
@@ -798,11 +827,12 @@ export async function searchSpotify(query: string, limit = 10): Promise<SpotifyT
 
 export async function searchSpotifyPlaylists(
   query: string,
-  limit = 10
+  limit = 10,
+  offset = 0
 ): Promise<SpotifyPlaylist[]> {
   const result = (await partnerQuery('searchPlaylists', {
     searchTerm: query,
-    offset: 0,
+    offset,
     limit,
     numberOfTopResults: limit,
     includeAudiobooks: true,
@@ -835,6 +865,48 @@ export async function searchSpotifyPlaylists(
       } as SpotifyPlaylist
     })
     .filter((p) => p.id !== '')
+}
+
+export async function searchSpotifyAlbums(
+  query: string,
+  limit = 10,
+  offset = 0
+): Promise<SpotifyAlbum[]> {
+  const result = (await partnerQuery('searchAlbums', {
+    searchTerm: query,
+    offset,
+    limit,
+    numberOfTopResults: limit,
+    includeAudiobooks: true,
+    includeAuthors: false,
+    includePreReleases: false
+  })) as { data: RawSearch }
+
+  const items = result.data?.searchV2?.albumsV2?.items
+  if (!items?.length) return []
+
+  return items
+    .map((item) => {
+      const data = item.data
+      const albumImage = getBiggestImage(data.coverArt?.sources || [])
+
+      return {
+        id: data.uri?.split(':').pop() || '',
+        name: data.name || '',
+        artists: (data.artists?.items || []).map((artist) => ({
+          id: artist.uri?.split(':').pop() || '',
+          name: artist.profile?.name || ''
+        })),
+        images: formatImage(albumImage),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        year: (data as any).date?.year || 0,
+        tracks: {
+          items: [],
+          total: 0
+        }
+      } as SpotifyAlbum
+    })
+    .filter((a) => a.id !== '')
 }
 
 // --- Universal Dispatcher ---

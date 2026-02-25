@@ -5,6 +5,8 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatTrack } from '~/utils/stringUtil'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'status',
@@ -76,10 +78,7 @@ const command: Command = {
       })
 
     if (replyMessage) {
-      setTimeout(() => {
-        replyMessage.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
-      }, 20000)
+      deleteMessage([replyMessage, message], TIME.MEDIUM)
     }
   }
 }

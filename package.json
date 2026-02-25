@@ -23,7 +23,10 @@
       "@prisma/engines",
       "prisma",
       "@prisma/client"
-    ]
+    ],
+    "patchedDependencies": {
+      "lavalink-client@2.9.2": "patches/lavalink-client@2.9.2.patch"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

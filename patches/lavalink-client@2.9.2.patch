@@ -1,0 +1,26 @@
+diff --git a/dist/index.js b/dist/index.js
+index c5a3760ba20399b6263f4f282df9c6dd866869e6..baf4a63f55b07c2a539f47e4cfab67b73b4b3fbb 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1194,7 +1194,7 @@ async function getClosestTrack(data, player) {
+     const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
+     if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
+   }
+-  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" by ");
++  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" ");
+   const sourceName = data.info?.sourceName;
+   return await player.search(
+     {
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 327877d09a8b0377dc46ec866de1d67855c3fe40..5b10bb23ecc9727f48c0736a6857590773248600 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1130,7 +1130,7 @@ async function getClosestTrack(data, player) {
+     const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
+     if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
+   }
+-  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" by ");
++  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" ");
+   const sourceName = data.info?.sourceName;
+   return await player.search(
+     {

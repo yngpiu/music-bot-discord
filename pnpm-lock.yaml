@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  lavalink-client@2.9.2:
+    hash: 226bb7338613f9f483317b75d5c830ac7bbeefe7eb4b026409aa41aa32ea9308
+    path: patches/lavalink-client@2.9.2.patch
+
 importers:
 
   .:
@@ -25,7 +30,7 @@ importers:
         version: 5.9.3
       lavalink-client:
         specifier: ^2.9.2
-        version: 2.9.2
+        version: 2.9.2(patch_hash=226bb7338613f9f483317b75d5c830ac7bbeefe7eb4b026409aa41aa32ea9308)
       playwright:
         specifier: ^1.58.2
         version: 1.58.2
@@ -2585,7 +2590,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  lavalink-client@2.9.2:
+  lavalink-client@2.9.2(patch_hash=226bb7338613f9f483317b75d5c830ac7bbeefe7eb4b026409aa41aa32ea9308):
     dependencies:
       tslib: 2.8.1
       ws: 8.19.0

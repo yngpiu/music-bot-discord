@@ -5,6 +5,8 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { deleteMessage } from '~/utils/messageUtil.js'
+import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'join',
@@ -74,9 +76,7 @@ const command: Command = {
         })
 
       if (replyMessage) {
-        setTimeout(() => {
-          message.delete().catch((e) => logger.error(e))
-        }, 10000)
+        deleteMessage([message], TIME.SHORT)
       }
     }
   }
