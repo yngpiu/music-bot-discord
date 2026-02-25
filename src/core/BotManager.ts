@@ -141,7 +141,7 @@ export class BotManager {
                   searchStr = `${lastPlayedTrack.info.title} other track`
                 }
 
-                const fallbackQuery = `ytmsearch:${searchStr}`
+                const fallbackQuery = `ytsearch:${searchStr}`
                 logger.info(`[Autoplay] Dùng fallback search: ${fallbackQuery}`)
 
                 const fallbackResponse = await player.search(
