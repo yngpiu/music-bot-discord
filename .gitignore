@@ -9,3 +9,4 @@ lavalink/plugins/
 .spotify-token-cache.json
 /dist
 multi-distube-bots-open-source/
+lavalink.log

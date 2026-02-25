@@ -1,12 +1,12 @@
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'volume',
@@ -24,7 +24,9 @@ const command: Command = {
 
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError('Chỉ có **Chủ xị** mới có quyền dùng lệnh này.')
+      throw new BotError(
+        'Chỉ **người đang có quyền điều khiển cao nhất** mới có quyền dùng lệnh này.'
+      )
     }
 
     if (!args[0]) {
