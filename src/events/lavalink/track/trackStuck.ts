@@ -11,7 +11,7 @@ export default async (
   bot: BotClient,
   player: Player,
   track: Track | null,
-   
+
   payload: TrackStuckEvent
 ) => {
   logger.error(
@@ -43,9 +43,12 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
       logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track stuck:`, e)
       return null
     })
+
+  // Skip the stuck track
+  await player.skip()
 }
