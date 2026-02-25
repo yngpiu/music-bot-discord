@@ -14,6 +14,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+COPY patches ./patches
 
 RUN pnpm install --frozen-lockfile
 
@@ -47,6 +48,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile --prod
 
 # Cài Playwright Chromium TRƯỚC khi copy dist
