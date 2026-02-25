@@ -53,7 +53,7 @@ interface PlayRecord {
   artworkUrl?: string | null
   uri?: string | null
   guildId: string
-  userId: string
+  listenerIds: string[] // Tất cả userId đang có mặt trong VC khi bài kết thúc
   botId: string
   playedAt: string // ISO string
 }
@@ -73,7 +73,7 @@ export async function recordTrackPlay(
     uri?: string | null
   },
   guildId: string,
-  userId: string,
+  listenerIds: string[],
   botId: string
 ): Promise<void> {
   if (!redis) {
@@ -83,7 +83,7 @@ export async function recordTrackPlay(
   const record: PlayRecord = {
     ...trackInfo,
     guildId,
-    userId,
+    listenerIds,
     botId,
     playedAt: new Date().toISOString()
   }
@@ -182,13 +182,23 @@ async function upsertPlayRecord(record: PlayRecord): Promise<void> {
   }
 
   // Ghi lịch sử phát
-  await prisma.playHistory.create({
+  const playHistory = await prisma.playHistory.create({
     data: {
       trackId: track.id,
       guildId: record.guildId,
-      userId: record.userId,
       botId: record.botId,
       playedAt: new Date(record.playedAt)
     }
   })
+
+  // Ghi danh sách người nghe
+  if (record.listenerIds.length > 0) {
+    await prisma.playListener.createMany({
+      data: record.listenerIds.map((userId) => ({
+        historyId: playHistory.id,
+        userId
+      })),
+      skipDuplicates: true
+    })
+  }
 }

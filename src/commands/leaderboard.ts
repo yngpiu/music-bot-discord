@@ -48,10 +48,11 @@ async function getPersonalTopTracks(
   const results = await prisma.$queryRaw<
     { title: string; artist: string; uri: string | null; playCount: bigint }[]
   >`
-    SELECT t."title", t."artist", t."uri", COUNT(ph."id")::bigint AS "playCount"
-    FROM "PlayHistory" ph
+    SELECT t."title", t."artist", t."uri", COUNT(pl."id")::bigint AS "playCount"
+    FROM "PlayListener" pl
+    JOIN "PlayHistory" ph ON ph."id" = pl."historyId"
     JOIN "Track" t ON t."id" = ph."trackId"
-    WHERE ph."guildId" = ${guildId} AND ph."userId" = ${userId}
+    WHERE ph."guildId" = ${guildId} AND pl."userId" = ${userId}
     GROUP BY t."id", t."title", t."artist", t."uri"
     ORDER BY "playCount" DESC
     LIMIT ${limit}
@@ -110,10 +111,11 @@ async function getTopListeners(
   guildId: string
 ): Promise<{ userId: string; playCount: number }[]> {
   const results = await prisma.$queryRaw<{ userId: string; playCount: bigint }[]>`
-    SELECT "userId", COUNT("id")::bigint AS "playCount"
-    FROM "PlayHistory"
-    WHERE "guildId" = ${guildId}
-    GROUP BY "userId"
+    SELECT pl."userId", COUNT(pl."id")::bigint AS "playCount"
+    FROM "PlayListener" pl
+    JOIN "PlayHistory" ph ON ph."id" = pl."historyId"
+    WHERE ph."guildId" = ${guildId}
+    GROUP BY pl."userId"
     ORDER BY "playCount" DESC
     LIMIT ${limit}
   `

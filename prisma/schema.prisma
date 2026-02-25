@@ -35,17 +35,26 @@ model Track {
 }
 
 model PlayHistory {
-  id      String @id @default(cuid())
-  trackId String
-  track   Track  @relation(fields: [trackId], references: [id])
-  guildId String
-  userId  String
-  botId   String
-
-  playedAt DateTime @default(now())
+  id        String         @id @default(cuid())
+  trackId   String
+  track     Track          @relation(fields: [trackId], references: [id])
+  guildId   String
+  botId     String
+  playedAt  DateTime       @default(now())
+  listeners PlayListener[]
 
   @@index([guildId])
-  @@index([userId])
   @@index([trackId])
   @@index([playedAt])
+}
+
+model PlayListener {
+  id        String      @id @default(cuid())
+  historyId String
+  history   PlayHistory @relation(fields: [historyId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@unique([historyId, userId])
+  @@index([userId])
+  @@index([historyId])
 }

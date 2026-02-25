@@ -17,10 +17,21 @@ export default async (
   // Chỉ ghi nhận khi bài hát phát xong hoàn toàn
   if (payload.reason !== 'finished' || !track) return
 
-  // Lấy userId từ requester (được set lúc gọi player.search() hoặc queue.add())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const requester = track.requester as any
-  const userId: string = requester?.id || requester?.toString?.() || 'unknown'
+  // Snapshot tất cả members trong voice channel lúc bài kết thúc (loại bỏ bots)
+  const listenerIds: string[] = []
+  try {
+    const guild = bot.guilds.cache.get(player.guildId)
+    const voiceChannel = guild?.channels.cache.get(player.voiceChannelId!)
+    if (voiceChannel?.isVoiceBased()) {
+      voiceChannel.members.forEach((member) => {
+        if (!member.user.bot) {
+          listenerIds.push(member.id)
+        }
+      })
+    }
+  } catch (e) {
+    logger.warn(`[Player: ${player.guildId}] Không lấy được danh sách thành viên VC:`, e)
+  }
 
   // Fire-and-forget: ghi nhận lượt phát, không block player
   recordTrackPlay(
@@ -34,7 +45,7 @@ export default async (
       uri: track.info.uri
     },
     player.guildId,
-    userId,
+    listenerIds,
     bot.user!.id
   )
 }
