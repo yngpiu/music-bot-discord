@@ -366,6 +366,7 @@ class SpotifyTokenHandler {
   private context: BrowserContext | null = null
   private page: Page | null = null
   private refreshTimeout: NodeJS.Timeout | null = null
+  private isRefreshing = false
 
   constructor() {
     // loadCache is async — called explicitly via init()
@@ -427,19 +428,22 @@ class SpotifyTokenHandler {
 
     const now = Date.now()
     const expiresIn = this.accessTokenExpirationTimestampMs - now
-    const refreshIn = Math.max(expiresIn - 10000, 0) // trigger 10 seconds before actually expired
+    // Trigger 10s before expiry, but minimum 30s to prevent tight loops
+    const refreshIn = Math.max(expiresIn - 10000, 30000)
 
     this.refreshTimeout = setTimeout(async () => {
+      if (this.isRefreshing) return // Already refreshing, skip
       try {
+        this.isRefreshing = true
         logger.info(
           '[Spotify:Token] Token is about to expire (< 10s). Executing background auto-refresh...'
         )
-        const newToken = await this.refreshToken()
-        this.accessToken = newToken.accessToken
+        await this.getAccessToken(true)
       } catch (err) {
         logger.warn('[Spotify:Token] Failed to auto-refresh Spotify token in background', err)
+      } finally {
+        this.isRefreshing = false
       }
-      this.scheduleRefresh()
     }, refreshIn)
   }
 
@@ -531,7 +535,7 @@ class SpotifyTokenHandler {
 
   public async refreshToken(): Promise<SpotifyToken> {
     logger.info('[Spotify:Token] Forcing token refresh. Clearing cache and opening Chromium...')
-    this.accessToken = null
+    // Không null accessToken — giữ fetchTokenPromise mutex hoạt động
     this.accessTokenExpirationTimestampMs = 0
     return this.getAccessToken(true)
   }

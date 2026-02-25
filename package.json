@@ -32,6 +32,7 @@
     "@eslint/js": "^10.0.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
@@ -44,12 +45,14 @@
     "typescript-eslint": "^8.55.0"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.0",
     "colorette": "^2.0.20",
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
     "ioredis": "^5.9.3",
     "lavalink-client": "^2.9.2",
+    "pg": "^8.18.0",
     "playwright": "^1.58.2",
     "prisma": "^7.4.0",
     "redis": "^5.11.0",

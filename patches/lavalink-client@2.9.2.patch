@@ -1,8 +1,30 @@
 diff --git a/dist/index.js b/dist/index.js
-index c5a3760ba20399b6263f4f282df9c6dd866869e6..baf4a63f55b07c2a539f47e4cfab67b73b4b3fbb 100644
+index c5a3760ba20399b6263f4f282df9c6dd866869e6..af6ceb8f27a7af85747669fb1a9bf5760805a5c5 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -1194,7 +1194,7 @@ async function getClosestTrack(data, player) {
+@@ -1162,7 +1162,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
+ }
+ async function applyUnresolvedData(resTrack, data, utils) {
+   if (!resTrack?.info || !data?.info) return;
+-  if (data.info.uri) resTrack.info.uri = data.info.uri;
++  const resolvedUri = resTrack.info.uri;
++  const resolvedSourceName = resTrack.info.sourceName;
+   if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
+     if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
+     if (data.info.title?.length) resTrack.info.title = data.info.title;
+@@ -1174,8 +1175,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
+     if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
+   }
+   for (const key of Object.keys(data.info))
+-    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key])
++    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && key !== "uri" && key !== "sourceName" && data.info[key])
+       resTrack.info[key] = data.info[key];
++  resTrack.info.uri = resolvedUri;
++  resTrack.info.sourceName = resolvedSourceName;
+   return resTrack;
+ }
+ async function getClosestTrack(data, player) {
+@@ -1194,7 +1197,7 @@ async function getClosestTrack(data, player) {
      const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
      if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
    }
@@ -12,10 +34,32 @@ index c5a3760ba20399b6263f4f282df9c6dd866869e6..baf4a63f55b07c2a539f47e4cfab67b7
    return await player.search(
      {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 327877d09a8b0377dc46ec866de1d67855c3fe40..5b10bb23ecc9727f48c0736a6857590773248600 100644
+index 327877d09a8b0377dc46ec866de1d67855c3fe40..ce9473c7f0d42b27a4ef406e19cb4f3ec7c0bbe5 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -1130,7 +1130,7 @@ async function getClosestTrack(data, player) {
+@@ -1098,7 +1098,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
+ }
+ async function applyUnresolvedData(resTrack, data, utils) {
+   if (!resTrack?.info || !data?.info) return;
+-  if (data.info.uri) resTrack.info.uri = data.info.uri;
++  const resolvedUri = resTrack.info.uri;
++  const resolvedSourceName = resTrack.info.sourceName;
+   if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
+     if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
+     if (data.info.title?.length) resTrack.info.title = data.info.title;
+@@ -1110,8 +1111,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
+     if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
+   }
+   for (const key of Object.keys(data.info))
+-    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key])
++    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && key !== "uri" && key !== "sourceName" && data.info[key])
+       resTrack.info[key] = data.info[key];
++  resTrack.info.uri = resolvedUri;
++  resTrack.info.sourceName = resolvedSourceName;
+   return resTrack;
+ }
+ async function getClosestTrack(data, player) {
+@@ -1130,7 +1133,7 @@ async function getClosestTrack(data, player) {
      const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
      if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
    }

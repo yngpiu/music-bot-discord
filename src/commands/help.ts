@@ -7,9 +7,10 @@ import {
 } from 'discord.js'
 import { config } from '~/config/env.js'
 
-import type { BotClient } from '~/core/BotClient.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
 import { TIME } from '~/constants/time.js'
+import type { BotClient } from '~/core/BotClient.js'
+
+import { deleteMessage } from '~/utils/messageUtil.js'
 
 export const commandsByCategory = {
   Track: [
@@ -19,7 +20,12 @@ export const commandsByCategory = {
       args: '<tên bài/link>',
       desc: 'Phát nhạc từ tên bài hát hoặc link.'
     },
-    { name: 'search', aliases: ['find'], args: '<tên bài>', desc: 'Tìm và chọn nhạc.' },
+    {
+      name: 'search',
+      aliases: ['find'],
+      args: '[(album|alb|ab)/(playlist|pls|pl)] <tên>',
+      desc: 'Tìm và chọn bài hát, album hoặc playlist.'
+    },
     { name: 'pause', aliases: ['ps'], args: '', desc: 'Tạm dừng nhạc.' },
     {
       name: 'resume',
@@ -120,7 +126,13 @@ export const commandsByCategory = {
       args: '',
       desc: 'Đuổi bot khỏi kênh thoại và dừng nhạc.'
     },
-    { name: 'help', aliases: ['h'], args: '', desc: 'Hiển thị danh sách lệnh.' }
+    { name: 'help', aliases: ['h'], args: '', desc: 'Hiển thị danh sách lệnh.' },
+    {
+      name: 'leaderboard',
+      aliases: ['lb', 'top'],
+      args: '',
+      desc: 'Xem bảng xếp hạng bài hát và bot.'
+    }
   ]
 }
 

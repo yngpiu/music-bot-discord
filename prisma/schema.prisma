@@ -12,3 +12,40 @@ model GuildConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Track {
+  id              String  @id // "deezer:123456789" or "youtube:dQw4w9WgXcQ"
+  sourceName      String // "deezer", "youtube", "soundcloud"...
+  identifier      String // Platform-specific ID
+  isrc            String? // ISRC code (nullable, used for cross-source matching)
+  title           String
+  artist          String
+  normalizedTitle String // Lowercased, cleaned title for fuzzy matching
+  normalizedArtist String // Lowercased, cleaned artist for fuzzy matching
+  artworkUrl      String?
+  uri             String? // Full URL to the track on the source platform
+
+  plays PlayHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isrc])
+  @@index([normalizedTitle, normalizedArtist])
+}
+
+model PlayHistory {
+  id      String @id @default(cuid())
+  trackId String
+  track   Track  @relation(fields: [trackId], references: [id])
+  guildId String
+  userId  String
+  botId   String
+
+  playedAt DateTime @default(now())
+
+  @@index([guildId])
+  @@index([userId])
+  @@index([trackId])
+  @@index([playedAt])
+}

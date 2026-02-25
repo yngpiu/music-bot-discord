@@ -7,6 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { Loader } from '~/core/Loader.js'
 import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
+import { initTrackService } from '~/lib/trackService.js'
 
 import { logger } from '~/utils/logger.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
@@ -33,6 +34,7 @@ export class BotManager {
       await this.redis.connect()
       setRedisClient(this.redis)
       setSpotifyRedisClient(this.redis)
+      initTrackService(this.redis)
       await initSpotifyToken()
       logger.info('[Boot] Successfully established connection to Redis Server.')
     } catch {
