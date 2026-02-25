@@ -120,7 +120,7 @@ interface RawAlbum {
   coverArt?: { sources: RawImage[] }
   tracksV2?: { items: { track: RawTrack }[]; totalCount: number }
   tracks?: { items: RawTrack[]; totalCount: number }
-  artists?: { items: RawArtist[] }
+  artists?: { items: { uri?: string; profile?: { name?: string } }[] }
   date?: { year: number }
 }
 
@@ -868,9 +868,14 @@ export async function searchSpotifyPlaylists(
         description = `Theo ${data.ownerV2.data.name}`
       }
 
+      let fullName = data.name || ''
+      if (data.ownerV2?.data?.name?.trim()) {
+        fullName = `${fullName} - ${data.ownerV2.data.name}`
+      }
+
       return {
         id: data.uri?.split(':').pop() || '',
-        name: data.name || '',
+        name: fullName,
         description,
         images: formatImage(playlistImage),
         tracks: {
@@ -905,16 +910,25 @@ export async function searchSpotifyAlbums(
       const data = item.data
       const albumImage = getBiggestImage(data.coverArt?.sources || [])
 
+      let fullName = data.name || ''
+      const artistNames = (data.artists?.items || [])
+        .map((artist) => artist.profile?.name)
+        .filter(Boolean)
+        .join(', ')
+
+      if (artistNames) {
+        fullName = `${fullName} - ${artistNames}`
+      }
+
       return {
         id: data.uri?.split(':').pop() || '',
-        name: data.name || '',
+        name: fullName,
         artists: (data.artists?.items || []).map((artist) => ({
           id: artist.uri?.split(':').pop() || '',
           name: artist.profile?.name || ''
         })),
         images: formatImage(albumImage),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        year: (data as any).date?.year || 0,
+        year: data.date?.year || 0,
         tracks: {
           items: [],
           total: 0
