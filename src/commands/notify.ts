@@ -25,7 +25,7 @@ const command: Command = {
     // Tạo embed thông báo
     const notifyEmbed = new EmbedBuilder()
       .setAuthor({
-        name: `Thông báo từ ${message.author.displayAvatarURL || message.author.username}`,
+        name: `Thông báo từ ${message.author.displayName || message.author.username}`,
         iconURL: message.author.displayAvatarURL({ size: 128 })
       })
       .setDescription(content)
