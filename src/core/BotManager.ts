@@ -249,11 +249,10 @@ export class BotManager {
 
       // Priority 2: any idle bot
       if (!chosenBot) {
-        for (const bot of this.bots) {
-          if (this.isIdle(bot, guildId)) {
-            chosenBot = bot
-            break
-          }
+        const idleBots = this.bots.filter((bot) => this.isIdle(bot, guildId))
+        if (idleBots.length > 0) {
+          const randomIndex = Math.floor(Math.random() * idleBots.length)
+          chosenBot = idleBots[randomIndex]
         }
       }
     } else {
