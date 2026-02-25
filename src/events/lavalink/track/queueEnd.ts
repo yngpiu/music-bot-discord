@@ -12,7 +12,7 @@ export default async (
   payload: TrackEndEvent
 ) => {
   logger.debug(
-    `[Player: ${player.guildId}] Sự kiện queueEnd được trigger do bài hát cuối cùng kết thúc`
+    `[Player: ${player.guildId}] queueEnd event triggered because the last track finished`
   )
   // Khi queue hết và bài cuối phát xong → ghi nhận lượt phát
   // (lavalink-client không emit trackEnd khi queue trống, mà gọi thẳng queueEnd)
@@ -31,7 +31,7 @@ export default async (
       })
     }
   } catch (e) {
-    logger.warn(`[Player: ${player.guildId}] Không lấy được danh sách thành viên VC:`, e)
+    logger.warn(`[Player: ${player.guildId}] Could not get VC member list:`, e)
   }
 
   recordTrackPlay(

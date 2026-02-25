@@ -23,7 +23,7 @@ export function initTrackService(redisClient: Redis) {
   if (flushTimer) clearInterval(flushTimer)
   flushTimer = setInterval(() => {
     flushPendingPlays().catch((e) => {
-      logger.error('[Dịch vụ: TrackService] Lỗi khi flush dữ liệu play history lên DB:', e)
+      logger.error('[Service: TrackService] Error flushing play history data to DB:', e)
     })
   }, FLUSH_INTERVAL_MS)
 }
@@ -91,7 +91,7 @@ export async function recordTrackPlay(
   try {
     await redis.rpush(REDIS_KEY, JSON.stringify(record))
   } catch (e) {
-    logger.error('[Dịch vụ: TrackService] Lỗi đẩy dữ liệu tracking lượt phát vào Redis buffer:', e)
+    logger.error('[Service: TrackService] Error pushing play tracking data to Redis buffer:', e)
   }
 }
 
@@ -132,7 +132,7 @@ async function flushPendingPlays(): Promise<void> {
     try {
       await upsertPlayRecord(record)
     } catch (e) {
-      logger.error(`[Dịch vụ: TrackService] Lỗi upsert bản ghi phát nhạc: ${record.title}`, e)
+      logger.error(`[Service: TrackService] Error upserting play record: ${record.title}`, e)
     }
   }
 }

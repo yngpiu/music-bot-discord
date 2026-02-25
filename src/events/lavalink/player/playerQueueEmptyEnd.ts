@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player) => {
-  logger.info(`[Player: ${player.guildId}] Không có nhạc mới, tiến hành rời kênh`)
+  logger.info(`[Player: ${player.guildId}] No new tracks, leaving channel`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -30,7 +30,7 @@ export default async (bot: BotClient, player: Player) => {
         flags: ['IsComponentsV2']
       })
     } catch (e) {
-      logger.warn(`[Player: ${player.guildId}] Lỗi xoá tin nhắn queueEmptyMessageId:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error deleting queueEmptyMessageId message:`, e)
     }
   }
 }

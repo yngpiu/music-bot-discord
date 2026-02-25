@@ -8,7 +8,5 @@ export default async (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   players: LavalinkPlayer[]
 ) => {
-  logger.info(
-    `[Lavalink Node: ${node.id}] Đã khôi phục kết nối thành công với session: ${payload.sessionId}`
-  )
+  logger.info(`[Lavalink Node: ${node.id}] Successfully resumed session: ${payload.sessionId}`)
 }

@@ -102,7 +102,7 @@ export async function spotifySearch(
       tracks
     }
   } catch (err) {
-    logger.error(`[Spotify] Lỗi giải mã link: ${query}`, err)
+    logger.error(`[Spotify] Error resolving link: ${query}`, err)
     return {
       loadType: 'error',
       exception: {

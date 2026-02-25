@@ -15,7 +15,7 @@ export default async (
   payload: TrackStuckEvent
 ) => {
   logger.error(
-    `[Player: ${player.guildId}] Bài hát bị kẹt: ${track?.info?.title || 'Không rõ'} (Ngưỡng kẹt: ${payload.thresholdMs}ms)`
+    `[Player: ${player.guildId}] Track stuck: ${track?.info?.title || 'Unknown'} (Stuck threshold: ${payload.thresholdMs}ms)`
   )
 
   if (!track || !player.textChannelId) return
@@ -45,7 +45,7 @@ export default async (
     })
 
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track stuck:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending track stuck notification:`, e)
       return null
     })
 

@@ -18,7 +18,7 @@ const command: Command = {
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
     logger.info(
-      `[Lệnh: insert] Người dùng ${message.author.tag} yêu cầu chèn nhạc vào vị trí ${args[0] || '?'}`
+      `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
     )
 
     const member = message.member as GuildMember

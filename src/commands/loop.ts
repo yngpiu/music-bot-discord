@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: loop] Người dùng ${message.author.tag} yêu cầu chuyển đổi chế độ lặp`)
+    logger.info(`[Command: loop] User ${message.author.tag} requested to toggle loop mode`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -60,9 +60,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: loop] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: loop] Error sending notification:', e)
         return null
       })
 

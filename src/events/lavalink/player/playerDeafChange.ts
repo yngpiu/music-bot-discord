@@ -23,9 +23,9 @@ export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverD
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo server deaf change:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending server deaf change notification:`, e)
       return null
     })
 }

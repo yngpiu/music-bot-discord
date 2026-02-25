@@ -12,9 +12,7 @@ export default async (
   oldVoiceChannelId: string,
   newVoiceChannelId: string
 ) => {
-  logger.info(
-    `[Player: ${player.guildId}] Bị di chuyển ra khỏi ${oldVoiceChannelId} sang ${newVoiceChannelId}`
-  )
+  logger.info(`[Player: ${player.guildId}] Moved from ${oldVoiceChannelId} to ${newVoiceChannelId}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -29,9 +27,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo move:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending move notification:`, e)
       return null
     })
 }

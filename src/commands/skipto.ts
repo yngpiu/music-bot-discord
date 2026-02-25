@@ -56,9 +56,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn(`[Lệnh: skipto] Lỗi gửi thông báo:`, e)
+        logger.warn(`[Command: skipto] Error sending notification:`, e)
         return null
       })
 

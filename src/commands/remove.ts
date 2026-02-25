@@ -56,7 +56,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
-    logger.info(`[Lệnh: remove] Người dùng ${message.author.tag} yêu cầu xoá bài hát khỏi hàng đợi`)
+    logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -102,9 +102,9 @@ const command: Command = {
 
     const replyMessage = await message
       .reply({ components: [container], flags: ['IsComponentsV2'] })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: remove] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: remove] Error sending notification:', e)
         return null
       })
 

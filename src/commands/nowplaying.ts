@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: nowplaying] Người dùng ${message.author.tag} yêu cầu xem bài hát hiện tại`)
+    logger.info(`[Command: nowplaying] User ${message.author.tag} requested to view current track`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -50,9 +50,9 @@ const command: Command = {
       .reply({
         embeds: [embed]
       })
-       
+
       .catch((e) => {
-        logger.warn(`[Lệnh: nowplaying] Lỗi gửi thông báo:`, e)
+        logger.warn(`[Command: nowplaying] Error sending notification:`, e)
         return null
       })
 

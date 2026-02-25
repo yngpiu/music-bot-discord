@@ -5,6 +5,7 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { BotManager } from '~/core/BotManager.js'
 import { BotError } from '~/core/errors.js'
@@ -31,12 +32,19 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   const content = `${EMOJI.ERROR} ${text}`
 
   if (target instanceof Message) {
-    const reply = await target.reply(content).catch(() => null)
+    const reply = await target.reply(content).catch((error: Error) => {
+      logger.error('[System] Error replying error message to user:', error.message)
+      return null
+    })
     if (reply) {
       setTimeout(() => {
-        reply.delete().catch(() => {})
-        target.delete().catch(() => {})
-      }, 15000)
+        reply.delete().catch((error: Error) => {
+          logger.error('[System] Error deleting error message:', error.message)
+        })
+        target.delete().catch((error: Error) => {
+          logger.error('[System] Error deleting error message:', error.message)
+        })
+      }, TIME.VERY_SHORT)
     }
     return
   }
@@ -45,11 +53,11 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
       await target.editReply({ content }).catch((err) => {
-        logger.warn('[Hệ Thống] Lỗi editReply thông báo lỗi cho User:', err)
+        logger.warn('[System] Error editReply error message to user:', err)
       })
     } else {
       await target.reply({ content, flags: ['Ephemeral'] }).catch((err) => {
-        logger.warn('[Hệ Thống] Lỗi reply thông báo lỗi cho User:', err)
+        logger.warn('[System] Error reply error message to user:', err)
       })
     }
   }
@@ -94,7 +102,7 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
 
       // Log all non-BotError exceptions
       const label = isPrismaError(err) ? 'Database' : 'Hệ Thống'
-      logger.error(`[${label}] Lỗi không xác định khi thực thi sự kiện ${eventName}:`, err)
+      logger.error(`[${label}] Unknown error when executing event ${eventName}:`, err)
 
       // Reply to user if we have a reply target
       if (target) {

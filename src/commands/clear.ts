@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: clear] Người dùng ${message.author.tag} yêu cầu xoá sạch danh sách chờ`)
+    logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -49,9 +49,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: clear] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: clear] Error sending notification:', e)
         return null
       })
 

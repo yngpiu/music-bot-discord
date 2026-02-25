@@ -38,7 +38,7 @@ export class BotManager {
       initTrackService(this.redis)
       await initSpotifyToken()
     } catch (err) {
-      logger.error('[Hệ Thống] Lỗi kết nối Redis hoặc cấu hình Spotify:', err)
+      logger.error('[System] Redis connection or Spotify configuration error:', err)
     }
 
     // Create bot clients
@@ -76,16 +76,16 @@ export class BotManager {
             destroyAfterMs: 300000,
             autoPlayFunction: async (player, lastPlayedTrack) => {
               if (!player.get('autoplay')) {
-                logger.debug('[Autoplay] Bỏ qua vì autoplay đang tắt.')
+                logger.debug('[Autoplay] Skipped because autoplay is disabled.')
                 return
               }
               if (!lastPlayedTrack) {
-                logger.debug('[Autoplay] Bỏ qua vì không có bài hát vừa phát.')
+                logger.debug('[Autoplay] Skipped because there is no previous track.')
                 return
               }
 
               logger.info(
-                `[Autoplay] Bắt đầu tìm kiếm bài hát autoplay dựa trên: ${lastPlayedTrack.info.title}`
+                `[Autoplay] Starting to search for autoplay track based on: ${lastPlayedTrack.info.title}`
               )
 
               let identifier: string | undefined = undefined
@@ -96,7 +96,7 @@ export class BotManager {
                 lastPlayedTrack.info.sourceName === 'youtubemusic'
               ) {
                 identifier = lastPlayedTrack.info.identifier
-                logger.info(`[Autoplay] Dùng identifier trực tiếp từ YouTube: ${identifier}`)
+                logger.info(`[Autoplay] Using direct identifier from YouTube: ${identifier}`)
               }
               // 2. If it's any other track (Spotify, SoundCloud, Apple Music etc), we first need to search YouTube to get a YouTube Video ID.
               else {
@@ -108,7 +108,7 @@ export class BotManager {
                   queryStr = `${author} - ${title}`
                 }
 
-                logger.info(`[Autoplay] Tìm kiếm YouTube để lấy identifier cho: ${queryStr}`)
+                logger.info(`[Autoplay] Searching YouTube to get identifier for: ${queryStr}`)
 
                 const ytSearchRes = await player.search(
                   {
@@ -123,9 +123,9 @@ export class BotManager {
 
                 if (ytSearchRes.tracks.length > 0) {
                   identifier = ytSearchRes.tracks[0].info.identifier
-                  logger.info(`[Autoplay] Đã tìm thấy identifier từ YouTube: ${identifier}`)
+                  logger.info(`[Autoplay] Found identifier from YouTube: ${identifier}`)
                 } else {
-                  logger.warn(`[Autoplay] Không tìm thấy kết quả YouTube cho: ${queryStr}`)
+                  logger.warn(`[Autoplay] No YouTube results found for: ${queryStr}`)
                 }
               }
 
@@ -142,7 +142,7 @@ export class BotManager {
                 }
 
                 const fallbackQuery = `ytsearch:${searchStr}`
-                logger.info(`[Autoplay] Dùng fallback search: ${fallbackQuery}`)
+                logger.info(`[Autoplay] Using fallback search: ${fallbackQuery}`)
 
                 const fallbackResponse = await player.search(
                   { query: fallbackQuery },
@@ -153,14 +153,14 @@ export class BotManager {
                   const tracks = fallbackResponse.tracks.slice(0, 5)
                   const randomTrack = tracks[Math.floor(Math.random() * tracks.length)]
                   if (randomTrack) {
-                    logger.info(`[Autoplay] Đã thêm bài hát từ fallback: ${randomTrack.info.title}`)
+                    logger.info(`[Autoplay] Added track from fallback: ${randomTrack.info.title}`)
                     await player.queue.add(randomTrack)
                     if (!player.playing) await player.play()
 
                     await this.sendAutoplayEmbed(bot, player, [randomTrack])
                   }
                 } else {
-                  logger.warn(`[Autoplay] Fallback search không trả về kết quả nào.`)
+                  logger.warn(`[Autoplay] Fallback search returned no results.`)
                   try {
                     const channel = bot.channels.cache.get(player.textChannelId!)
                     if (channel?.isTextBased() && 'send' in channel) {
@@ -169,7 +169,7 @@ export class BotManager {
                       })
                     }
                   } catch (e) {
-                    logger.error('[Autoplay] Lỗi gửi thông báo fallback trống:', e)
+                    logger.error('[Autoplay] Error sending empty fallback notification:', e)
                   }
                 }
                 return
@@ -177,7 +177,7 @@ export class BotManager {
 
               // 4. Fetch the Youtube Mix playlist using the identifier
               try {
-                logger.info(`[Autoplay] Tìm kiếm Youtube Mix cho: ${identifier}`)
+                logger.info(`[Autoplay] Searching Youtube Mix for: ${identifier}`)
                 const mixResponse = await player.search(
                   {
                     query: `https://www.youtube.com/watch?v=${identifier}&list=RD${identifier}`,
@@ -203,21 +203,24 @@ export class BotManager {
                       return track
                     })
 
-                    logger.info(`[Autoplay] Đã thêm ${tracksToAdd.length} bài hát từ Youtube Mix`)
+                    logger.info(`[Autoplay] Added ${tracksToAdd.length} tracks from Youtube Mix`)
                     await player.queue.add(tracksToAdd)
                     if (!player.playing) await player.play()
 
                     await this.sendAutoplayEmbed(bot, player, tracksToAdd)
                   } else {
                     logger.warn(
-                      `[Autoplay] Youtube Mix chỉ trả về bài hát hiện tại, không có bài mới.`
+                      `[Autoplay] Youtube Mix only returned the current track, no new tracks.`
                     )
                   }
                 } else {
-                  logger.warn(`[Autoplay] Không tìm thấy Youtube Mix cho identifier: ${identifier}`)
+                  logger.warn(`[Autoplay] Youtube Mix not found for identifier: ${identifier}`)
                 }
               } catch (err) {
-                logger.error('[Player] Gặp sự cố khi tìm Youtube Mix cho autoplay:', err)
+                logger.error(
+                  '[Player] Encountered an issue while finding Youtube Mix for autoplay:',
+                  err
+                )
               }
             }
           }
@@ -242,7 +245,7 @@ export class BotManager {
 
       // Login
       await bot.login(botConfig.token)
-      logger.info(`[Hệ Thống] Đã đăng nhập thành công MusicBot #${i + 1} (${botConfig.clientId})`)
+      logger.info(`[System] Successfully logged in MusicBot #${i + 1} (${botConfig.clientId})`)
       this.bots.push(bot)
     }
   }
@@ -351,7 +354,7 @@ export class BotManager {
       .setDescription(description)
 
     await channel.send({ embeds: [embed] }).catch((err) => {
-      logger.error('[Player] Lỗi khi gửi tin nhắn thông báo Autoplay:', err)
+      logger.error('[Player] Error sending Autoplay notification message:', err)
     })
   }
 }

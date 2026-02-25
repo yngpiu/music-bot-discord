@@ -5,7 +5,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player) => {
-  logger.info(`[Player: ${player.guildId}] Đã khởi tạo player cho server`)
+  logger.info(`[Player: ${player.guildId}] Initialized player for server`)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const owner = player.get<string | null>('owner')
 
@@ -28,6 +28,6 @@ export default async (bot: BotClient, player: Player) => {
       'filler'
     ])
   } catch (e) {
-    logger.warn(`[Player: ${player.guildId}] Lỗi bật SponsorBlock:`, e)
+    logger.warn(`[Player: ${player.guildId}] Error enabling SponsorBlock:`, e)
   }
 }

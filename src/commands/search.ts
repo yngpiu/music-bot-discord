@@ -450,9 +450,8 @@ async function handleAlbumSearch(bot: BotClient, message: Message, query: string
 
         if (!player.playing) await player.play().catch(() => {})
         collector.stop('selected')
-         
       } catch (error) {
-        logger.error('[Lệnh: search] Lỗi khi tải chi tiết album:', error)
+        logger.error('[Command: search] Error loading album details:', error)
         await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải album.`)
       }
     }
@@ -666,9 +665,8 @@ async function handlePlaylistSearch(
 
         if (!player.playing) await player.play().catch(() => {})
         collector.stop('selected')
-         
       } catch (error) {
-        logger.error('[Lệnh: search] Lỗi khi tải chi tiết playlist:', error)
+        logger.error('[Command: search] Error loading playlist details:', error)
         await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
       }
     }
@@ -696,7 +694,7 @@ const command: Command = {
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
     logger.info(
-      `[Lệnh: search] Người dùng ${message.author.tag} yêu cầu tìm kiếm: ${args.join(' ')}`
+      `[Command: search] User ${message.author.tag} requested to search: ${args.join(' ')}`
     )
 
     const member = message.member as GuildMember

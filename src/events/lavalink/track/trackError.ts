@@ -14,7 +14,7 @@ export default async (
   payload: TrackExceptionEvent | Error
 ) => {
   logger.error(
-    `[Player: ${player.guildId}] Lỗi phát bài hát: ${track?.info?.title || 'Không rõ'}`,
+    `[Player: ${player.guildId}] Error playing track: ${track?.info?.title || 'Unknown'}`,
     payload
   )
   if (payload instanceof Error && payload.message === 'No closest Track found') {
@@ -47,9 +47,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track error:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending track error notification:`, e)
       return null
     })
 }

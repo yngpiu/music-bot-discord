@@ -18,7 +18,7 @@ const command: Command = {
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
     logger.info(
-      `[Lệnh: play] Người dùng ${message.author.tag} yêu cầu phát nhạc ở server ${message.guild.id}`
+      `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild.id}`
     )
 
     const member = message.member as GuildMember
@@ -115,7 +115,7 @@ const command: Command = {
     if (!player.playing)
       await player.play().catch((err: Error) => {
         logger.error(
-          `[Lệnh: play] Lỗi khi bắt đầu phát tự động ở server ${message.guild!.id}:`,
+          `[Command: play] Error auto-starting playback in server ${message.guild!.id}:`,
           err
         )
       })

@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: resume] Người dùng ${message.author.tag} yêu cầu tiếp tục phát nhạc`)
+    logger.info(`[Command: resume] User ${message.author.tag} requested to resume track`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -50,9 +50,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-         
+
         .catch((e) => {
-          logger.warn(`[Lệnh: resume] Lỗi gửi thông báo:`, e)
+          logger.warn(`[Command: resume] Error sending notification:`, e)
           return null
         })
     }

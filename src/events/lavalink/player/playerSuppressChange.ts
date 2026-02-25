@@ -34,9 +34,9 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo suppress change:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending suppress change notification:`, e)
       return null
     })
 }

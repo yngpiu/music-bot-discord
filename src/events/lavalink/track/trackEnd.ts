@@ -12,7 +12,7 @@ export default async (
   payload: TrackEndEvent
 ) => {
   logger.debug(
-    `[Player: ${player.guildId}] Bài hát kết thúc: ${track?.info?.title || 'Không rõ'} (Lý do: ${payload.reason})`
+    `[Player: ${player.guildId}] Track ended: ${track?.info?.title || 'Unknown'} (Reason: ${payload.reason})`
   )
   // Chỉ ghi nhận khi bài hát phát xong hoàn toàn
   if (payload.reason !== 'finished' || !track) return
@@ -30,7 +30,7 @@ export default async (
       })
     }
   } catch (e) {
-    logger.warn(`[Player: ${player.guildId}] Không lấy được danh sách thành viên VC:`, e)
+    logger.warn(`[Player: ${player.guildId}] Could not get VC member list:`, e)
   }
 
   // Fire-and-forget: ghi nhận lượt phát, không block player

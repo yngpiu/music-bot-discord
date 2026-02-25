@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: join] Người dùng ${message.author.tag} yêu cầu bot vào kênh`)
+    logger.info(`[Command: join] User ${message.author.tag} requested bot to join channel`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -71,9 +71,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-         
+
         .catch((e) => {
-          logger.warn('[Lệnh: join] Lỗi gửi thông báo:', e)
+          logger.warn('[Command: join] Error sending notification:', e)
           return null
         })
 

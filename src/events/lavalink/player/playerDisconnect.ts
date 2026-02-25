@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, voiceChannelId: string) => {
-  logger.warn(`[Player: ${player.guildId}] Bị ngắt kết nối khỏi kênh thoại ${voiceChannelId}`)
+  logger.warn(`[Player: ${player.guildId}] Disconnected from voice channel ${voiceChannelId}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -22,9 +22,9 @@ export default async (bot: BotClient, player: Player, voiceChannelId: string) =>
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo disconnect:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending disconnect notification:`, e)
       return null
     })
 }

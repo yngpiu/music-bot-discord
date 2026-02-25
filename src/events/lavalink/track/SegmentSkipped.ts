@@ -13,7 +13,7 @@ export default async (
   payload: SponsorBlockSegmentSkipped
 ) => {
   logger.info(
-    `[Player: ${player.guildId}] Đã tự động bỏ qua đoạn ${payload.segment.category} trong bài hát`
+    `[Player: ${player.guildId}] Automatically skipped ${payload.segment.category} segment in the track`
   )
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -40,9 +40,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2', 'SuppressNotifications']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo segment skipped:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending segment skipped notification:`, e)
       return null
     })
 }

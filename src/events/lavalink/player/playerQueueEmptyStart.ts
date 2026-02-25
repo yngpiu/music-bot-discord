@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, delayMs: number) => {
   logger.info(
-    `[Player: ${player.guildId}] Danh sách phát trống, tính giờ chờ rời kênh (${delayMs}ms)`
+    `[Player: ${player.guildId}] Queue empty, starting timer to leave channel (${delayMs}ms)`
   )
 
   const channel = bot.channels.cache.get(player.textChannelId!)
@@ -29,6 +29,6 @@ export default async (bot: BotClient, player: Player, delayMs: number) => {
     })
     player.set('queueEmptyMessageId', msg.id)
   } catch (e) {
-    logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo chờ rời kênh:`, e)
+    logger.warn(`[Player: ${player.guildId}] Error sending leave channel timer notification:`, e)
   }
 }

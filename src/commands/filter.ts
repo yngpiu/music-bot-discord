@@ -82,7 +82,7 @@ const command: Command = {
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
     logger.info(
-      `[Lệnh: filter] Người dùng ${message.author.tag} yêu cầu chuyển đổi hiệu ứng: ${args[0] ?? 'trống'}`
+      `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
     )
 
     const player = bot.lavalink.getPlayer(message.guild.id)
@@ -109,7 +109,7 @@ const command: Command = {
         actionText = await applyFilter(filterManager, key)
       }
     } catch (e) {
-      logger.error('[Lệnh: filter] Lỗi áp dụng filter:', e)
+      logger.error('[Command: filter] Error applying filter:', e)
       throw new BotError(
         `Không thể áp dụng hiệu ứng: ${e instanceof Error ? e.message : 'Lỗi không xác định'}.`
       )
@@ -123,9 +123,9 @@ const command: Command = {
 
     const reply = await message
       .reply({ components: [container], flags: ['IsComponentsV2'] })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: filter] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: filter] Error sending notification:', e)
         return null
       })
 

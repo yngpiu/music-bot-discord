@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: shuffle] Người dùng ${message.author.tag} yêu cầu trộn danh sách chờ`)
+    logger.info(`[Command: shuffle] User ${message.author.tag} requested to shuffle queue`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -40,9 +40,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: shuffle] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: shuffle] Error sending notification:', e)
         return null
       })
 

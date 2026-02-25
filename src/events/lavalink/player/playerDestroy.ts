@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, reason?: string) => {
-  logger.warn(`[Player: ${player.guildId}] Player đã bị hủy. Lý do: ${reason || 'Không rõ'}`)
+  logger.warn(`[Player: ${player.guildId}] Player destroyed. Reason: ${reason || 'Unknown'}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -20,9 +20,9 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo destroy:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending destroy notification:`, e)
       return null
     })
 }

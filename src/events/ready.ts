@@ -9,6 +9,6 @@ export default {
   once: true,
   async execute(bot: BotClient) {
     await bot.lavalink.init({ ...bot.user!, shards: 'auto' })
-    logger.info(`[Hệ Thống] Bot ${bot.user?.tag} đã sẵn sàng và khởi tạo Lavalink thành công!`)
+    logger.info(`[System] Bot ${bot.user?.tag} is ready and successfully initialized Lavalink!`)
   }
 }

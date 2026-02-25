@@ -8,7 +8,7 @@ import { logger } from '~/utils/logger.js'
 import { formatDuration, formatTrack, lines } from '~/utils/stringUtil'
 
 export default async (bot: BotClient, player: Player, track: Track) => {
-  logger.info(`[Player: ${player.guildId}] Bắt đầu phát bài: ${track?.info?.title}`)
+  logger.info(`[Player: ${player.guildId}] Started playing track: ${track?.info?.title}`)
   if (!track || !player.textChannelId) return
 
   const channel = bot.channels.cache.get(player.textChannelId)
@@ -37,9 +37,9 @@ export default async (bot: BotClient, player: Player, track: Track) => {
       components: [container],
       flags: ['IsComponentsV2', 'SuppressNotifications']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track start:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending track start notification:`, e)
       return null
     })
 }

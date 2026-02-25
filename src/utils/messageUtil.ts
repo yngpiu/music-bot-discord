@@ -14,7 +14,7 @@ export const deleteMessage = (
     messages.forEach((msg) => {
       if (msg) {
         msg.delete().catch((e: Error) => {
-          logger.warn(`[Hệ Thống] Không thể xoá tin nhắn cũ: ${e.message}`)
+          logger.warn(`[System] Failed to delete old messages: ${e.message}`)
         })
       }
     })

@@ -281,7 +281,7 @@ const command: Command = {
     const guild = message.guild!
     const userId = message.author.id
     logger.info(
-      `[Lệnh: leaderboard] Người dùng ${message.author.tag} yêu cầu xem bảng xếp hạng ở server ${guild.id}`
+      `[Command: leaderboard] User ${message.author.tag} requested to view leaderboard in server ${guild.id}`
     )
     // Cache data per view
     let personalEntries: TrackEntry[] = []
@@ -419,7 +419,7 @@ const command: Command = {
 
     collector.on('end', async () => {
       await reply.edit({ components: getComponents(true) }).catch((err) => {
-        logger.warn('[Lệnh: leaderboard] Lỗi vô hiệu hoá nút bấm khi hết giờ:', err)
+        logger.warn('[Command: leaderboard] Error disabling buttons on timeout:', err)
       })
     })
   }

@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: leave] Người dùng ${message.author.tag} yêu cầu bot rời khỏi kênh`)
+    logger.info(`[Command: leave] User ${message.author.tag} requested bot to leave channel`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -52,9 +52,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-         
+
         .catch((e) => {
-          logger.warn('[Lệnh: leave] Lỗi gửi thông báo:', e)
+          logger.warn('[Command: leave] Error sending notification:', e)
           return null
         })
       if (replyMessage) {

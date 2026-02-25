@@ -23,7 +23,7 @@ const command: Command = {
       throw new BotError('Vui lòng nhập nội dung thông báo.')
     }
     logger.info(
-      `[Lệnh: notify] Owner ${message.author.tag} yêu cầu gửi thông báo: ${content.substring(0, 50)}...`
+      `[Command: notify] Owner ${message.author.tag} requested to send notification: ${content.substring(0, 50)}...`
     )
 
     // Tạo embed thông báo
@@ -50,7 +50,10 @@ const command: Command = {
             await channel.send({ embeds: [notifyEmbed] })
             successCount++
           } catch (err) {
-            logger.error(`[Lệnh: notify] Lỗi gửi thông báo tới kênh ${channel.id}:`, err)
+            logger.error(
+              `[Command: notify] Error sending notification to channel ${channel.id}:`,
+              err
+            )
             failCount++
           }
         }

@@ -34,9 +34,9 @@ export default async (bot: BotClient, player: Player, selfMuted: boolean, server
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo mute change:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error sending mute change notification:`, e)
       return null
     })
 }

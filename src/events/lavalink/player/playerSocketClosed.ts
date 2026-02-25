@@ -11,7 +11,7 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
   // during playerMove and playerDisconnect. We should ignore it to prevent spam.
   if (payload.code === 4014) return
   logger.error(
-    `[Player: ${player.guildId}] Voice WebSocket đóng bất thường: Code ${payload.code}, Lý do: ${payload.reason}`
+    `[Player: ${player.guildId}] Voice WebSocket unexpectedly closed: Code ${payload.code}, Reason: ${payload.reason}`
   )
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -27,9 +27,9 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
       components: [container],
       flags: ['IsComponentsV2']
     })
-     
+
     .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Lỗi thông báo sự cố WebSocket:`, e)
+      logger.warn(`[Player: ${player.guildId}] Error announcing WebSocket issue:`, e)
       return null
     })
 }

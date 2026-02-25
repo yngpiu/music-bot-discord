@@ -17,7 +17,7 @@ const command: Command = {
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
     logger.info(
-      `[Lệnh: move] Người dùng ${message.author.tag} yêu cầu chuyển vị trí bài số ${args[0]} tới ${args[1] || 1}`
+      `[Command: move] User ${message.author.tag} requested to move track ${args[0]} to position ${args[1] || 1}`
     )
 
     const player = bot.lavalink.getPlayer(message.guild.id)
@@ -76,9 +76,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: move] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: move] Error sending notification:', e)
         return null
       })
 

@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: replay] Người dùng ${message.author.tag} yêu cầu phát lại bài hát`)
+    logger.info(`[Command: replay] User ${message.author.tag} requested to replay track`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -45,9 +45,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
-       
+
       .catch((e) => {
-        logger.warn('[Lệnh: replay] Lỗi gửi thông báo:', e)
+        logger.warn('[Command: replay] Error sending notification:', e)
         return null
       })
 

@@ -387,10 +387,10 @@ class SpotifyTokenHandler {
         this.clientId = data.clientId
         this.accessTokenExpirationTimestampMs = data.accessTokenExpirationTimestampMs
       } else {
-        logger.debug('[Spotify] Cache token không hợp lệ hoặc đã hết hạn')
+        logger.debug('[Spotify] Invalid or expired cache token')
       }
     } catch (e) {
-      logger.warn('[Spotify] Lỗi đọc token từ Redis:', e)
+      logger.warn('[Spotify] Error reading token from Redis:', e)
     }
   }
 
@@ -411,7 +411,7 @@ class SpotifyTokenHandler {
         ttlMs
       )
     } catch (e) {
-      logger.warn('[Spotify] Lỗi lưu token vào Redis:', e)
+      logger.warn('[Spotify] Error saving token to Redis:', e)
     }
   }
 
@@ -430,7 +430,7 @@ class SpotifyTokenHandler {
         this.isRefreshing = true
         await this.getAccessToken(true)
       } catch (e) {
-        logger.error('[Spotify] Lỗi tự động làm mới token:', e)
+        logger.error('[Spotify] Error auto-refreshing token:', e)
       } finally {
         this.isRefreshing = false
       }
@@ -555,7 +555,7 @@ class SpotifyTokenHandler {
               resolve(json as SpotifyToken)
             }
           } catch (e) {
-            logger.debug('[Spotify] Lỗi parse response từ API /api/token:', e)
+            logger.debug('[Spotify] Error parsing response from API /api/token:', e)
           }
         }
 
@@ -586,7 +586,7 @@ class SpotifyTokenHandler {
         isAnonymous: this.isAnonymous
       }
     } catch (error) {
-      logger.error('[Spotify] Lỗi lấy token mới bằng Playwright:', error)
+      logger.error('[Spotify] Error fetching new token with Playwright:', error)
       throw error
     } finally {
       if (timeout) clearTimeout(timeout)

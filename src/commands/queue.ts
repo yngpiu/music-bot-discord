@@ -18,7 +18,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: queue] Người dùng ${message.author.tag} yêu cầu xem hàng đợi`)
+    logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -123,9 +123,9 @@ const command: Command = {
         embeds: [generateEmbed(currentPage)],
         components: totalPages > 1 ? [getRow(currentPage)] : []
       })
-       
+
       .catch((e: Error) => {
-        logger.warn(`[Lệnh: queue] Lỗi gửi thông báo:`, e)
+        logger.warn(`[Command: queue] Error sending notification:`, e)
         return null
       })
 
@@ -148,7 +148,7 @@ const command: Command = {
             embeds: [generateEmbed(currentPage)],
             components: [getRow(currentPage)]
           })
-          .catch((err) => logger.warn(`[Lệnh: queue] Lỗi update trang danh sách chờ:`, err))
+          .catch((err) => logger.warn(`[Command: queue] Error updating queue page:`, err))
       })
 
       collector.on('end', (collected, reason) => {

@@ -144,7 +144,7 @@ const command: Command = {
   requiresVoice: false,
 
   async execute(bot: BotClient, message: Message) {
-    logger.info(`[Lệnh: help] Người dùng ${message.author.tag} yêu cầu xem danh sách lệnh`)
+    logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({

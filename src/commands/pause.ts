@@ -16,7 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
-    logger.info(`[Lệnh: pause] Người dùng ${message.author.tag} yêu cầu tạm dừng nhạc`)
+    logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -54,9 +54,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
-         
+
         .catch((e) => {
-          logger.warn(`[Lệnh: pause] Lỗi gửi thông báo cho lệnh pause:`, e)
+          logger.warn(`[Command: pause] Error sending notification:`, e)
           return null
         })
     }
