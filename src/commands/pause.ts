@@ -1,12 +1,12 @@
 import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'pause',
@@ -16,6 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    logger.info(`[Lệnh: pause] Người dùng ${message.author.tag} yêu cầu tạm dừng nhạc`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -53,8 +54,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
+         
         .catch((e) => {
-          logger.error(e)
+          logger.warn(`[Lệnh: pause] Lỗi gửi thông báo cho lệnh pause:`, e)
           return null
         })
     }

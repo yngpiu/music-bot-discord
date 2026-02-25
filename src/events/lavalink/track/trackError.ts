@@ -13,15 +13,13 @@ export default async (
   track: Track | UnresolvedTrack | null,
   payload: TrackExceptionEvent | Error
 ) => {
+  logger.error(
+    `[Player: ${player.guildId}] Lỗi phát bài hát: ${track?.info?.title || 'Không rõ'}`,
+    payload
+  )
   if (payload instanceof Error && payload.message === 'No closest Track found') {
-    logger.warn(
-      `[Lavalink:Player] ${player.guildId} :: Bỏ qua bài hát do không thể phân giải (không tìm thấy nguồn): ${track?.info.title}`
-    )
+    // eslint-disable-next-line no-empty
   } else {
-    logger.error(
-      `[Lavalink:Player] ${player.guildId} :: ERROR: Encountered a fatal exception while playing track. Details:`,
-      payload
-    )
   }
 
   if (!track || !player.textChannelId) return
@@ -49,8 +47,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
+     
     .catch((e) => {
-      logger.error(e)
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track error:`, e)
       return null
     })
 }

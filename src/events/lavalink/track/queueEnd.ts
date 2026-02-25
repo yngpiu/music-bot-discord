@@ -11,10 +11,9 @@ export default async (
   track: Track | null,
   payload: TrackEndEvent
 ) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Player queue finished. Last track: ${track?.info?.title || 'Unknown'}. Reason: ${payload?.reason || 'unknown'}`
+  logger.debug(
+    `[Player: ${player.guildId}] Sự kiện queueEnd được trigger do bài hát cuối cùng kết thúc`
   )
-
   // Khi queue hết và bài cuối phát xong → ghi nhận lượt phát
   // (lavalink-client không emit trackEnd khi queue trống, mà gọi thẳng queueEnd)
   if (payload?.reason !== 'finished' || !track) return

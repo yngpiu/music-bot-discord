@@ -13,7 +13,9 @@ export const deleteMessage = (
   setTimeout(() => {
     messages.forEach((msg) => {
       if (msg) {
-        msg.delete().catch((e: Error) => logger.error(e.message))
+        msg.delete().catch((e: Error) => {
+          logger.warn(`[Hệ Thống] Không thể xoá tin nhắn cũ: ${e.message}`)
+        })
       }
     })
   }, timeoutMs)

@@ -12,6 +12,7 @@ import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
+import { logger } from '~/utils/logger.js'
 import { formatTrack } from '~/utils/stringUtil.js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -135,17 +136,17 @@ function buildViewSelect(currentView: LeaderboardView, disabled = false) {
     .setDisabled(disabled)
     .addOptions(
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH bài hát bạn nghe nhiều nhất')
+        .setLabel('BXH cá nhân theo tổng lượt phát')
         .setValue('personal')
         .setEmoji('👤')
         .setDefault(currentView === 'personal'),
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH bài hát được phát nhiều nhất')
+        .setLabel('BXH bài hát theo tổng lượt phát')
         .setValue('tracks')
         .setEmoji('🎵')
         .setDefault(currentView === 'tracks'),
       new StringSelectMenuOptionBuilder()
-        .setLabel('BXH bot có số lần phát nhiều nhất')
+        .setLabel('BXH bot theo tổng lượt phát')
         .setValue('bots')
         .setEmoji('🤖')
         .setDefault(currentView === 'bots')
@@ -203,7 +204,7 @@ function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, gu
 
   return new EmbedBuilder()
     .setAuthor({
-      name: `BXH bot có số lần phát nhiều nhất ở ${guild.name}`,
+      name: `BXH bot theo tổng lượt phát ở ${guild.name}`,
       iconURL: guild.iconURL() ?? undefined
     })
     .setDescription(description)
@@ -225,7 +226,9 @@ const command: Command = {
 
     const guild = message.guild!
     const userId = message.author.id
-
+    logger.info(
+      `[Lệnh: leaderboard] Người dùng ${message.author.tag} yêu cầu xem bảng xếp hạng ở server ${guild.id}`
+    )
     // Cache data per view
     let personalEntries: TrackEntry[] = []
     let trackEntries: TrackEntry[] = []
@@ -250,7 +253,7 @@ const command: Command = {
           currentPage,
           totalPages,
           guild,
-          `BXH bài hát bạn nghe nhiều nhất ở ${guild.name}`
+          `BXH cá nhân theo tổng lượt phát ở ${guild.name}`
         )
       }
       if (currentView === 'tracks') {
@@ -259,7 +262,7 @@ const command: Command = {
           currentPage,
           totalPages,
           guild,
-          `BXH bài hát được phát nhiều nhất ở ${guild.name}`
+          `BXH bài hát theo tổng lượt phát ở ${guild.name}`
         )
       }
       return buildBotEmbed(botEntries, currentPage, totalPages, guild)
@@ -340,7 +343,9 @@ const command: Command = {
     })
 
     collector.on('end', async () => {
-      await reply.edit({ components: getComponents(true) }).catch(() => {})
+      await reply.edit({ components: getComponents(true) }).catch((err) => {
+        logger.warn('[Lệnh: leaderboard] Lỗi vô hiệu hoá nút bấm khi hết giờ:', err)
+      })
     })
   }
 }

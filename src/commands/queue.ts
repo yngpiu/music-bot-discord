@@ -18,6 +18,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    logger.info(`[Lệnh: queue] Người dùng ${message.author.tag} yêu cầu xem hàng đợi`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -122,8 +123,9 @@ const command: Command = {
         embeds: [generateEmbed(currentPage)],
         components: totalPages > 1 ? [getRow(currentPage)] : []
       })
+       
       .catch((e: Error) => {
-        logger.error('Error sending queue message:', e)
+        logger.warn(`[Lệnh: queue] Lỗi gửi thông báo:`, e)
         return null
       })
 
@@ -141,16 +143,18 @@ const command: Command = {
         else if (i.customId === 'queue_next') currentPage++
         else if (i.customId === 'queue_last') currentPage = totalPages
 
-        await i.update({
-          embeds: [generateEmbed(currentPage)],
-          components: [getRow(currentPage)]
-        })
+        await i
+          .update({
+            embeds: [generateEmbed(currentPage)],
+            components: [getRow(currentPage)]
+          })
+          .catch((err) => logger.warn(`[Lệnh: queue] Lỗi update trang danh sách chờ:`, err))
       })
 
       collector.on('end', (collected, reason) => {
         if (reason === 'idle' || reason === 'time') {
-          replyMessage.delete().catch((e: Error) => logger.error(e))
-          message.delete().catch((e: Error) => logger.error(e))
+          replyMessage.delete().catch(() => {})
+          message.delete().catch(() => {})
         }
       })
     } else {

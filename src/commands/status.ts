@@ -1,12 +1,12 @@
 import { EmbedBuilder, type Message } from 'discord.js'
 
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatTrack } from '~/utils/stringUtil'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
+import { formatTrack } from '~/utils/stringUtil'
 
 const command: Command = {
   name: 'status',
@@ -16,6 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    logger.info(`[Lệnh: status] Người dùng ${message.author.tag} yêu cầu xem trạng thái`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -72,8 +73,9 @@ const command: Command = {
       .reply({
         embeds: [embed]
       })
+       
       .catch((e) => {
-        logger.error(e)
+        logger.warn(`[Lệnh: status] Lỗi gửi thông báo:`, e)
         return null
       })
 

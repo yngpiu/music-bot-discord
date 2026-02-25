@@ -7,10 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Mute status changed. ${JSON.stringify({ selfMuted, serverMuted })}`
-  )
-
+  logger.info(`[Player: ${player.guildId}] Server mute change: ${serverMuted}`)
   if (serverMuted) {
     player.set('paused_of_servermute', true)
     if (!player.paused) await player.pause()
@@ -37,5 +34,9 @@ export default async (bot: BotClient, player: Player, selfMuted: boolean, server
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+     
+    .catch((e) => {
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo mute change:`, e)
+      return null
+    })
 }

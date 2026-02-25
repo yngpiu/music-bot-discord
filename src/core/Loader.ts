@@ -44,9 +44,13 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   // Interaction (button, modal, slash command...)
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
-      await target.editReply({ content }).catch(() => {})
+      await target.editReply({ content }).catch((err) => {
+        logger.warn('[Hệ Thống] Lỗi editReply thông báo lỗi cho User:', err)
+      })
     } else {
-      await target.reply({ content, flags: ['Ephemeral'] }).catch(() => {})
+      await target.reply({ content, flags: ['Ephemeral'] }).catch((err) => {
+        logger.warn('[Hệ Thống] Lỗi reply thông báo lỗi cho User:', err)
+      })
     }
   }
 }
@@ -89,8 +93,8 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
       }
 
       // Log all non-BotError exceptions
-      const label = isPrismaError(err) ? 'DATABASE ERROR' : 'UNEXPECTED ERROR'
-      logger.error(`[Event:${eventName}] [${label}]:`, err)
+      const label = isPrismaError(err) ? 'Database' : 'Hệ Thống'
+      logger.error(`[${label}] Lỗi không xác định khi thực thi sự kiện ${eventName}:`, err)
 
       // Reply to user if we have a reply target
       if (target) {

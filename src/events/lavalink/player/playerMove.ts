@@ -13,9 +13,8 @@ export default async (
   newVoiceChannelId: string
 ) => {
   logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Moved from voice channel <#${oldVoiceChannelId}> to <#${newVoiceChannelId}>.`
+    `[Player: ${player.guildId}] Bị di chuyển ra khỏi ${oldVoiceChannelId} sang ${newVoiceChannelId}`
   )
-
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -30,5 +29,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+     
+    .catch((e) => {
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo move:`, e)
+      return null
+    })
 }

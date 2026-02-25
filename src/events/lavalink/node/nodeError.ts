@@ -4,8 +4,7 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default async (bot: BotClient, node: LavalinkNode, error: Error, payload: unknown) => {
-  logger.error(
-    `[Lavalink:Node] ${node.id} :: Encountered a critical error: ${error.message || error} ${JSON.stringify(payload)}`
-  )
+  logger.error(`[Lavalink Node: ${node.id}] Lỗi node:`, error)
 }

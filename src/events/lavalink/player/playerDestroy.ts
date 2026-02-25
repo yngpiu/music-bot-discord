@@ -1,16 +1,13 @@
 import { ContainerBuilder } from 'discord.js'
 import { Player } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji'
+import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, reason?: string) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Player destroyed. Reason: ${reason || 'Unknown'}`
-  )
-
+  logger.warn(`[Player: ${player.guildId}] Player đã bị hủy. Lý do: ${reason || 'Không rõ'}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -23,8 +20,9 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
+     
     .catch((e) => {
-      logger.error(e)
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo destroy:`, e)
       return null
     })
 }

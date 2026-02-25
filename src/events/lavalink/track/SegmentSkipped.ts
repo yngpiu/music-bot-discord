@@ -13,9 +13,8 @@ export default async (
   payload: SponsorBlockSegmentSkipped
 ) => {
   logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Skipped SponsorBlock segment: ${payload.segment.category}`
+    `[Player: ${player.guildId}] Đã tự động bỏ qua đoạn ${payload.segment.category} trong bài hát`
   )
-
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -41,5 +40,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2', 'SuppressNotifications']
     })
-    .catch((e) => { logger.error(e); return null })
+     
+    .catch((e) => {
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo segment skipped:`, e)
+      return null
+    })
 }

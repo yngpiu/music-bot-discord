@@ -16,6 +16,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
+    logger.info(`[Lệnh: volume] Người dùng ${message.author.tag} yêu cầu chỉnh âm lượng`)
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -54,8 +55,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
+       
       .catch((e) => {
-        logger.error(e)
+        logger.warn(`[Lệnh: volume] Lỗi gửi thông báo:`, e)
         return null
       })
 

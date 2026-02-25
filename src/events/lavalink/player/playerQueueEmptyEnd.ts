@@ -7,9 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Disconnect timer ended. Player leaving channel.`
-  )
+  logger.info(`[Player: ${player.guildId}] Không có nhạc mới, tiến hành rời kênh`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -31,8 +29,8 @@ export default async (bot: BotClient, player: Player) => {
         components: [container],
         flags: ['IsComponentsV2']
       })
-    } catch (error) {
-      logger.error(`Failed to delete queue empty message on end: ${error}`)
+    } catch (e) {
+      logger.warn(`[Player: ${player.guildId}] Lỗi xoá tin nhắn queueEmptyMessageId:`, e)
     }
   }
 }

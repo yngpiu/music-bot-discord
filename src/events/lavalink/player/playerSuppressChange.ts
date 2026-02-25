@@ -7,8 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, suppress: boolean) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Suppress status changed.`, { suppress })
-
+  logger.info(`[Player: ${player.guildId}] Suppress change: ${suppress}`)
   if (suppress) {
     player.set('paused_of_servermute', true) // Reusing the same flag since the effect is identical (can't speak)
     if (!player.paused) await player.pause()
@@ -35,8 +34,9 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
       components: [container],
       flags: ['IsComponentsV2']
     })
+     
     .catch((e) => {
-      logger.error(e)
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo suppress change:`, e)
       return null
     })
 }

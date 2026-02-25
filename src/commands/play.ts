@@ -17,6 +17,9 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
+    logger.info(
+      `[Lệnh: play] Người dùng ${message.author.tag} yêu cầu phát nhạc ở server ${message.guild.id}`
+    )
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -110,7 +113,12 @@ const command: Command = {
     deleteMessage([replyMessage, message], TIME.MEDIUM)
 
     if (!player.playing)
-      await player.play().catch((e: Error | unknown) => logger.warn('player.play() error:', e))
+      await player.play().catch((err: Error) => {
+        logger.error(
+          `[Lệnh: play] Lỗi khi bắt đầu phát tự động ở server ${message.guild!.id}:`,
+          err
+        )
+      })
   }
 }
 

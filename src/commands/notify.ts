@@ -3,6 +3,7 @@ import { EmbedBuilder, type Message, type TextChannel } from 'discord.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
+import { logger } from '~/utils/logger.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
 const command: Command = {
@@ -21,6 +22,9 @@ const command: Command = {
     if (!content) {
       throw new BotError('Vui lòng nhập nội dung thông báo.')
     }
+    logger.info(
+      `[Lệnh: notify] Owner ${message.author.tag} yêu cầu gửi thông báo: ${content.substring(0, 50)}...`
+    )
 
     // Tạo embed thông báo
     const notifyEmbed = new EmbedBuilder()
@@ -45,7 +49,8 @@ const command: Command = {
           try {
             await channel.send({ embeds: [notifyEmbed] })
             successCount++
-          } catch {
+          } catch (err) {
+            logger.error(`[Lệnh: notify] Lỗi gửi thông báo tới kênh ${channel.id}:`, err)
             failCount++
           }
         }

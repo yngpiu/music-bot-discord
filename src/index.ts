@@ -6,7 +6,8 @@ import { logger } from '~/utils/logger.js'
 
 const manager = new BotManager()
 
+ 
 manager.start().catch((err) => {
-  logger.error('Fatal error starting bots:', err)
+  logger.error('[Hệ Thống] Khởi động BotManager thất bại:', err)
   process.exit(1)
 })

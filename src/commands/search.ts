@@ -199,7 +199,6 @@ async function handleTrackSearch(bot: BotClient, message: Message, query: string
           components: getComponents(false, currentSource)
         })
       } catch (error) {
-        logger.error(`Error searching source ${newSource}:`, error)
         await interaction.followUp({
           content: `Lỗi khi tìm kiếm: ${error instanceof Error ? error.message : 'Unknown error'}`,
           ephemeral: true
@@ -215,8 +214,8 @@ async function handleTrackSearch(bot: BotClient, message: Message, query: string
 
       if (!track) return
 
-      await interaction.deferUpdate().catch((e) => logger.error(e))
-      await interaction.message.delete().catch((e) => logger.error(e))
+      await interaction.deferUpdate().catch(() => {})
+      await interaction.message.delete().catch(() => {})
 
       await player.queue.add(track)
 
@@ -246,17 +245,15 @@ async function handleTrackSearch(bot: BotClient, message: Message, query: string
 
   collector.on('end', async (collected, reason) => {
     if (reason === 'time') {
-      await reply.delete().catch((e) => logger.error(e))
-      await message.delete().catch((e) => logger.error(e))
+      await reply.delete().catch(() => {})
+      await message.delete().catch(() => {})
 
       // Destroy player if not playing anything and queue is empty
       if (!player.playing && player.queue.tracks.length === 0) {
         await player.destroy()
       }
     } else if (reason !== 'selected') {
-      await reply
-        .edit({ components: getComponents(true, currentSource) })
-        .catch((e) => logger.error(e))
+      await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
     }
   })
 }
@@ -277,8 +274,8 @@ async function handleAlbumSearch(bot: BotClient, message: Message, query: string
     try {
       albums = await searchSpotifyAlbums(query, 10, page * 10)
       pageCache.set(page, albums)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      logger.error('Error fetching spotify albums:', error)
       throw new BotError(
         'Đã có lỗi xảy ra khi lấy danh sách album, vui lòng liên hệ **Ban quản lý**.'
       )
@@ -376,7 +373,7 @@ async function handleAlbumSearch(bot: BotClient, message: Message, query: string
   collector.on('collect', async (interaction) => {
     if (interaction.isButton()) {
       collector.resetTimer()
-      await interaction.deferUpdate().catch((e) => logger.error(e))
+      await interaction.deferUpdate().catch(() => {})
 
       if (interaction.customId === 'prev_page' && currentPage > 0) {
         currentPage--
@@ -399,8 +396,8 @@ async function handleAlbumSearch(bot: BotClient, message: Message, query: string
 
       if (!album) return
 
-      await interaction.deferUpdate().catch((e) => logger.error(e))
-      await interaction.message.delete().catch((e) => logger.error(e))
+      await interaction.deferUpdate().catch(() => {})
+      await interaction.message.delete().catch(() => {})
 
       // Tạo tin nhắn "đang tải"
       const loadingQuery = `https://open.spotify.com/album/${album.id}`
@@ -451,11 +448,11 @@ async function handleAlbumSearch(bot: BotClient, message: Message, query: string
 
         await loadingMessage.edit({ content: '', ...addedEmbed })
 
-        if (!player.playing)
-          await player.play().catch((e: Error | unknown) => logger.warn('player.play() error:', e))
+        if (!player.playing) await player.play().catch(() => {})
         collector.stop('selected')
+         
       } catch (error) {
-        logger.error('Error fetching album tracks: ', error)
+        logger.error('[Lệnh: search] Lỗi khi tải chi tiết album:', error)
         await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải album.`)
       }
     }
@@ -496,8 +493,8 @@ async function handlePlaylistSearch(
     try {
       playlists = await searchSpotifyPlaylists(query, 10, page * 10)
       pageCache.set(page, playlists)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      logger.error('Error fetching spotify playlists:', error)
       throw new BotError(
         'Đã có lỗi xảy ra khi lấy danh sách phát, vui lòng liên hệ **Ban quản lý**.'
       )
@@ -591,7 +588,7 @@ async function handlePlaylistSearch(
   collector.on('collect', async (interaction) => {
     if (interaction.isButton()) {
       collector.resetTimer()
-      await interaction.deferUpdate().catch((e) => logger.error(e))
+      await interaction.deferUpdate().catch(() => {})
 
       if (interaction.customId === 'prev_page' && currentPage > 0) {
         currentPage--
@@ -614,8 +611,8 @@ async function handlePlaylistSearch(
 
       if (!playlist) return
 
-      await interaction.deferUpdate().catch((e) => logger.error(e))
-      await interaction.message.delete().catch((e) => logger.error(e))
+      await interaction.deferUpdate().catch(() => {})
+      await interaction.message.delete().catch(() => {})
 
       // Tạo tin nhắn "đang tải"
       const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
@@ -667,11 +664,11 @@ async function handlePlaylistSearch(
 
         await loadingMessage.edit({ content: '', ...addedEmbed })
 
-        if (!player.playing)
-          await player.play().catch((e: Error | unknown) => logger.warn('player.play() error:', e))
+        if (!player.playing) await player.play().catch(() => {})
         collector.stop('selected')
+         
       } catch (error) {
-        logger.error('Error fetching playlist tracks: ', error)
+        logger.error('[Lệnh: search] Lỗi khi tải chi tiết playlist:', error)
         await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
       }
     }
@@ -698,6 +695,9 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
+    logger.info(
+      `[Lệnh: search] Người dùng ${message.author.tag} yêu cầu tìm kiếm: ${args.join(' ')}`
+    )
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId

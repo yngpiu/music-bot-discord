@@ -1,12 +1,12 @@
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'autoplay',
@@ -16,6 +16,9 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    logger.info(
+      `[Lệnh: autoplay] Người dùng ${message.author.tag} yêu cầu đổi trạng thái tự động phát`
+    )
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -43,8 +46,9 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
+       
       .catch((e) => {
-        logger.error(e)
+        logger.warn('[Lệnh: autoplay] Lỗi gửi thông báo:', e)
         return null
       })
 

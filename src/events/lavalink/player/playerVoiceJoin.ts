@@ -2,9 +2,8 @@ import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 
-import { logger } from '~/utils/logger.js'
 
 // IGNORE
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default async (bot: BotClient, player: Player, userId: string) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: User <@${userId}> joined the voice channel.`)
 }

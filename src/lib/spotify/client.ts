@@ -386,17 +386,11 @@ class SpotifyTokenHandler {
         this.accessToken = data.accessToken
         this.clientId = data.clientId
         this.accessTokenExpirationTimestampMs = data.accessTokenExpirationTimestampMs
-        this.isAnonymous = data.isAnonymous
-        logger.info('[Spotify:Token] Successfully restored valid token from Redis cache.')
-        this.scheduleRefresh()
       } else {
-        logger.debug('[Spotify:Token] Redis token cache is empty or expired.')
+        logger.debug('[Spotify] Cache token không hợp lệ hoặc đã hết hạn')
       }
     } catch (e) {
-      logger.error(
-        '[Spotify:Token] Failed to parse Redis token cache. Proceeding without cache.',
-        e
-      )
+      logger.warn('[Spotify] Lỗi đọc token từ Redis:', e)
     }
   }
 
@@ -416,9 +410,8 @@ class SpotifyTokenHandler {
         'PX',
         ttlMs
       )
-      logger.debug('[Spotify:Token] Saved newly generated access token to Redis cache.')
     } catch (e) {
-      logger.error('[Spotify:Token] Failed to write token cache to Redis.', e)
+      logger.warn('[Spotify] Lỗi lưu token vào Redis:', e)
     }
   }
 
@@ -435,12 +428,9 @@ class SpotifyTokenHandler {
       if (this.isRefreshing) return // Already refreshing, skip
       try {
         this.isRefreshing = true
-        logger.info(
-          '[Spotify:Token] Token is about to expire (< 10s). Executing background auto-refresh...'
-        )
         await this.getAccessToken(true)
-      } catch (err) {
-        logger.warn('[Spotify:Token] Failed to auto-refresh Spotify token in background', err)
+      } catch (e) {
+        logger.error('[Spotify] Lỗi tự động làm mới token:', e)
       } finally {
         this.isRefreshing = false
       }
@@ -449,9 +439,6 @@ class SpotifyTokenHandler {
 
   private async launchBrowser() {
     if (this.browser) return
-    logger.info(
-      '[Spotify:Playwright] Launching headless chromium instance to obtain anonymous token...'
-    )
     this.browser = await chromium.launch({
       headless: true,
       args: [
@@ -518,23 +505,15 @@ class SpotifyTokenHandler {
     let lastError: unknown
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        logger.info(
-          `[Spotify:Playwright] Attempting to fetch new token (Attempt ${attempt}/${maxRetries})...`
-        )
         return await this.fetchNewToken()
       } catch (err) {
         lastError = err
-        logger.warn(
-          `[Spotify:Playwright] Token fetch attempt ${attempt}/${maxRetries} failed. Retrying if possible.`,
-          err
-        )
       }
     }
     throw lastError
   }
 
   public async refreshToken(): Promise<SpotifyToken> {
-    logger.info('[Spotify:Token] Forcing token refresh. Clearing cache and opening Chromium...')
     // Không null accessToken — giữ fetchTokenPromise mutex hoạt động
     this.accessTokenExpirationTimestampMs = 0
     return this.getAccessToken(true)
@@ -546,10 +525,6 @@ class SpotifyTokenHandler {
 
     let timeout: NodeJS.Timeout | null = null
     try {
-      logger.debug(
-        '[Spotify:Playwright] Navigating to https://open.spotify.com/ to sniff token from network requests...'
-      )
-
       await this.context.route('**/*', (route) => {
         const url = route.request().url()
         const type = route.request().resourceType()
@@ -579,8 +554,8 @@ class SpotifyTokenHandler {
               if (timeout) clearTimeout(timeout)
               resolve(json as SpotifyToken)
             }
-          } catch {
-            // ignore
+          } catch (e) {
+            logger.debug('[Spotify] Lỗi parse response từ API /api/token:', e)
           }
         }
 
@@ -601,9 +576,6 @@ class SpotifyTokenHandler {
         token.accessTokenExpirationTimestampMs || Date.now() + (token.expiresIn || 3600) * 1000
       this.isAnonymous = token.isAnonymous
 
-      logger.info(
-        `[Spotify:Playwright] Token successfully sniffed and retrieved. (Expires in: ${Math.round((this.accessTokenExpirationTimestampMs - Date.now()) / 1000)}s)`
-      )
       await this.saveCache()
       this.scheduleRefresh()
 
@@ -614,10 +586,7 @@ class SpotifyTokenHandler {
         isAnonymous: this.isAnonymous
       }
     } catch (error) {
-      logger.error(
-        '[Spotify:Playwright] Fatal error occurred during token fetching process. Could not resolve token.',
-        error
-      )
+      logger.error('[Spotify] Lỗi lấy token mới bằng Playwright:', error)
       throw error
     } finally {
       if (timeout) clearTimeout(timeout)
@@ -659,9 +628,6 @@ export async function partnerQuery(
 
     if (!response.ok) {
       if (response.status === 401 && !isRetry) {
-        logger.warn(
-          `[Spotify:API] Received 401 Unauthorized for ${operationName}. Token likely revoked early by Spotify. Triggering immediate Force Refresh...`
-        )
         return partnerQuery(operationName, variables, true)
       }
 
@@ -673,14 +639,9 @@ export async function partnerQuery(
     return await response.json()
   } catch (error) {
     if (!isRetry) {
-      logger.warn(
-        `[Spotify:API] Network error during ${operationName}, retrying once. Details:`,
-        error
-      )
       return partnerQuery(operationName, variables, true)
     }
 
-    logger.error(`[Spotify:API] Fatal network error during ${operationName}:`, error)
     throw new Error(
       `Spotify API Network Error [${operationName}]: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { cause: error }
@@ -727,9 +688,6 @@ async function _fetchPlaylistBatch(
   limit: number,
   offset: number
 ): Promise<SpotifyPlaylist> {
-  logger.debug(
-    `[Spotify:API] Fetching Playlist Batch (ID: ${playlistId} | Limit: ${limit} | Offset: ${offset})`
-  )
   const data = await partnerQuery('fetchPlaylist', {
     uri: `spotify:playlist:${playlistId}`,
     enableWatchFeedEntrypoint: false,
@@ -776,9 +734,6 @@ async function _fetchAlbumBatch(
   limit: number,
   offset: number
 ): Promise<SpotifyPlaylist> {
-  logger.debug(
-    `[Spotify:API] Fetching Album Batch (ID: ${albumId} | Limit: ${limit} | Offset: ${offset})`
-  )
   const data = await partnerQuery('getAlbum', {
     uri: `spotify:album:${albumId}`,
     locale: '',
@@ -789,7 +744,6 @@ async function _fetchAlbumBatch(
 }
 
 export async function fetchTrack(trackId: string): Promise<SpotifyTrack> {
-  logger.debug(`[Spotify:API] Fetching standard track via partner query (ID: ${trackId})`)
   const data = await partnerQuery('getTrack', {
     uri: `spotify:track:${trackId}`
   })
@@ -803,12 +757,8 @@ export async function fetchTrack(trackId: string): Promise<SpotifyTrack> {
       if (match?.artists.length) {
         track.artists = match.artists
       }
-    } catch (e) {
-      logger.warn(
-        `[Spotify:API] Failed to implicitly enrich track artist info for track ${trackId} via album lookup.`,
-        e
-      )
-    }
+      // eslint-disable-next-line no-empty
+    } catch {}
   }
 
   return track

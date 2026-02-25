@@ -10,6 +10,6 @@ export default async (
   reason: { code?: number; reason?: string }
 ) => {
   logger.warn(
-    `[Lavalink:Node] ${node.id} :: Disconnected from the Lavalink server. Code: ${reason.code ?? 'Unknown'}, Reason: ${reason.reason ?? 'No reason provided'}.`
+    `[Lavalink Node: ${node.id}] Node ngắt kết nối. Lý do: ${reason.reason || 'Không rõ'} (Code: ${reason.code || 'None'})`
   )
 }

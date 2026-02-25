@@ -17,6 +17,7 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
+    logger.info(`[Lệnh: claim] Người dùng ${message.author.tag} yêu cầu lấy quyền kiểm soát Player`)
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId
@@ -51,8 +52,9 @@ const command: Command = {
             components: [container],
             flags: ['IsComponentsV2']
           })
+           
           .catch((e) => {
-            logger.error(e)
+            logger.warn('[Lệnh: claim] Lỗi gửi thông báo:', e)
             return null
           })
 
@@ -90,8 +92,9 @@ const command: Command = {
           components: [container],
           flags: ['IsComponentsV2']
         })
+         
         .catch((e) => {
-          logger.error(e)
+          logger.warn('[Lệnh: claim] Lỗi gửi thông báo:', e)
           return null
         })
 

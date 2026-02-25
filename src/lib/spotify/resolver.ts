@@ -37,18 +37,10 @@ export async function spotifySearch(
     }
   }
 
-  logger.info(
-    `[Spotify:Resolver] Emitting custom parse routine for '${type}' query. (URL: ${query})`
-  )
-
   try {
     // ── Single track ──────────────────────────────────────────────────────────
     if (type === 'track') {
-      logger.debug(`[Spotify:Resolver] Instructing Spotify Client to fetch track segment...`)
       const spotifyTrack = await fetchTrack(extractTrackId(query))
-      logger.info(
-        `[Spotify:Resolver] Intercepted Track: "${spotifyTrack.name}" from ${spotifyTrack.artists.map((a) => a.name).join(', ')}. Passing to Lavalink Build Manager (ISRC: ${spotifyTrack.isrc ?? 'Missing'})`
-      )
       const spotifyUrl = `https://open.spotify.com/track/${spotifyTrack.id}`
       const unresolvedTrack = player.LavalinkManager.utils.buildUnresolvedTrack(
         {
@@ -73,17 +65,10 @@ export async function spotifySearch(
     }
 
     // ── Album or Playlist ─────────────────────────────────────────────────────
-    logger.debug(
-      `[Spotify:Resolver] Instructing Spotify Client to fetch bulk structure (${type})...`
-    )
     const data =
       type === 'album'
         ? await fetchAlbum(extractAlbumId(query))
         : await fetchPlaylist(extractPlaylistId(query))
-
-    logger.info(
-      `[Spotify:Resolver] Intercepted bulk items: ${type.toUpperCase()} "${data.name}" containing ${data.tracks.total} valid tracks. Resolving batch...`
-    )
 
     const tracks = data.tracks.items.map((spotifyTrack) => {
       const spotifyUrl = `https://open.spotify.com/track/${spotifyTrack.id}`
@@ -117,6 +102,7 @@ export async function spotifySearch(
       tracks
     }
   } catch (err) {
+    logger.error(`[Spotify] Lỗi giải mã link: ${query}`, err)
     return {
       loadType: 'error',
       exception: {

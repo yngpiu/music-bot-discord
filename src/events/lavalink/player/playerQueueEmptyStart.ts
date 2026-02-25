@@ -7,7 +7,9 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, delayMs: number) => {
-  logger.info(`[Lavalink:Player] ${player.guildId} :: Queue empty. Disconnect timer started...`)
+  logger.info(
+    `[Player: ${player.guildId}] Danh sách phát trống, tính giờ chờ rời kênh (${delayMs}ms)`
+  )
 
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -26,7 +28,7 @@ export default async (bot: BotClient, player: Player, delayMs: number) => {
       flags: ['IsComponentsV2']
     })
     player.set('queueEmptyMessageId', msg.id)
-  } catch (error) {
-    logger.error(`Failed to send playerQueueEmptyStart message: ${error}`)
+  } catch (e) {
+    logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo chờ rời kênh:`, e)
   }
 }

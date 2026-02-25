@@ -8,9 +8,7 @@ export default {
   name: Events.ClientReady,
   once: true,
   async execute(bot: BotClient) {
-    logger.info(
-      `[Ready] Bot instance #${bot.botIndex + 1} is now online and active as "${bot.user?.tag}".`
-    )
     await bot.lavalink.init({ ...bot.user!, shards: 'auto' })
+    logger.info(`[Hệ Thống] Bot ${bot.user?.tag} đã sẵn sàng và khởi tạo Lavalink thành công!`)
   }
 }

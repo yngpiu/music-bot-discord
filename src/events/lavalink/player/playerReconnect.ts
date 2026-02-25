@@ -7,10 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, voiceChannelId: string) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Successfully reconnected to voice channel <#${voiceChannelId}>.`
-  )
-
+  logger.info(`[Player: ${player.guildId}] Đã kết nối lại kênh thoại ${voiceChannelId}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -25,5 +22,9 @@ export default async (bot: BotClient, player: Player, voiceChannelId: string) =>
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+     
+    .catch((e) => {
+      logger.warn(`[Player: ${player.guildId}] Lỗi kết nối lại:`, e)
+      return null
+    })
 }

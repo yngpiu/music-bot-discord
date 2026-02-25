@@ -7,14 +7,12 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player, payload: WebSocketClosedEvent) => {
-  logger.error(
-    `[Lavalink:Player] ${player.guildId} :: ERROR: Websocket closed unexpectedly. Code: ${payload.code}, Reason: ${payload.reason} ${JSON.stringify(payload)}`
-  )
-
   // Code 4014 means Discord disconnected the Voice WebSocket. This happens naturally
   // during playerMove and playerDisconnect. We should ignore it to prevent spam.
   if (payload.code === 4014) return
-
+  logger.error(
+    `[Player: ${player.guildId}] Voice WebSocket đóng bất thường: Code ${payload.code}, Lý do: ${payload.reason}`
+  )
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
 
@@ -29,5 +27,9 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
       components: [container],
       flags: ['IsComponentsV2']
     })
-    .catch((e) => { logger.error(e); return null })
+     
+    .catch((e) => {
+      logger.warn(`[Player: ${player.guildId}] Lỗi thông báo sự cố WebSocket:`, e)
+      return null
+    })
 }

@@ -4,7 +4,6 @@ import { EMOJI } from '~/constants/emoji.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { logger } from '~/utils/logger.js'
 import { formatDuration } from '~/utils/stringUtil.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { TIME } from '~/constants/time.js'
@@ -69,8 +68,8 @@ const command: Command = {
         components: [container],
         flags: ['IsComponentsV2']
       })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .catch((e) => {
-        logger.error(e)
         return null
       })
 

@@ -81,6 +81,9 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
+    logger.info(
+      `[Lệnh: filter] Người dùng ${message.author.tag} yêu cầu chuyển đổi hiệu ứng: ${args[0] ?? 'trống'}`
+    )
 
     const player = bot.lavalink.getPlayer(message.guild.id)
     if (!player) {
@@ -106,6 +109,7 @@ const command: Command = {
         actionText = await applyFilter(filterManager, key)
       }
     } catch (e) {
+      logger.error('[Lệnh: filter] Lỗi áp dụng filter:', e)
       throw new BotError(
         `Không thể áp dụng hiệu ứng: ${e instanceof Error ? e.message : 'Lỗi không xác định'}.`
       )
@@ -119,15 +123,16 @@ const command: Command = {
 
     const reply = await message
       .reply({ components: [container], flags: ['IsComponentsV2'] })
+       
       .catch((e) => {
-        logger.error(e)
+        logger.warn('[Lệnh: filter] Lỗi gửi thông báo:', e)
         return null
       })
 
     if (reply) {
       setTimeout(() => {
-        reply.delete().catch((e: Error) => logger.error(e))
-        message.delete().catch((e: Error) => logger.error(e))
+        reply.delete().catch(() => {})
+        message.delete().catch(() => {})
       }, 15_000)
     }
   }

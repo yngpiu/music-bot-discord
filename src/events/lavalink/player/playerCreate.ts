@@ -5,10 +5,9 @@ import { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 
 export default async (bot: BotClient, player: Player) => {
+  logger.info(`[Player: ${player.guildId}] Đã khởi tạo player cho server`)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const owner = player.get<string | null>('owner')
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Player instance created for the guild. Owner: ${owner || 'None'}.`
-  )
 
   player.set('ignore_voice_state', true)
   setTimeout(() => {
@@ -29,7 +28,6 @@ export default async (bot: BotClient, player: Player) => {
       'filler'
     ])
   } catch (e) {
-    logger.error(e)
-    logger.warn(`[Lavalink:Player] ${player.guildId} :: Failed to set SponsorBlock segments.`)
+    logger.warn(`[Player: ${player.guildId}] Lỗi bật SponsorBlock:`, e)
   }
 }

@@ -1,11 +1,13 @@
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
+
+import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
 
 const command: Command = {
   name: 'insert',
@@ -15,6 +17,9 @@ const command: Command = {
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return
+    logger.info(
+      `[Lệnh: insert] Người dùng ${message.author.tag} yêu cầu chèn nhạc vào vị trí ${args[0] || '?'}`
+    )
 
     const member = message.member as GuildMember
     const vcId = member?.voice?.channelId

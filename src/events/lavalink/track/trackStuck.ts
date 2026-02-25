@@ -11,11 +11,11 @@ export default async (
   bot: BotClient,
   player: Player,
   track: Track | null,
+   
   payload: TrackStuckEvent
 ) => {
   logger.error(
-    `[Lavalink:Player] ${player.guildId} :: Track is permanently stuck. System will skip. Details:`,
-    payload
+    `[Player: ${player.guildId}] Bài hát bị kẹt: ${track?.info?.title || 'Không rõ'} (Ngưỡng kẹt: ${payload.thresholdMs}ms)`
   )
 
   if (!track || !player.textChannelId) return
@@ -43,8 +43,9 @@ export default async (
       components: [container],
       flags: ['IsComponentsV2']
     })
+     
     .catch((e) => {
-      logger.error(e)
+      logger.warn(`[Player: ${player.guildId}] Lỗi gửi thông báo track stuck:`, e)
       return null
     })
 }

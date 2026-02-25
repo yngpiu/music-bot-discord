@@ -22,12 +22,10 @@ export function initTrackService(redisClient: Redis) {
   // Khởi động periodic flush
   if (flushTimer) clearInterval(flushTimer)
   flushTimer = setInterval(() => {
-    flushPendingPlays().catch((err) => logger.error('[Leaderboard] Flush error:', err))
+    flushPendingPlays().catch((e) => {
+      logger.error('[Dịch vụ: TrackService] Lỗi khi flush dữ liệu play history lên DB:', e)
+    })
   }, FLUSH_INTERVAL_MS)
-
-  logger.info(
-    `[Leaderboard] Track service initialized. Flush interval: ${FLUSH_INTERVAL_MS / 1000}s`
-  )
 }
 
 // ─── Normalize ────────────────────────────────────────────────────────────────
@@ -79,7 +77,6 @@ export async function recordTrackPlay(
   botId: string
 ): Promise<void> {
   if (!redis) {
-    logger.warn('[Leaderboard] Redis not available, skipping track record.')
     return
   }
 
@@ -93,8 +90,8 @@ export async function recordTrackPlay(
 
   try {
     await redis.rpush(REDIS_KEY, JSON.stringify(record))
-  } catch (error) {
-    logger.error('[Leaderboard] Failed to push to Redis buffer:', error)
+  } catch (e) {
+    logger.error('[Dịch vụ: TrackService] Lỗi đẩy dữ liệu tracking lượt phát vào Redis buffer:', e)
   }
 }
 
@@ -131,17 +128,13 @@ async function flushPendingPlays(): Promise<void> {
 
   if (records.length === 0) return
 
-  logger.info(`[Leaderboard] Flushing ${records.length} play record(s) to database...`)
-
   for (const record of records) {
     try {
       await upsertPlayRecord(record)
-    } catch (error) {
-      logger.error(`[Leaderboard] Failed to upsert record "${record.title}":`, error)
+    } catch (e) {
+      logger.error(`[Dịch vụ: TrackService] Lỗi upsert bản ghi phát nhạc: ${record.title}`, e)
     }
   }
-
-  logger.info(`[Leaderboard] Flush complete. ${records.length} record(s) processed.`)
 }
 
 /**

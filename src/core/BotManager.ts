@@ -36,9 +36,8 @@ export class BotManager {
       setSpotifyRedisClient(this.redis)
       initTrackService(this.redis)
       await initSpotifyToken()
-      logger.info('[Boot] Successfully established connection to Redis Server.')
-    } catch {
-      logger.warn('[Boot] Failed to connect to Redis. Falling back to in-memory store.')
+    } catch (err) {
+      logger.error('[Hệ Thống] Lỗi kết nối Redis hoặc cấu hình Spotify:', err)
     }
 
     // Create bot clients
@@ -175,8 +174,8 @@ export class BotManager {
                     await this.sendAutoplayEmbed(bot, player, tracksToAdd)
                   }
                 }
-              } catch {
-                // Ignore search errors or warn quietly
+              } catch (err) {
+                logger.warn('[Player] Gặp sự cố khi tìm Youtube Mix cho autoplay:', err)
               }
             }
           }
@@ -201,8 +200,8 @@ export class BotManager {
 
       // Login
       await bot.login(botConfig.token)
+      logger.info(`[Hệ Thống] Đã đăng nhập thành công MusicBot #${i + 1} (${botConfig.clientId})`)
       this.bots.push(bot)
-      logger.info(`[Boot] Bot instance ${i + 1}/${config.bots.length} authenticated successfully.`)
     }
   }
 
@@ -310,6 +309,8 @@ export class BotManager {
       })
       .setDescription(description)
 
-    await channel.send({ embeds: [embed] }).catch(() => {})
+    await channel.send({ embeds: [embed] }).catch((err) => {
+      logger.error('[Player] Lỗi khi gửi tin nhắn thông báo Autoplay:', err)
+    })
   }
 }

@@ -4,9 +4,6 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 
-// IGNORE
 export default async (bot: BotClient, player: Player) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Queue no longer empty. Disconnect timer cancelled.`
-  )
+  logger.info(`[Player: ${player.guildId}] Đã huỷ lịch hẹn rời kênh do có nhạc mới được thêm`)
 }

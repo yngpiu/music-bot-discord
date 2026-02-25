@@ -11,10 +11,9 @@ export default async (
   track: Track | null,
   payload: TrackEndEvent
 ) => {
-  logger.info(
-    `[Lavalink:Player] ${player.guildId} :: Finished playing track: ${track?.info?.title || 'Unknown'}. Reason: ${payload.reason}`
+  logger.debug(
+    `[Player: ${player.guildId}] Bài hát kết thúc: ${track?.info?.title || 'Không rõ'} (Lý do: ${payload.reason})`
   )
-
   // Chỉ ghi nhận khi bài hát phát xong hoàn toàn
   if (payload.reason !== 'finished' || !track) return
 
