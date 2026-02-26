@@ -79,16 +79,11 @@ const command: Command = {
   description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...).',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message, args: string[]) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(
       `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
     )
 
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
     const input = args[0]?.toLowerCase()
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
       throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)

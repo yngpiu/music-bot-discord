@@ -14,14 +14,8 @@ const command: Command = {
   description: 'Quay lại bài hát trước đó.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: back] User ${message.author.tag} requested to play previous track`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (!player.queue.previous || player.queue.previous.length === 0) {
       throw new BotError('Không có bài hát nào trước đó để quay lại.')

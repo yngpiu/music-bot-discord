@@ -14,14 +14,8 @@ const command: Command = {
   description: 'Bỏ qua bài hát hiện tại để phát bài tiếp theo.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: skip] User ${message.author.tag} requested to skip track`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (!player.playing && !player.queue.current) {
       throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)

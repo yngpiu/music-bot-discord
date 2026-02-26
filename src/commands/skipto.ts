@@ -14,16 +14,10 @@ const command: Command = {
   description: 'Chuyển đến một bài hát cụ thể trong danh sách chờ.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message, args: string[]) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(
       `[Lệnh: skipto] Người dùng ${message.author.tag} yêu cầu chuyển tới bài số ${args[0] || 'trống'}`
     )
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (!player.playing && !player.queue.current) {
       throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)

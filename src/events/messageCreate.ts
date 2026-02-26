@@ -1,9 +1,11 @@
-import { ContainerBuilder, Events, Message } from 'discord.js'
+import { ContainerBuilder, Events, GuildMember, Message } from 'discord.js'
+import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
 
 import { EMOJI } from '~/constants/emoji'
 import type { BotClient } from '~/core/BotClient'
 import type { BotManager } from '~/core/BotManager'
+import { BotError } from '~/core/errors.js'
 
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
@@ -24,7 +26,7 @@ export default {
     if (!command) return
 
     // ─── Bot Routing (must run FIRST to avoid duplicate responses) ─────────
-    const member = message.guild.members.cache.get(message.author.id)
+    const member = message.guild.members.cache.get(message.author.id) as GuildMember
     const vcId = member?.voice?.channelId ?? undefined
 
     const targetBotId =
@@ -35,15 +37,13 @@ export default {
     const chosenBot = manager.getOrAssignBot(message.guild.id, {
       vcId,
       messageId: message.id,
-      requiresVoice: command.requiresVoice ?? false,
+      requiresVoice:
+        command.requiresVoice ?? command.requiresVoiceMatch ?? command.requiresOwner ?? false,
       targetBotId
     })
 
     if (!chosenBot) {
       if (targetBotId) {
-        // Tagged bot was busy and didn't even get returned
-        // Provide specific message (although getOrAssignBot returns the bot even if busy,
-        // this is just a safety catch).
         const container = new ContainerBuilder().addTextDisplayComponents((t) =>
           t.setContent(`${EMOJI.ANIMATED_CAT_NO_IDEA} Đó không phải là **bot** đâu nhé...`)
         )
@@ -59,7 +59,6 @@ export default {
           lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
         )
       )
-      // All bots busy — pick one predictably based on message ID to avoid duplicates
       const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
       if (bot.botIndex === randomBotIndex) {
         await message.reply({ components: [container], flags: ['IsComponentsV2'] })
@@ -119,6 +118,40 @@ export default {
       }
     }
 
-    await command.execute(bot, message, args)
+    // ─── Command Guards ────────────────────────────────────────────────────────
+    let player: Player | null = null
+    let userVcId: string | null = null
+
+    // requiresVoice / requiresVoiceMatch / requiresOwner all need an active player
+    if (command.requiresVoice || command.requiresVoiceMatch || command.requiresOwner) {
+      player = bot.lavalink.getPlayer(message.guild.id) ?? null
+      if (!player) throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+    }
+
+    // requiresVoiceMatch: user must be in a voice channel and same as bot
+    if (command.requiresVoiceMatch) {
+      userVcId = member?.voice?.channelId ?? null
+      if (!userVcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+      if (player!.voiceChannelId !== userVcId)
+        throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
+    }
+
+    // requiresOwner: caller must own the player session
+    if (command.requiresOwner) {
+      const sessionOwner = player!.get<string | null>('owner')
+      if (sessionOwner && message.author.id !== sessionOwner)
+        throw new BotError(
+          'Chỉ **người đang có quyền điều khiển cao nhất** mới có quyền dùng lệnh này.'
+        )
+    }
+
+    // Build context — safe casts: middleware above guarantees these are set
+    // when the corresponding flags are true
+    const ctx: CommandContext = {
+      player: player as Player,
+      vcId: userVcId as string
+    }
+
+    await command.execute(bot, message, args, ctx)
   }
 }

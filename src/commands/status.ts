@@ -2,7 +2,6 @@ import { EmbedBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
-import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
@@ -14,14 +13,8 @@ const command: Command = {
   description: 'Hiển thị các trạng thái của trình phát nhạc (lặp, tự động phát, âm lượng, ...).',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     const currentMode = player.repeatMode
     const isAutoplayEnabled = player.get<boolean>('autoplay') ?? false

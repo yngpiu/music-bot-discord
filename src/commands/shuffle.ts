@@ -14,14 +14,8 @@ const command: Command = {
   description: 'Trộn ngẫu nhiên các bài hát trong danh sách chờ.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: shuffle] User ${message.author.tag} requested to shuffle queue`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (player.queue.tracks.length < 2) {
       throw new BotError('Danh sách chờ cần có ít nhất 2 bài hát.')

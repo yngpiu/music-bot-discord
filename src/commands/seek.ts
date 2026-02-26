@@ -1,12 +1,12 @@
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { formatDuration } from '~/utils/stringUtil.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { TIME } from '~/constants/time.js'
+import { formatDuration } from '~/utils/stringUtil.js'
 
 function parseTime(timeStr: string): number {
   if (timeStr.includes(':')) {
@@ -24,14 +24,7 @@ const command: Command = {
   description: 'Tua bài hát đến một thời gian cụ thể',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message, args: string[]) {
-    if (!message.guild) return
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
-
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }

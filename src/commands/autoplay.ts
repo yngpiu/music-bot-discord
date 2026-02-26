@@ -3,7 +3,6 @@ import { ContainerBuilder, type Message } from 'discord.js'
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
 import type { BotClient } from '~/core/BotClient.js'
-import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
@@ -14,14 +13,8 @@ const command: Command = {
   description: 'Bật/tắt chế độ tự động phát nhạc đề xuất khi hết danh sách chờ.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: autoplay] User ${message.author.tag} requested to toggle autoplay state`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     const currentAutoplay = player.get<boolean>('autoplay') ?? false
     // Đảo ngược trạng thái

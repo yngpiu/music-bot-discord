@@ -1,4 +1,4 @@
-import { ContainerBuilder, type GuildMember, type Message } from 'discord.js'
+import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
@@ -12,24 +12,10 @@ const command: Command = {
   name: 'pause',
   aliases: ['ps'],
   description: 'Tạm dừng bài hát hiện tại.',
-  requiresVoice: true,
+  requiresVoiceMatch: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
-
-    const member = message.member as GuildMember
-    const vcId = member?.voice?.channelId
-    if (!vcId) {
-      throw new BotError('Bạn đang không ở kênh thoại nào cả.')
-    }
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
-    if (player.voiceChannelId !== vcId) {
-      throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
-    }
 
     if (!player.playing && !player.paused) {
       throw new BotError('Không có bài hát nào đang được phát.')

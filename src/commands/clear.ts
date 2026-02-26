@@ -12,16 +12,10 @@ const command: Command = {
   name: 'clear',
   aliases: ['c', 'cq', 'empty'],
   description: 'Xóa toàn bộ bài hát trong sách chờ.',
-  requiresVoice: true,
+  requiresOwner: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (player.queue.tracks.length === 0) {
       throw new BotError('Danh sách phát hiện tại đang trống.')

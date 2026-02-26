@@ -14,14 +14,8 @@ const command: Command = {
   description: 'Hiển thị thông tin bài hát đang phát.',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: nowplaying] User ${message.author.tag} requested to view current track`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')

@@ -16,9 +16,8 @@ const command: Command = {
   requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
-    if (!message.guild) return
     logger.info(
-      `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild.id}`
+      `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild!.id}`
     )
 
     const member = message.member as GuildMember
@@ -34,9 +33,9 @@ const command: Command = {
       throw new BotError('Vui lòng nhập tên/đường dẫn bài hát.')
     } // Get or create player
     const player =
-      bot.lavalink.getPlayer(message.guild.id) ??
+      bot.lavalink.getPlayer(message.guild!.id) ??
       bot.lavalink.createPlayer({
-        guildId: message.guild.id,
+        guildId: message.guild!.id,
         voiceChannelId: vcId,
         textChannelId: message.channel.id,
         selfDeaf: true,

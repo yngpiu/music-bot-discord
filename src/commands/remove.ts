@@ -54,14 +54,8 @@ const command: Command = {
   description: 'Xóa bài hát khỏi danh sách chờ (VD: `remove 1`, `remove 2 7 4`, `remove 2-7`).',
   requiresVoice: true,
 
-  async execute(bot: BotClient, message: Message, args: string[]) {
-    if (!message.guild) return
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
-
-    const player = bot.lavalink.getPlayer(message.guild.id)
-    if (!player) {
-      throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
-    }
 
     if (player.queue.tracks.length === 0) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
