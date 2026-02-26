@@ -1,3 +1,7 @@
+/**
+ * @file search.ts
+ * @description Advanced search command for finding tracks, albums, and playlists across multiple sources (Spotify, Deezer, etc.).
+ */
 import type { Message, VoiceChannel } from 'discord.js'
 import {
   ActionRowBuilder,
@@ -25,21 +29,27 @@ import {
 import { logger } from '~/utils/logger.js'
 import { formatDuration, formatTrack, lines } from '~/utils/stringUtil.js'
 
+/**
+ * Command for searching music from multiple providers with an interactive UI.
+ */
 class SearchCommand extends BaseCommand {
   name = 'search'
   description = 'Tìm kiếm bài hát, album, hoặc playlist.'
 
-  // ─── Private Handlers ──────────────────────────────────────────────────
-
+  /**
+   * Handles track-specific searching across different providers.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string} query - The search query.
+   * @param {Player} player - The player instance.
+   */
   private async handleTrackSearch(bot: BotClient, message: Message, query: string, player: Player) {
-    // Default source is deezer, same as bot's default configuration if not specified
     const result = await player.search({ query, source: 'dzsearch' }, message.author)
 
     let tracks = result.tracks.slice(0, 10)
 
     let currentSource = 'dzsearch'
 
-    // Helper to build components
     const getComponents = (disabled = false, activeSource = 'dzsearch') => {
       const isSelectDisabled = disabled || tracks.length === 0
 
@@ -73,7 +83,6 @@ class SearchCommand extends BaseCommand {
       }
       selectMenu.setDisabled(isSelectDisabled)
 
-      // Source buttons
       const sources = [
         { label: 'Deezer', id: 'dzsearch', emoji: EMOJI.DEEZER, style: ButtonStyle.Secondary },
         { label: 'YouTube', id: 'ytsearch', emoji: EMOJI.YOUTUBE, style: ButtonStyle.Secondary },
@@ -114,7 +123,6 @@ class SearchCommand extends BaseCommand {
       spsearch: 'Spotify'
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildDescription = (trackList: any[], sourceId: string) => {
       if (trackList.length === 0) {
         return lines(
@@ -153,7 +161,6 @@ class SearchCommand extends BaseCommand {
     })
 
     collector.on('collect', async (interaction) => {
-      // Handle Button (Source Switch)
       if (interaction.isButton()) {
         collector.resetTimer()
         const newSource = interaction.customId
@@ -169,7 +176,6 @@ class SearchCommand extends BaseCommand {
             if (!spotifyTracks.length) {
               newResult = { loadType: 'empty', tracks: [] }
             } else {
-              // Convert to UnresolvedTrack
               const mappedTracks = spotifyTracks.map(
                 (t) =>
                   player.LavalinkManager.utils.buildUnresolvedTrack(
@@ -189,7 +195,6 @@ class SearchCommand extends BaseCommand {
               newResult = { loadType: 'search', tracks: mappedTracks }
             }
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             newResult = await player.search({ query, source: newSource as any }, message.author)
           }
 
@@ -214,7 +219,6 @@ class SearchCommand extends BaseCommand {
         return
       }
 
-      // Handle Select Menu
       if (interaction.isStringSelectMenu()) {
         const index = parseInt(interaction.values[0])
         const track = tracks[index]
@@ -234,7 +238,7 @@ class SearchCommand extends BaseCommand {
             thumbnailUrl: track.info.artworkUrl ?? null,
             author: track.info.author,
             trackLink: track.info.uri ?? 'https://github.com/yngpiu',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             authorLink: (track as any).pluginInfo?.artistUrl ?? null
           },
           player,
@@ -255,7 +259,6 @@ class SearchCommand extends BaseCommand {
         await reply.delete().catch(() => {})
         await message.delete().catch(() => {})
 
-        // Destroy player if not playing anything and queue is empty
         if (!player.playing && player.queue.tracks.length === 0) {
           await player.destroy()
         }
@@ -265,11 +268,16 @@ class SearchCommand extends BaseCommand {
     })
   }
 
+  /**
+   * Handles album-specific searching using the Spotify API.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string} query - The search query.
+   * @param {Player} player - The player instance.
+   */
   private async handleAlbumSearch(bot: BotClient, message: Message, query: string, player: Player) {
-    // Lấy album từ Spotify Client
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let albums: any[] = []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const pageCache = new Map<number, any[]>()
 
     const fetchPage = async (page: number) => {
@@ -281,7 +289,6 @@ class SearchCommand extends BaseCommand {
       try {
         albums = await searchSpotifyAlbums(query, 10, page * 10)
         pageCache.set(page, albums)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         throw new BotError(
           'Đã có lỗi xảy ra khi lấy danh sách album, vui lòng liên hệ **Ban quản lý**.'
@@ -291,7 +298,6 @@ class SearchCommand extends BaseCommand {
 
     await fetchPage(0)
 
-    // Nếu không có album nào
     if (albums.length === 0) {
       throw new BotError('Không tìm thấy album nào.')
     }
@@ -299,7 +305,6 @@ class SearchCommand extends BaseCommand {
     let currentPage = 0
     const itemsPerPage = 10
 
-    // Helper tạo select menu hiển thị album
     const getComponents = (page: number, disabled = false) => {
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('search_album_select')
@@ -345,8 +350,6 @@ class SearchCommand extends BaseCommand {
       ]
     }
 
-    // Xây dựng đoạn giới thiệu về các album
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildDescription = (albumList: any[], page: number) => {
       const start = page * itemsPerPage
 
@@ -406,7 +409,6 @@ class SearchCommand extends BaseCommand {
         await interaction.deferUpdate().catch(() => {})
         await interaction.message.delete().catch(() => {})
 
-        // Tạo tin nhắn "đang tải"
         const loadingQuery = `https://open.spotify.com/album/${album.id}`
         const loadingMessage = await message.reply(`⏳ Đang tải album **${album.name}**...`)
 
@@ -439,12 +441,12 @@ class SearchCommand extends BaseCommand {
           await player.queue.add(tracks)
 
           const addedEmbed = buildAddedItemEmbed(
-            'playlist', // Lavalink uses playlist type for albums anyway inside buildAddedItemEmbed
+            'playlist',
             {
               title: spotifyAlbum.name || album.name,
               tracks: tracks,
               thumbnailUrl: spotifyAlbum.images[0]?.url ?? album.images[0]?.url ?? null,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
               author: album.artists.map((a: any) => a.name).join(', ') || undefined,
               trackLink: loadingQuery
             },
@@ -478,16 +480,21 @@ class SearchCommand extends BaseCommand {
     })
   }
 
+  /**
+   * Handles playlist-specific searching using the Spotify API.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string} query - The search query.
+   * @param {Player} player - The player instance.
+   */
   private async handlePlaylistSearch(
     bot: BotClient,
     message: Message,
     query: string,
     player: Player
   ) {
-    // Lấy playlist từ Spotify Client
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let playlists: any[] = []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const pageCache = new Map<number, any[]>()
 
     const fetchPage = async (page: number) => {
@@ -499,7 +506,6 @@ class SearchCommand extends BaseCommand {
       try {
         playlists = await searchSpotifyPlaylists(query, 10, page * 10)
         pageCache.set(page, playlists)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         throw new BotError(
           'Đã có lỗi xảy ra khi lấy danh sách phát, vui lòng liên hệ **Ban quản lý**.'
@@ -509,7 +515,6 @@ class SearchCommand extends BaseCommand {
 
     await fetchPage(0)
 
-    // Nếu không có playlist nào
     if (playlists.length === 0) {
       throw new BotError('Không tìm thấy danh sách phát nào.')
     }
@@ -517,7 +522,6 @@ class SearchCommand extends BaseCommand {
     let currentPage = 0
     const itemsPerPage = 10
 
-    // Helper tạo select menu hiển thị playlist
     const getComponents = (page: number, disabled = false) => {
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('search_playlist_select')
@@ -559,8 +563,6 @@ class SearchCommand extends BaseCommand {
       ]
     }
 
-    // Xây dựng đoạn giới thiệu về các playlist
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildDescription = (playlistList: any[], page: number) => {
       const start = page * itemsPerPage
 
@@ -620,7 +622,6 @@ class SearchCommand extends BaseCommand {
         await interaction.deferUpdate().catch(() => {})
         await interaction.message.delete().catch(() => {})
 
-        // Tạo tin nhắn "đang tải"
         const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
         const loadingMessage = await message.reply(
           `⏳ Đang tải danh sách phát **${playlist.name}**...`
@@ -660,7 +661,7 @@ class SearchCommand extends BaseCommand {
               title: spotifyPlaylist.name || playlist.name,
               tracks: tracks,
               thumbnailUrl: spotifyPlaylist.images[0]?.url ?? playlist.images[0]?.url ?? null,
-              author: undefined, // Mặc định không có owner authorLink ở loadType playlist
+              author: undefined,
               trackLink: loadingQuery
             },
             player,
@@ -693,8 +694,13 @@ class SearchCommand extends BaseCommand {
     })
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the search command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments.
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(
     bot: BotClient,
     message: Message,
@@ -734,7 +740,6 @@ class SearchCommand extends BaseCommand {
       throw new BotError('Lệnh tìm kiếm không hỗ trợ đường dẫn, vui lòng sử dụng lệnh `play`.')
     }
 
-    // Get or create player
     const player =
       existingPlayer ??
       bot.lavalink.createPlayer({

@@ -1,24 +1,34 @@
+/**
+ * @file embeds.ts
+ * @description Utilities for building complex Discord embeds for music-related feedback.
+ */
 import { EmbedBuilder } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
 
 import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
+/**
+ * Extracts the info property from either a Track or UnresolvedTrack.
+ * @param {Track | UnresolvedTrack} track - The track object.
+ * @returns {object} - The track's info.
+ */
 function getTrackInfo(track: Track | UnresolvedTrack) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return 'info' in track ? track.info : (track as any).info
 }
 
-// ─── Embeds ───────────────────────────────────────────────────────────────────
-
-/**
- * "Started playing X by Y" — shown on trackStart event
- */
-
-/**
- * "Added Track" embed — shown when a single track is queued
- */
 export type AddedItemType = 'track' | 'playlist'
 
+/**
+ * Builds a standardized embed notifying that a track or playlist has been added to the queue.
+ * @param {AddedItemType} type - Whether a single track or a playlist was added.
+ * @param {object} item - Metadata about the added item.
+ * @param {Player} player - The current Lavalink player.
+ * @param {object} [requester] - The user who requested the item.
+ * @param {string} [botAvatarUrl] - The bot's avatar URL.
+ * @param {number} [positionOverride] - Manual queue position override.
+ * @param {number} [estimatedMsOverride] - Manual wait time override.
+ * @returns {object} - An object containing the embed and any files (for use in channel.send).
+ */
 export function buildAddedItemEmbed(
   type: AddedItemType,
   item: {
@@ -39,8 +49,6 @@ export function buildAddedItemEmbed(
   const isPlaylist = type === 'playlist'
   const totalDurationMs = item.tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
 
-  // Calculate estimated time and queue position
-  // player.queue.tracks -> is the future list, it doesn't include the upcoming track if we just enqueued it unless it's the very first play
   const incomingLength = isPlaylist ? item.tracks.length : 1
   let queueLength = positionOverride ?? 0
   if (!positionOverride && player.playing) {
@@ -78,7 +86,6 @@ export function buildAddedItemEmbed(
     })
   }
 
-  // Common fields
   embed.addFields(
     {
       name: 'Thời lượng',

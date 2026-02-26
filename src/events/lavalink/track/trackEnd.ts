@@ -1,3 +1,7 @@
+/**
+ * @file trackEnd.ts
+ * @description Event handler for when a track finishes playing.
+ */
 import { Player, Track, TrackEndEvent } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
@@ -6,17 +10,26 @@ import { recordTrackPlay } from '~/lib/trackService.js'
 
 import { logger } from '~/utils/logger.js'
 
+/**
+ * Event handler for the 'trackEnd' event.
+ */
 class TrackEndHandler extends LavalinkEvent {
   name = 'trackEnd'
 
+  /**
+   * Logs the event and records the track play in the database.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Player} player - The Lavalink player instance.
+   * @param {Track | null} track - The track that ended.
+   * @param {TrackEndEvent} payload - The track end event data.
+   */
   async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackEndEvent) {
     logger.debug(
       `[Player: ${player.guildId}] Track ended: ${track?.info?.title || 'Unknown'} (Reason: ${payload.reason})`
     )
-    // Chỉ ghi nhận khi bài hát phát xong hoàn toàn
+
     if (payload.reason !== 'finished' || !track) return
 
-    // Snapshot tất cả members trong voice channel lúc bài kết thúc (loại bỏ bots)
     const listenerIds: string[] = []
     try {
       const guild = bot.guilds.cache.get(player.guildId)
@@ -32,7 +45,7 @@ class TrackEndHandler extends LavalinkEvent {
       logger.warn(`[Player: ${player.guildId}] Could not get VC member list:`, e)
     }
 
-    // Fire-and-forget: ghi nhận lượt phát, không block player
+    // Capture play statistics for the track.
     recordTrackPlay(
       {
         sourceName: track.info.sourceName,

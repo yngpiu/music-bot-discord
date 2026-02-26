@@ -1,3 +1,7 @@
+/**
+ * @file Loader.ts
+ * @description Provides static methods for hot-loading commands, events, and interactions.
+ */
 import { Prisma } from '@prisma/client'
 import { BaseInteraction, Message } from 'discord.js'
 import { readdirSync } from 'fs'
@@ -14,10 +18,13 @@ import { logger } from '~/utils/logger.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// ─── Error Helpers ────────────────────────────────────────────────────────────
-
 type ReplyTarget = Message | BaseInteraction
 
+/**
+ * Checks if an error is a Prisma-related database error.
+ * @param {unknown} err - The error object to check.
+ * @returns {boolean} - True if it's a Prisma error.
+ */
 function isPrismaError(err: unknown): boolean {
   return (
     err instanceof Prisma.PrismaClientKnownRequestError ||
@@ -28,6 +35,11 @@ function isPrismaError(err: unknown): boolean {
   )
 }
 
+/**
+ * Sends an error message to a user and handles cleanup.
+ * @param {ReplyTarget} target - The message or interaction to reply to.
+ * @param {string} text - The error message text.
+ */
 async function replyError(target: ReplyTarget, text: string): Promise<void> {
   const content = `${EMOJI.ERROR} ${text}`
 
@@ -49,7 +61,6 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
     return
   }
 
-  // Interaction (button, modal, slash command...)
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
       await target.editReply({ content }).catch((err) => {
@@ -64,10 +75,10 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 }
 
 /**
- * Finds a Discord Message or Interaction from the event arguments.
- * Used to auto-reply errors back to the user who triggered the action.
+ * Helper function to find a replyable target from a list of arguments.
+ * @param {any[]} args - List of arguments to search.
+ * @returns {ReplyTarget | null} - The found target or null.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function findReplyTarget(args: any[]): ReplyTarget | null {
   for (const arg of args) {
     if (arg instanceof Message) return arg
@@ -76,35 +87,29 @@ function findReplyTarget(args: any[]): ReplyTarget | null {
   return null
 }
 
-// ─── Safe Execute ─────────────────────────────────────────────────────────────
-
 /**
- * Wraps any event handler with centralized error handling.
- *
- * - `BotError`  → reply error message to user (if Message/Interaction found)
- * - Prisma      → log DB error + reply generic DB message
- * - Unknown     → log unexpected error + reply generic system message
+ * Wraps a function with a global error handler that notifies users and logs errors.
+ * @param {string} eventName - The name of the event/action being executed.
+ * @param {function} fn - The function to wrap.
+ * @returns {function} - The wrapped function.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (...args: any[]) => {
     try {
       await fn(...args)
     } catch (err) {
       const target = findReplyTarget(args)
 
-      // BotError: user-facing, just reply, no logging
+      // Handle custom bot errors by showing the message directly to the user.
       if (err instanceof BotError) {
         if (target) await replyError(target, err.message)
         return
       }
 
-      // Log all non-BotError exceptions
+      // Handle database and system errors with generic users-friendly messages.
       const label = isPrismaError(err) ? 'Database' : 'Hệ Thống'
       logger.error(`[${label}] Unknown error when executing event ${eventName}:`, err)
 
-      // Reply to user if we have a reply target
       if (target) {
         const msg = isPrismaError(err)
           ? 'Cơ sở dữ liệu đã gặp sự cố, vui lòng thử lại hoặc liên hệ với **Ban quản lý** để được hỗ trợ.'
@@ -115,9 +120,11 @@ function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>
   }
 }
 
-// ─── Loader ───────────────────────────────────────────────────────────────────
-
 export class Loader {
+  /**
+   * Dynamically loads all command files from the commands directory.
+   * @param {BotClient} bot - The bot instance to load commands into.
+   */
   static async loadCommands(bot: BotClient) {
     const commandsPath = join(__dirname, '../commands')
     const files = readdirSync(commandsPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'))
@@ -125,6 +132,7 @@ export class Loader {
       const mod = await import(join(commandsPath, file))
       const command = mod.default ?? mod
       bot.commands.set(command.name, command)
+      // Register aliases if present.
       if (command.aliases) {
         for (const alias of command.aliases) {
           bot.commands.set(alias, command)
@@ -133,6 +141,11 @@ export class Loader {
     }
   }
 
+  /**
+   * Dynamically registers all standard Discord events from the events directory.
+   * @param {BotClient} bot - The bot instance.
+   * @param {BotManager} botManager - The bot manager instance.
+   */
   static async registerEvents(bot: BotClient, botManager: BotManager) {
     const eventsPath = join(__dirname, '../events')
     const files = readdirSync(eventsPath).filter(
@@ -144,19 +157,21 @@ export class Loader {
       if (event.once) {
         bot.once(
           event.name,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
         )
       } else {
         bot.on(
           event.name,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
         )
       }
     }
   }
 
+  /**
+   * Recursively discovers and registers all Lavalink manager and node events.
+   * @param {BotClient} bot - The bot instance.
+   */
   static async registerLavalinkEvents(bot: BotClient) {
     const eventsPath = join(__dirname, '../events', 'lavalink')
 
@@ -179,24 +194,26 @@ export class Loader {
 
       const eventName = instance.name
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const wrappedHandler = safeExecute(eventName, (...args: any[]) =>
         instance.execute(bot, ...args)
       )
 
+      // Node events are slightly different and handled by nodeManager.
       if (filePath.includes('/node/')) {
         let nodeEventName = eventName.replace(/^node/, '')
         nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bot.lavalink.nodeManager.on(nodeEventName as any, wrappedHandler)
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bot.lavalink.on(eventName as any, wrappedHandler)
       }
     }
   }
 
+  /**
+   * Dynamically loads interaction handlers (buttons, modals, autocompletes).
+   * @param {BotClient} bot - The bot instance.
+   */
   static async loadInteractions(bot: BotClient) {
     const interactionsPath = join(__dirname, '../interactions')
 
@@ -213,7 +230,6 @@ export class Loader {
       try {
         files = readdirSync(dirPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'))
       } catch {
-        // Directory doesn't exist yet, skip
         continue
       }
 
@@ -222,7 +238,6 @@ export class Loader {
         const handler = mod.default ?? mod
 
         if (typeof handler === 'object' && handler.customId && handler.execute) {
-          // Format: { customId: 'xxx', execute: async (interaction, bot) => {...} }
           collection.set(handler.customId, handler.execute)
         }
       }

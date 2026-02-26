@@ -1,19 +1,37 @@
+/**
+ * @file BaseCommand.ts
+ * @description Defines the base structure for all commands in the bot.
+ */
 import type { Message } from 'discord.js'
 
 import type { BotClient } from '~/core/BotClient.js'
 
+/**
+ * Abstract class representing a command.
+ * All bot commands should extend this class.
+ */
 export abstract class BaseCommand {
+  /** The name of the command. */
   abstract name: string
+  /** Alternative names for the command. */
   aliases?: string[]
+  /** A brief description of what the command does. */
   description?: string
 
-  /** Player must exist in this guild. */
+  /** If true, a Lavalink player must exist in the guild to use this command. */
   requiresVoice?: boolean
-  /** User must be in the same voice channel as the bot (implies requiresVoice). */
+  /** If true, the user must be in the same voice channel as the bot. */
   requiresVoiceMatch?: boolean
-  /** User must be the player owner (implies requiresVoice). */
+  /** If true, the user must be the person who started the current player. */
   requiresOwner?: boolean
 
+  /**
+   * Executes the command logic.
+   * @param {BotClient} bot - The Discord client instance executing the command.
+   * @param {Message} message - The Discord message that triggered the command.
+   * @param {string[]} args - Arguments passed to the command.
+   * @param {CommandContext} ctx - Contextual data for command execution.
+   */
   abstract execute(
     bot: BotClient,
     message: Message,

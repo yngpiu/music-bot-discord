@@ -1,6 +1,8 @@
+/**
+ * @file filter.ts
+ * @description Command to manage audio filters and effects like Bassboost, Nightcore, etc.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
-// --- Helpers ---
-
 import type { FilterManager } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -10,8 +12,9 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 
-// --- Config ---
-
+/**
+ * Mapping of filter keys to their toggle methods and display labels.
+ */
 const FILTER_MAP = {
   nightcore: { toggle: 'toggleNightcore', label: '🐿️ Nightcore (nhanh & cao)' },
   vaporwave: { toggle: 'toggleVaporwave', label: '🌆 Vaporwave (chậm & vang)' },
@@ -24,6 +27,9 @@ const FILTER_MAP = {
 
 type FilterKey = keyof typeof FILTER_MAP
 
+/**
+ * Aliases for specific filter names.
+ */
 const FILTER_ALIASES: Record<string, FilterKey> = {
   '3d': 'rotation',
   '8d': 'rotation'
@@ -39,14 +45,22 @@ const AVAILABLE_FILTERS = [
   'off'
 ]
 
-// --- Filter helpers (module-level, reused by search too) ---
-
+/**
+ * Resets all active filters and equalizers.
+ * @param {FilterManager} filterManager - The player's filter manager.
+ */
 async function resetAll(filterManager: FilterManager) {
   await filterManager.resetFilters()
   await filterManager.clearEQ()
 }
 
+/**
+ * Applies or removes the Bassboost effect.
+ * @param {FilterManager} filterManager - The player's filter manager.
+ * @returns {Promise<string>} - The status message describing the action taken.
+ */
 async function applyBassboost(filterManager: FilterManager): Promise<string> {
+  // Check if Bassboost (Bands 0, 1, 2) is already active.
   const isActive = filterManager.equalizerBands.some((b) => b.band === 0 && b.gain === 0.25)
 
   await resetAll(filterManager)
@@ -61,6 +75,12 @@ async function applyBassboost(filterManager: FilterManager): Promise<string> {
   return '**bật** hiệu ứng `🎧 Bassboost 🎧`'
 }
 
+/**
+ * Toggles a specific filter by its key.
+ * @param {FilterManager} filterManager - The player's filter manager.
+ * @param {FilterKey} key - The filter key to toggle.
+ * @returns {Promise<string>} - The status message describing the action taken.
+ */
 async function applyFilter(filterManager: FilterManager, key: FilterKey): Promise<string> {
   const { toggle, label } = FILTER_MAP[key]
   const filterStateKey = key === 'lowpass' ? 'lowPass' : key
@@ -70,20 +90,26 @@ async function applyFilter(filterManager: FilterManager, key: FilterKey): Promis
 
   if (isActive) return `**tắt** hiệu ứng \`${key}\``
 
+  // Dynamically call the toggle method on the filter manager.
   await (filterManager[toggle] as unknown as () => Promise<void>)()
   return `**bật** hiệu ứng ${label}`
 }
 
-// --- Command ---
-
+/**
+ * Command to apply various audio filters to the current track.
+ */
 class FilterCommand extends BaseCommand {
   name = 'filter'
   aliases = ['f', 'effects', 'fx']
   description = 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...).'
   requiresVoice = true
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
+  /**
+   * Validates that the provided filter name is supported.
+   * @param {string | undefined} input - The filter name from user input.
+   * @returns {string} - The validated filter name.
+   * @throws {BotError} - If the filter is invalid.
+   */
   private validateInput(input: string | undefined): string {
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
       throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)
@@ -91,6 +117,12 @@ class FilterCommand extends BaseCommand {
     return input
   }
 
+  /**
+   * Applies the chosen effect to the player.
+   * @param {FilterManager} filterManager - The player's filter manager.
+   * @param {string} input - The validated filter name.
+   * @returns {Promise<string>} - The success message.
+   */
   private async applyEffect(filterManager: FilterManager, input: string): Promise<string> {
     try {
       if (RESET_ARGS.has(input)) {
@@ -108,6 +140,12 @@ class FilterCommand extends BaseCommand {
     }
   }
 
+  /**
+   * Sends a follow-up message confirming the filter change.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The original command message.
+   * @param {string} actionText - The text describing the change.
+   */
   private async sendConfirmation(
     bot: BotClient,
     message: Message,
@@ -134,8 +172,13 @@ class FilterCommand extends BaseCommand {
     }
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the filter command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments.
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(
       `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`

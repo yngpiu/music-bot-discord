@@ -1,9 +1,14 @@
+/**
+ * @file permissionUtil.ts
+ * @description Utilities for validating user permissions against bot-specific developer and owner roles.
+ */
 import type { Message } from 'discord.js'
 import { config } from '~/config/env.js'
 
 /**
- * Kiểm tra xem người dùng có phải là Developer (có trong list DEVELOPERS)
- * hoặc là Owner của Server hiện tại hay không.
+ * Checks if a user is a configured developer or the owner of the guild.
+ * @param {Message} message - The Discord message context.
+ * @returns {boolean} - True if the user has elevated privileges.
  */
 export function isDeveloperOrServerOwner(message: Message): boolean {
   if (config.DEVELOPERS.includes(message.author.id)) return true

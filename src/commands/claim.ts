@@ -1,3 +1,7 @@
+/**
+ * @file claim.ts
+ * @description Command to take ownership of the music player in a guild.
+ */
 import { ContainerBuilder, Message, VoiceChannel } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -10,18 +14,28 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
+/**
+ * Command to claim player ownership. Useful when the previous owner has left the channel.
+ */
 class ClaimCommand extends BaseCommand {
   name = 'claim'
   aliases = ['c']
   description = 'Lấy quyền kiểm soát player nếu người dùng trước đó đã rời kênh thoại.'
   requiresVoiceMatch = true
 
+  /**
+   * Transfers player ownership to the command executor if the current owner is no longer present or if the executor has elevated permissions.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: claim] User ${message.author.tag} requested to claim player control`)
 
     const currentOwnerId = player.get<string>('owner')
 
-    // If there is no owner, just set it to the current user
+    // If there is no current owner, just take it.
     if (!currentOwnerId) {
       player.set('owner', message.author.id)
 
@@ -54,12 +68,13 @@ class ClaimCommand extends BaseCommand {
       throw new BotError('Bạn đang có quyền điều khiển cao nhất của player này rồi mà.')
     }
 
-    // Checking if the owner is still in the voice channel
     const botVc = message.guild?.channels.cache.get(player.voiceChannelId!) as
       | VoiceChannel
       | undefined
+
+    // Check if the current owner is still in the voice channel.
     if (botVc && botVc.members.has(currentOwnerId)) {
-      // If the current user has higher permissions, they can claim
+      // Developers and server owners can override the claim.
       if (!isDeveloperOrServerOwner(message)) {
         throw new BotError(
           'Người đang có quyền điều khiển cao nhất hiện tại vẫn đang ở trong kênh thoại này.'
@@ -67,6 +82,7 @@ class ClaimCommand extends BaseCommand {
       }
     }
 
+    // Transfer ownership.
     player.set('owner', message.author.id)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>

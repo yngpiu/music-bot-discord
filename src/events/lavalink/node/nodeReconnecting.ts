@@ -1,16 +1,28 @@
+/**
+ * @file nodeReconnecting.ts
+ * @description Event handler for when a Lavalink node is attempting to reconnect.
+ */
 import { LavalinkNode } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
-
-import { logger } from '~/utils/logger.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
+import { logger } from '~/utils/logger.js'
+
+/**
+ * Event handler for the 'nodeReconnecting' event.
+ */
 class NodeReconnectingEvent extends LavalinkEvent {
   name = 'nodeReconnecting'
 
+  /**
+   * Logs a message when a node starts reconnecting.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {LavalinkNode} node - The Lavalink node that is reconnecting.
+   */
   async execute(bot: BotClient, node: LavalinkNode) {
-  logger.info(`[Lavalink Node: ${node.id}] Reconnecting...`)
-}
+    logger.info(`[Lavalink Node: ${node.id}] Reconnecting...`)
+  }
 }
 
 export default new NodeReconnectingEvent()

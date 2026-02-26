@@ -1,3 +1,7 @@
+/**
+ * @file clear.ts
+ * @description Command to clear all tracks from the current music queue.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -9,12 +13,22 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command to empty the queue.
+ */
 class ClearCommand extends BaseCommand {
   name = 'clear'
   aliases = ['c', 'cq', 'empty']
   description = 'Xóa toàn bộ bài hát trong sách chờ.'
   requiresOwner = true
 
+  /**
+   * Removes all tracks from the player's queue.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
 
@@ -22,6 +36,7 @@ class ClearCommand extends BaseCommand {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
+    // Additional check to ensure the user has permission to clear the queue.
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
       throw new BotError(
@@ -30,7 +45,8 @@ class ClearCommand extends BaseCommand {
     }
 
     const trackCount = player.queue.tracks.length
-    // Xóa toàn bộ tracks
+
+    // Clear the queue.
     await player.queue.splice(0, trackCount)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>

@@ -1,3 +1,7 @@
+/**
+ * @file remove.ts
+ * @description Command to remove one or multiple tracks from the music queue using indices or ranges.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -10,17 +14,17 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
 /**
- * Parse args into a sorted, deduplicated, 1-based list of positions.
- * Supports:
- *   single:  "3"
- *   multiple: "1 3 7 2"
- *   range:    "2-7"  (or "2–7")
+ * Parses raw command arguments into a sorted list of unique queue positions.
+ * Supports individual numbers and ranges (e.g., "1-5").
+ * @param {string[]} args - Raw arguments from the user.
+ * @param {number} maxLength - Current length of the queue for validation.
+ * @returns {number[]} - A sorted list of validated positions.
+ * @throws {BotError} - If arguments are invalid.
  */
 function parsePositions(args: string[], maxLength: number): number[] {
   const positions = new Set<number>()
 
   for (const arg of args) {
-    // Range: "2-7" or "2–7"
     const rangeMatch = arg.match(/^(\d+)[–-](\d+)$/)
     if (rangeMatch) {
       const from = parseInt(rangeMatch[1], 10)
@@ -31,13 +35,12 @@ function parsePositions(args: string[], maxLength: number): number[] {
       continue
     }
 
-    // Single number
     const n = parseInt(arg, 10)
     if (isNaN(n)) throw new BotError(`\`${arg}\` không phải là số hợp lệ.`)
     positions.add(n)
   }
 
-  // Validate all positions
+  // Validate that all requested positions are within bounds.
   for (const pos of positions) {
     if (pos < 1 || pos > maxLength) {
       throw new BotError(
@@ -49,12 +52,22 @@ function parsePositions(args: string[], maxLength: number): number[] {
   return [...positions].sort((a, b) => a - b)
 }
 
+/**
+ * Command to remove tracks from the queue.
+ */
 class RemoveCommand extends BaseCommand {
   name = 'remove'
   aliases = ['rm', 'delete', 'del']
   description = 'Xóa bài hát khỏi danh sách chờ (VD: `remove 1`, `remove 2 7 4`, `remove 2-7`).'
   requiresVoice = true
 
+  /**
+   * Executes the remove command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments containing positions or ranges.
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
 
@@ -71,8 +84,9 @@ class RemoveCommand extends BaseCommand {
     const queueLength = player.queue.tracks.length
     const positions = parsePositions(args, queueLength)
 
-    // Remove from highest index first so earlier indexes aren't shifted
     const removedTitles: string[] = []
+
+    // Remove tracks in reverse order to avoid index shifts during deletion.
     for (const pos of [...positions].reverse()) {
       const result = await player.queue.remove(pos - 1)
       if (result?.removed.length) {

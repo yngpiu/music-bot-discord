@@ -1,3 +1,7 @@
+/**
+ * @file play.ts
+ * @description Main command to search for and play tracks or playlists from various sources.
+ */
 import type { Message, VoiceChannel } from 'discord.js'
 import type { Player, SearchResult, UnresolvedSearchResult } from 'lavalink-client'
 
@@ -11,18 +15,33 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command for searching and playing music.
+ */
 class PlayCommand extends BaseCommand {
   name = 'play'
   aliases = ['p']
   description = 'Phát một bài hát hoặc danh sách phát.'
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
+  /**
+   * Validates if the bot can join the requested voice channel.
+   * @param {Message} message - The command message.
+   * @param {string} vcId - The ID of the voice channel.
+   * @throws {BotError} - If the channel is not joinable.
+   */
   private validateVoiceChannel(message: Message, vcId: string): void {
     const vc = message.guild!.channels.cache.get(vcId) as VoiceChannel
     if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
   }
 
+  /**
+   * Retrieves an existing player or creates a new one for the guild.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string} vcId - The target voice channel ID.
+   * @param {Player | null} existingPlayer - The existing player instance, if any.
+   * @returns {Promise<Player>} - The active player instance.
+   */
   private async getOrCreatePlayer(
     bot: BotClient,
     message: Message,
@@ -42,12 +61,24 @@ class PlayCommand extends BaseCommand {
       })
 
     if (!player.connected) await player.connect()
+
+    // Ensure the player is in the same channel as the user.
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
+
+    // Set initial owner if not defined.
     if (!player.get('owner')) player.set('owner', message.author.id)
 
     return player
   }
 
+  /**
+   * Searches for tracks based on the query, using Spotify resolver if necessary.
+   * @param {Player} player - The player instance.
+   * @param {Message} message - The command message.
+   * @param {string} query - The search query or URL.
+   * @returns {Promise<SearchResult | UnresolvedSearchResult>} - The search results.
+   * @throws {BotError} - If no tracks are found or an error occurs.
+   */
   private async searchQuery(
     player: Player,
     message: Message,
@@ -72,6 +103,15 @@ class PlayCommand extends BaseCommand {
     return result
   }
 
+  /**
+   * Builds the "Track Added" embed.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {Player} player - The player instance.
+   * @param {SearchResult | UnresolvedSearchResult} result - The search result.
+   * @param {string} query - The original search query.
+   * @returns {EmbedBuilder} - The constructed embed.
+   */
   private buildEmbed(
     bot: BotClient,
     message: Message,
@@ -104,8 +144,13 @@ class PlayCommand extends BaseCommand {
     )
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the play command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments (the query).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(
     bot: BotClient,
     message: Message,
@@ -125,6 +170,7 @@ class PlayCommand extends BaseCommand {
     const player = await this.getOrCreatePlayer(bot, message, vcId, existingPlayer)
     const result = await this.searchQuery(player, message, query)
 
+    // Add search results (tracks or playlist) to the queue.
     if (result.loadType === 'playlist') {
       await player.queue.add(result.tracks)
     } else {
@@ -135,6 +181,7 @@ class PlayCommand extends BaseCommand {
     const replyMessage = await message.reply(addedEmbed)
     deleteMessage([replyMessage, message], TIME.MEDIUM)
 
+    // Automatically start playback if not already playing.
     if (!player.playing) {
       await player.play().catch((err: Error) => {
         logger.error(

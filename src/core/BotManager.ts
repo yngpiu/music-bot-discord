@@ -1,3 +1,7 @@
+/**
+ * @file BotManager.ts
+ * @description The central coordinator for multiple bot instances, Redis connection, and Lavalink integration.
+ */
 import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
@@ -15,12 +19,19 @@ import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
+/**
+ * Manages the lifecycle of multiple bot clients and shared connections (Redis, Lavalink).
+ */
 export class BotManager {
+  /** Array of active bot client instances. */
   public bots: BotClient[] = []
+  /** Shared Redis client for state management. */
   private redis: Redis
+  /** Tracks which bot is handling specific message contexts. */
   private messageDestinations = new Map<string, string>()
 
   constructor() {
+    // Initialize Redis connection using environment variables or defaults.
     this.redis = new Redis({
       host: config.redis.url ? new URL(config.redis.url).hostname : 'localhost',
       port: config.redis.url ? parseInt(new URL(config.redis.url).port || '6379') : 6379,
@@ -29,8 +40,10 @@ export class BotManager {
     })
   }
 
+  /**
+   * Connects to Redis, initializes plugins, and spawns bot instances.
+   */
   async start() {
-    // Connect Redis
     try {
       await this.redis.connect()
       setRedisClient(this.redis)
@@ -41,13 +54,11 @@ export class BotManager {
       logger.error('[System] Redis connection or Spotify configuration error:', err)
     }
 
-    // Create bot clients
     for (let i = 0; i < config.bots.length; i++) {
       const botConfig = config.bots[i]
       const bot = new BotClient(i)
       bot.manager = this
 
-      // Setup LavalinkManager for this bot
       bot.lavalink = new LavalinkManager({
         nodes: [
           {
@@ -90,16 +101,13 @@ export class BotManager {
 
               let identifier: string | undefined = undefined
 
-              // 1. If it's already a YouTube/YouTube Music track, we already have the identifier
               if (
                 lastPlayedTrack.info.sourceName === 'youtube' ||
                 lastPlayedTrack.info.sourceName === 'youtubemusic'
               ) {
                 identifier = lastPlayedTrack.info.identifier
                 logger.info(`[Autoplay] Using direct identifier from YouTube: ${identifier}`)
-              }
-              // 2. If it's any other track (Spotify, SoundCloud, Apple Music etc), we first need to search YouTube to get a YouTube Video ID.
-              else {
+              } else {
                 const author = lastPlayedTrack.info.author
                 const title = lastPlayedTrack.info.title
 
@@ -129,7 +137,6 @@ export class BotManager {
                 }
               }
 
-              // 3. Fallback: If we couldn't get an identifier via Spotify or direct YT match, do a generic search
               if (!identifier) {
                 let searchStr: string
                 if (
@@ -175,7 +182,6 @@ export class BotManager {
                 return
               }
 
-              // 4. Fetch the Youtube Mix playlist using the identifier
               try {
                 logger.info(`[Autoplay] Searching Youtube Mix for: ${identifier}`)
                 const mixResponse = await player.search(
@@ -187,14 +193,12 @@ export class BotManager {
                 )
 
                 if (mixResponse && mixResponse.tracks.length > 0) {
-                  // Filter out the original track to prevent exact repetiton
                   const filteredTracks = mixResponse.tracks.filter(
                     (track) => track.info.identifier !== lastPlayedTrack.info.identifier
                   )
 
                   if (filteredTracks.length > 0) {
                     const tracksToAdd = filteredTracks.slice(0, 5).map((track) => {
-                      // Mark tracked as autoplayed
                       track.pluginInfo = track.pluginInfo || {}
                       track.pluginInfo.clientData = {
                         ...(track.pluginInfo.clientData || {}),
@@ -231,19 +235,14 @@ export class BotManager {
         }
       })
 
-      // Load commands
       await Loader.loadCommands(bot)
 
-      // Load interactions (buttons, modals, autocompletes)
       await Loader.loadInteractions(bot)
 
-      // Register events
       await Loader.registerEvents(bot, this)
 
-      // Register lavalink events
       await Loader.registerLavalinkEvents(bot)
 
-      // Login
       await bot.login(botConfig.token)
       logger.info(`[System] Successfully logged in MusicBot #${i + 1} (${botConfig.clientId})`)
       this.bots.push(bot)
@@ -251,18 +250,10 @@ export class BotManager {
   }
 
   /**
-   * Core routing — follows bots_flow.md:
-   *
-   * All commands:
-   *   Priority 0 — Specific bot requested (targetBotId)
-   *   Priority 1 — Bot already in user's VC
-   *
-   * Voice commands (fallback):
-   *   Priority 2 — Any idle bot
-   *   Fallback    — null (all busy)
-   *
-   * Non-voice commands (fallback):
-   *   Distribute evenly using message ID hash (no state needed)
+   * Retrieves an existing bot instance or assigns an idle one based on context.
+   * @param {string} guildId - The Discord guild ID.
+   * @param {object} options - Options for bot selection (voice channel, message context, etc).
+   * @returns {BotClient | null} - The assigned bot client or null.
    */
   getOrAssignBot(
     guildId: string,
@@ -270,7 +261,7 @@ export class BotManager {
   ): BotClient | null {
     const { vcId, messageId, requiresVoice, targetBotId } = options
 
-    // Check cache first to avoid race conditions across different bot instances
+    // Check if a bot was already assigned to this message context recently.
     if (messageId && this.messageDestinations.has(messageId)) {
       const cachedBotId = this.messageDestinations.get(messageId)
       return this.bots.find((b) => b.user?.id === cachedBotId) ?? null
@@ -278,12 +269,12 @@ export class BotManager {
 
     let chosenBot: BotClient | null = null
 
+    // If a specific bot ID is requested, try to find it.
     if (targetBotId) {
-      // Find the specific bot requested
       chosenBot = this.bots.find((b) => b.user?.id === targetBotId) ?? null
     }
 
-    // Always check first: bot already in user's VC
+    // If no bot is chosen and a voice channel ID is provided, find the bot already in that channel.
     if (!chosenBot && vcId) {
       for (const bot of this.bots) {
         const botVcId = bot.guilds.cache.get(guildId)?.members.me?.voice?.channelId
@@ -294,22 +285,21 @@ export class BotManager {
       }
     }
 
+    // If still no bot, pick an idle one for voice commands or use deterministic selection for others.
     if (!chosenBot) {
       if (requiresVoice) {
-        // Voice command: pick any idle bot
         const idleBots = this.bots.filter((bot) => this.isIdle(bot, guildId))
         if (idleBots.length > 0) {
           const randomIndex = Math.floor(Math.random() * idleBots.length)
           chosenBot = idleBots[randomIndex]
         }
       } else {
-        // Non-voice: distribute using message ID hash
         const idx = getDeterministicIndexFromId(messageId, this.bots.length)
         chosenBot = this.bots[idx] ?? this.bots[0] ?? null
       }
     }
 
-    // Cache the decision to prevent duplicate bot replies
+    // Cache the assignment for 30 seconds to maintain consistency in interactions.
     if (chosenBot && messageId && chosenBot.user?.id) {
       this.messageDestinations.set(messageId, chosenBot.user.id)
       setTimeout(() => this.messageDestinations.delete(messageId), 30_000)
@@ -319,7 +309,10 @@ export class BotManager {
   }
 
   /**
-   * A bot is "idle" in a guild if it has no active/playing player.
+   * Checks if a bot instance is currently idle (no active player) in a guild.
+   * @param {BotClient} bot - The bot instance to check.
+   * @param {string} guildId - The guild ID.
+   * @returns {boolean} - True if idle.
    */
   isIdle(bot: BotClient, guildId: string): boolean {
     const player = bot.lavalink.getPlayer(guildId)
@@ -327,9 +320,11 @@ export class BotManager {
   }
 
   /**
-   * Helper to send an embed when autoplay adds new tracks
+   * Sends a beautiful embed notification for tracks added via autoplay.
+   * @param {BotClient} bot - The bot client instance.
+   * @param {any} player - The Lavalink player instance.
+   * @param {any[]} tracks - The list of tracks added.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async sendAutoplayEmbed(bot: BotClient, player: any, tracks: any[]) {
     const channel = (
       player.textChannelId ? bot.channels.cache.get(player.textChannelId) : undefined

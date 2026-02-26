@@ -1,16 +1,24 @@
+/**
+ * @file playerUpdate.ts
+ * @description Event handler for periodic player state updates from Lavalink.
+ */
 import { Player } from 'lavalink-client'
 
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
+/**
+ * Event handler for the 'playerUpdate' event.
+ */
 class PlayerUpdateEvent extends LavalinkEvent {
   name = 'playerUpdate'
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async execute(_bot: BotClient, _player: Player) {
-    // Triggered frequently when the player updates its state.
-    // Useful to sync player data if maintaining an external cache.
-  }
+  /**
+   * Placeholder for handling periodic player state updates (position, etc.).
+   * @param {BotClient} _bot - The Discord client instance.
+   * @param {Player} _player - The Lavalink player instance.
+   */
+  async execute(_bot: BotClient, _player: Player) {}
 }
 
 export default new PlayerUpdateEvent()

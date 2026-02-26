@@ -1,3 +1,7 @@
+/**
+ * @file insert.ts
+ * @description Command to insert a track or playlist at a specific position in the queue.
+ */
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
@@ -10,12 +14,21 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command to add tracks to a specific index in the queue.
+ */
 class InsertCommand extends BaseCommand {
   name = 'insert'
   aliases = ['i', 'add', 'playnext', 'pn']
   description = 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.'
   requiresVoice = true
 
+  /**
+   * Executes the insert command, searching for the track and placing it at the requested position.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments: [position, ...query].
+   */
   async execute(bot: BotClient, message: Message, args: string[]) {
     logger.info(
       `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
@@ -35,6 +48,7 @@ class InsertCommand extends BaseCommand {
       )
     }
 
+    // Extract position and query.
     const positionStr = args.shift()
     const position = parseInt(positionStr || '', 10)
 
@@ -45,7 +59,7 @@ class InsertCommand extends BaseCommand {
     const query = args.join(' ')
     if (!query) {
       throw new BotError('Vui lòng nhập tên/đường dẫn bài hát.')
-    } // Get or create player
+    }
     const player =
       bot.lavalink.getPlayer(message.guild!.id) ??
       bot.lavalink.createPlayer({
@@ -61,36 +75,34 @@ class InsertCommand extends BaseCommand {
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
 
+    // Set initial owner if not defined.
     if (!player.get('owner')) {
       player.set('owner', message.author.id)
     }
 
-    // Adjust position if it exceeds the queue length.
-    // Index is 0-based for the tracks array.
-    // If the queue has 3 tracks, inserting at position 1 (index 0) is valid.
-    // Inserting at position 100 (index 99) should just append.
+    // Adjust insert index to be within bounds.
     let insertIndex = position - 1
     if (insertIndex > player.queue.tracks.length) {
       insertIndex = player.queue.tracks.length
     }
 
-    // Calculate estimated wait time before adding the track
+    // Calculate estimated time until this track plays.
     let estimatedMsOverride = 0
     if (player.playing) {
-      // Time remaining for the current playing track
       estimatedMsOverride += Math.max(
         0,
         (player.queue.current?.info.duration ?? 0) - (player.position ?? 0)
       )
-      // Add duration of all tracks BEFORE the insert index
+
       for (let i = 0; i < insertIndex; i++) {
         const track = player.queue.tracks[i]
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const info = 'info' in track ? track.info : (track as any).info
         estimatedMsOverride += info?.duration ?? 0
       }
     }
 
+    // Search for tracks.
     const result = isSpotifyQuery(query)
       ? await spotifySearch(player, query, message.author)
       : await player.search({ query }, message.author)
@@ -106,17 +118,16 @@ class InsertCommand extends BaseCommand {
         'Tớ không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh `search`.'
       )
 
+    // Add to queue at specific index.
     if (result.loadType === 'playlist') {
       await player.queue.add(result.tracks, insertIndex)
     } else {
       await player.queue.add(result.tracks[0], insertIndex)
     }
 
-    // The visually displayed position is insertIndex + 1
-    // If we're not playing yet, position is just 1 (it's the current track)
     const positionOverride = player.playing ? insertIndex + 1 : 1
 
-    // Send Embed always
+    // Build and send confirmation embed.
     const addedEmbed = buildAddedItemEmbed(
       result.loadType === 'playlist' ? 'playlist' : 'track',
       {
@@ -157,6 +168,7 @@ class InsertCommand extends BaseCommand {
 
     deleteMessage([replyMessage, message], TIME.MEDIUM)
 
+    // Auto-play if nothing is currently playing.
     if (!player.playing) await player.play()
   }
 }

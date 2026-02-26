@@ -1,3 +1,7 @@
+/**
+ * @file replay.ts
+ * @description Command to restart the current track from the beginning.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -9,12 +13,22 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command to replay the current track.
+ */
 class ReplayCommand extends BaseCommand {
   name = 'replay'
   aliases = ['restart', 'rp']
   description = 'Phát lại bài hát hiện tại từ đầu (0:00).'
   requiresVoice = true
 
+  /**
+   * Executes the replay command by seeking the player to position 0.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: replay] User ${message.author.tag} requested to replay track`)
 
@@ -23,6 +37,8 @@ class ReplayCommand extends BaseCommand {
     }
 
     const currentTrack = player.queue.current
+
+    // Verify that the track supports seeking.
     if (currentTrack.info.isStream || !currentTrack.info.isSeekable) {
       throw new BotError('Không thể phát lại từ đầu đối với luồng Livestream/Radio.')
     }

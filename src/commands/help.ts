@@ -1,3 +1,7 @@
+/**
+ * @file help.ts
+ * @description Command to display a list of available bot commands categorized by function.
+ */
 import {
   ActionRowBuilder,
   EmbedBuilder,
@@ -14,6 +18,9 @@ import type { BotClient } from '~/core/BotClient.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Commands grouped by category for display in the help menu.
+ */
 export const commandsByCategory = {
   Track: [
     {
@@ -120,14 +127,20 @@ export const commandsByCategory = {
   ]
 }
 
+/**
+ * Command to show help information with an interactive select menu.
+ */
 class HelpCommand extends BaseCommand {
   name = 'help'
   aliases = ['h']
   description = 'Hiển thị danh sách hướng dẫn lệnh.'
   requiresVoice = false
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
+  /**
+   * Builds the main landing embed for the help command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @returns {EmbedBuilder} - The main help embed.
+   */
   private buildMainEmbed(bot: BotClient) {
     return new EmbedBuilder()
       .setColor(0x00c2e6)
@@ -138,6 +151,12 @@ class HelpCommand extends BaseCommand {
       .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
   }
 
+  /**
+   * Builds an embed featuring commands from a specific category.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {keyof typeof commandsByCategory} category - The category to display.
+   * @returns {EmbedBuilder} - The category-specific help embed.
+   */
   private buildCategoryEmbed(
     bot: BotClient,
     category: keyof typeof commandsByCategory
@@ -162,6 +181,10 @@ class HelpCommand extends BaseCommand {
       .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
   }
 
+  /**
+   * Constructs the select menu for choosing help categories.
+   * @returns {{ select: StringSelectMenuBuilder, row: ActionRowBuilder<StringSelectMenuBuilder> }} - The menu components.
+   */
   private buildSelectMenu(): {
     select: StringSelectMenuBuilder
     row: ActionRowBuilder<StringSelectMenuBuilder>
@@ -188,6 +211,14 @@ class HelpCommand extends BaseCommand {
     return { select, row }
   }
 
+  /**
+   * Starts a collector to handle category selection from the select menu.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The original command message.
+   * @param {Message} reply - The bot's reply containing the menu.
+   * @param {StringSelectMenuBuilder} select - The select menu builder.
+   * @param {ActionRowBuilder<StringSelectMenuBuilder>} row - The action row.
+   */
   private startCollector(
     bot: BotClient,
     message: Message,
@@ -220,8 +251,11 @@ class HelpCommand extends BaseCommand {
     })
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the help command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   */
   async execute(bot: BotClient, message: Message) {
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 

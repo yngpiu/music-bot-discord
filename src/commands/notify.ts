@@ -1,3 +1,7 @@
+/**
+ * @file notify.ts
+ * @description Administrative command to broadcast a notification message to all active player text channels.
+ */
 import { EmbedBuilder, type Message, type TextChannel } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
@@ -7,14 +11,23 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
+/**
+ * Command for broadcasting announcements to active music bot instances.
+ */
 class NotifyCommand extends BaseCommand {
   name = 'notify'
   aliases = ['thongbao']
   description = 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho Owner).'
   requiresVoice = false
 
+  /**
+   * Executes the notification recruitment broadcast.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments containing the announcement content.
+   */
   async execute(bot: BotClient, message: Message, args: string[]) {
-    // Kiểm tra quyền Owner
+    // Permission check: only developers or server owners can broadcast.
     if (!isDeveloperOrServerOwner(message)) {
       throw new BotError('Bạn không có quyền sử dụng lệnh này.')
     }
@@ -27,7 +40,6 @@ class NotifyCommand extends BaseCommand {
       `[Command: notify] Owner ${message.author.tag} requested to send notification: ${content.substring(0, 50)}...`
     )
 
-    // Tạo embed thông báo
     const notifyEmbed = new EmbedBuilder()
       .setAuthor({
         name: `Thông báo từ ${message.author.displayName || message.author.username}`,
@@ -39,8 +51,8 @@ class NotifyCommand extends BaseCommand {
     let successCount = 0
     let failCount = 0
 
+    // Iterate through all managed bots and send announcement to active player text channels.
     if (message.guildId) {
-      // Chỉ gửi thông báo đến các bot đang phát nhạc TẠI SERVER HIỆN TẠI
       for (const b of bot.manager.bots) {
         const player = b.lavalink.getPlayer(message.guildId)
         if (!player || !player.textChannelId) continue
@@ -61,6 +73,7 @@ class NotifyCommand extends BaseCommand {
       }
     }
 
+    // Feedback to the command user.
     const replyEmbed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setDescription(

@@ -1,3 +1,7 @@
+/**
+ * @file nowplaying.ts
+ * @description Command to display information about the track currently being played.
+ */
 import { EmbedBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
@@ -9,21 +13,33 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatTrack } from '~/utils/stringUtil.js'
 
+/**
+ * Command to show currently playing track details.
+ */
 class NowplayingCommand extends BaseCommand {
   name = 'nowplaying'
   aliases = ['np', 'current']
   description = 'Hiển thị thông tin bài hát đang phát.'
   requiresVoice = true
 
+  /**
+   * Executes the nowplaying command, fetching and displaying current track info.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: nowplaying] User ${message.author.tag} requested to view current track`)
 
+    // Check if there is a track currently in the queue being played.
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
     const currentTrack = player.queue.current
 
+    // Construct embed with track metadata.
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({
@@ -52,7 +68,6 @@ class NowplayingCommand extends BaseCommand {
       })
 
     if (replyMessage) {
-      // Cho thời gian đọc board dài hơn (20s) trước khi xóa
       deleteMessage([replyMessage, message], TIME.MEDIUM)
     }
   }

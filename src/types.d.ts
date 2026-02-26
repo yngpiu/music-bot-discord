@@ -1,9 +1,12 @@
+/**
+ * @file types.d.ts
+ * @description Global type definitions and augmentations for the project.
+ */
 import type { Player } from 'lavalink-client'
 
 declare global {
   /**
-   * Pre-validated context populated by the command middleware in messageCreate.
-   * Only meaningful when the corresponding `requires*` flag is set on the command.
+   * Represents the context available to command execution.
    */
   interface CommandContext {
     /** Active player for this guild — guaranteed non-null when `requiresVoice` is true. */

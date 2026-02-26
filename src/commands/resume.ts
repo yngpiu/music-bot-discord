@@ -1,3 +1,7 @@
+/**
+ * @file resume.ts
+ * @description Command to resume audio playback if it was previously paused.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -9,14 +13,20 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command to unpause the music player.
+ */
 class ResumeCommand extends BaseCommand {
   name = 'resume'
   aliases = ['rs', 'unpause', 'continue']
   description = 'Tiếp tục phát nhạc đang tạm dừng.'
   requiresVoiceMatch = true
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
+  /**
+   * Sends a confirmation message after successfully resuming playback.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The original command message.
+   */
   private async sendConfirmation(bot: BotClient, message: Message): Promise<void> {
     if (!message.channel.isTextBased() || !('send' in message.channel)) return
 
@@ -36,11 +46,17 @@ class ResumeCommand extends BaseCommand {
     if (replyMessage) deleteMessage([message], TIME.SHORT)
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the resume command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: resume] User ${message.author.tag} requested to resume track`)
 
+    // Verify if the player is actually paused.
     if (!player.paused) throw new BotError('Nhạc vẫn đang phát mà.')
 
     await player.resume()

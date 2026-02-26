@@ -1,3 +1,7 @@
+/**
+ * @file status.ts
+ * @description Command to display the current status of the music player, including volume, filters, and repeat mode.
+ */
 import { EmbedBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
@@ -8,12 +12,22 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatTrack } from '~/utils/stringUtil'
 
+/**
+ * Command to show comprehensive player information.
+ */
 class StatusCommand extends BaseCommand {
   name = 'status'
   aliases = ['state', 'info']
   description = 'Hiển thị các trạng thái của trình phát nhạc (lặp, tự động phát, âm lượng, ...).'
   requiresVoice = true
 
+  /**
+   * Executes the status command, gathering state from the player instance.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
 
@@ -22,6 +36,7 @@ class StatusCommand extends BaseCommand {
     const isPaused = player.paused
     const volume = player.volume
 
+    // Determine the active audio filter.
     const fm = player.filterManager
     let activeFilter = 'Không'
     if (fm.equalizerBands.some((b) => b.band === 0 && b.gain === 0.25)) activeFilter = 'Bassboost'
@@ -37,6 +52,7 @@ class StatusCommand extends BaseCommand {
     if (currentMode === 'track') repeatText = 'Lặp 1 bài'
     else if (currentMode === 'queue') repeatText = 'Lặp toàn bộ'
 
+    // Construct status embed.
     const embed = new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({
@@ -51,6 +67,7 @@ class StatusCommand extends BaseCommand {
         { name: 'Tự động phát', value: isAutoplayEnabled ? 'Bật' : 'Tắt', inline: true }
       )
 
+    // Add current track info if available.
     if (player.queue.current) {
       embed.setDescription(
         `**Đang phát:** ${formatTrack({

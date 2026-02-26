@@ -1,3 +1,7 @@
+/**
+ * @file skipto.ts
+ * @description Command to skip to a specific track index in the queue.
+ */
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -9,12 +13,22 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
+/**
+ * Command for jumping to a specific position in the queue.
+ */
 class SkiptoCommand extends BaseCommand {
   name = 'skipto'
   aliases = ['st', 'nextto', 'nt']
   description = 'Chuyển đến một bài hát cụ thể trong danh sách chờ.'
   requiresVoice = true
 
+  /**
+   * Executes the skipto command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} args - Command arguments containing the target position.
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(
       `[Lệnh: skipto] Người dùng ${message.author.tag} yêu cầu chuyển tới bài số ${args[0] || 'trống'}`
@@ -30,14 +44,14 @@ class SkiptoCommand extends BaseCommand {
 
     const position = parseInt(args[0], 10)
 
+    // Validate the target position against the current queue length.
     if (isNaN(position) || position < 1 || position > player.queue.tracks.length) {
       throw new BotError(
         `Vị trí bài hát không hợp lệ, vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`
       )
     }
 
-    // Lavalink-client `skipTo` actually expects the 1-based position (number of tracks to skip).
-    // e.g. position 2 corresponds to skipping 1 track and playing the 2nd.
+    // Skip to the specified track. Original tracks before it will be removed.
     await player.skip(position)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>

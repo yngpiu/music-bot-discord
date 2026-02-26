@@ -1,3 +1,7 @@
+/**
+ * @file queue.ts
+ * @description Command to view the current music queue with interactive pagination.
+ */
 import type { Message, User } from 'discord.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js'
 import type { Player } from 'lavalink-client'
@@ -12,15 +16,21 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
+/**
+ * Command to display and navigate through the music queue.
+ */
 class QueueCommand extends BaseCommand {
   name = 'queue'
   aliases = ['q', 'list']
   description = 'Hiển thị danh sách phát nhạc hiện tại'
   requiresVoice = true
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /**
+   * Helper to format a single track entry in the queue list.
+   * @param {any} track - The track object.
+   * @param {string} indexStr - The rank/index string (e.g., "1.").
+   * @returns {string} - The formatted track string.
+   */
   private buildTrackString(track: any, indexStr: string): string {
     const trackDisplay = formatTrack({
       title: track.info.title,
@@ -38,12 +48,25 @@ class QueueCommand extends BaseCommand {
     return `${firstLine}\n${EMOJI.CORNER} ${requesterStr}`
   }
 
+  /**
+   * Parses custom emoji strings into a format usable by ButtonBuilder.
+   * @param {string} emoji - The raw emoji string.
+   * @returns {any} - The parsed emoji object or string.
+   */
   private parseEmoji(emoji: string) {
     const match = emoji.match(/^<(a?):(\w+):(\d+)>$/)
     if (match) return { animated: !!match[1], name: match[2], id: match[3] }
     return emoji
   }
 
+  /**
+   * Builds the embed representing a specific page of the queue.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Player} player - The player instance.
+   * @param {number} page - The current page index.
+   * @param {number} totalPages - Total number of pages.
+   * @returns {EmbedBuilder} - The constructed queue embed.
+   */
   private buildEmbed(
     bot: BotClient,
     player: Player,
@@ -58,6 +81,7 @@ class QueueCommand extends BaseCommand {
       ? currentTracks.map((t, i: number) => this.buildTrackString(t, `${start + i + 1}.`))
       : ['Không có bài hát nào...']
 
+    // Include the currently playing track in the description.
     if (current) {
       descLines.push('')
       descLines.push(
@@ -74,6 +98,12 @@ class QueueCommand extends BaseCommand {
       .setFooter({ text: `Trang ${page}/${totalPages}` })
   }
 
+  /**
+   * Constructs the action row containing pagination buttons.
+   * @param {number} page - The current page.
+   * @param {number} totalPages - Total pages available.
+   * @returns {ActionRowBuilder<ButtonBuilder>} - The buttons row.
+   */
   private buildNavRow(page: number, totalPages: number): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -99,6 +129,14 @@ class QueueCommand extends BaseCommand {
     )
   }
 
+  /**
+   * Starts a collector to handle interaction with the pagination buttons.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The original command message.
+   * @param {Message} replyMessage - The bot's reply containing the queue.
+   * @param {Player} player - The player instance.
+   * @param {number} totalPages - Total number of pages.
+   */
   private startPageCollector(
     bot: BotClient,
     message: Message,
@@ -114,6 +152,7 @@ class QueueCommand extends BaseCommand {
     })
 
     collector.on('collect', async (i) => {
+      // Navigate pages based on custom ID.
       if (i.customId === 'queue_first') currentPage = 1
       else if (i.customId === 'queue_prev') currentPage--
       else if (i.customId === 'queue_next') currentPage++
@@ -128,6 +167,7 @@ class QueueCommand extends BaseCommand {
     })
 
     collector.on('end', (_collected, reason) => {
+      // Cleanup: delete messages if the collector timed out or idled.
       if (reason === 'idle' || reason === 'time') {
         replyMessage.delete().catch(() => {})
         message.delete().catch(() => {})
@@ -135,8 +175,13 @@ class QueueCommand extends BaseCommand {
     })
   }
 
-  // ─── Execute ────────────────────────────────────────────────────────────
-
+  /**
+   * Executes the queue command.
+   * @param {BotClient} bot - The Discord client instance.
+   * @param {Message} message - The command message.
+   * @param {string[]} _args - Command arguments (unused).
+   * @param {CommandContext} context - The command execution context.
+   */
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
@@ -158,6 +203,7 @@ class QueueCommand extends BaseCommand {
 
     if (!replyMessage) return
 
+    // Initialize interactive navigation if there is more than one page.
     if (totalPages > 1) {
       this.startPageCollector(bot, message, replyMessage, player, totalPages)
     } else {

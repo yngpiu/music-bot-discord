@@ -1,25 +1,28 @@
+/**
+ * @file trackService.ts
+ * @description Service for tracking track play history, buffering data in Redis before batch-inserting into the DB.
+ */
 import type { Redis } from 'ioredis'
 
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 
-// ─── Redis Buffer Config ──────────────────────────────────────────────────────
-
+/** Redis key used for buffering play records. */
 const REDIS_KEY = 'leaderboard:pending_plays'
-const FLUSH_INTERVAL_MS = 30_000 // Flush mỗi 30 giây
+/** Interval for flushing buffered data to the database (30 seconds). */
+const FLUSH_INTERVAL_MS = 30_000
 
 let redis: Redis | null = null
 let flushTimer: ReturnType<typeof setInterval> | null = null
 
 /**
- * Inject Redis client và khởi động flush timer.
- * Gọi hàm này trong BotManager.start() sau khi connect Redis.
+ * Initializes the track tracking service.
+ * @param {Redis} redisClient - The Redis client instance.
  */
 export function initTrackService(redisClient: Redis) {
   redis = redisClient
 
-  // Khởi động periodic flush
   if (flushTimer) clearInterval(flushTimer)
   flushTimer = setInterval(() => {
     flushPendingPlays().catch((e) => {
@@ -28,22 +31,26 @@ export function initTrackService(redisClient: Redis) {
   }, FLUSH_INTERVAL_MS)
 }
 
-// ─── Normalize ────────────────────────────────────────────────────────────────
-
+/**
+ * Normalizes title and author strings for fuzzy database matching.
+ * @param {string} s - The string to normalize.
+ * @returns {string} - The normalized string.
+ */
 function normalizeString(s: string): string {
   return s
     .toLowerCase()
-    .replace(/\(.*?\)|\[.*?\]/g, '')
+    .replace(/\(.*?\)|\[.*?\]/g, '') // Remove parentheses and brackets.
     .replace(
       /[^a-z0-9가-힣\u3040-\u309f\u30a0-\u30ffàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/g,
       ''
-    )
-    .replace(/\s+/g, ' ')
+    ) // Keep alphanumeric and multi-language characters.
+    .replace(/\s+/g, ' ') // Collapse multiple spaces.
     .trim()
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
-
+/**
+ * Internal record structure for track play tracking.
+ */
 interface PlayRecord {
   sourceName: string
   identifier: string
@@ -53,14 +60,17 @@ interface PlayRecord {
   artworkUrl?: string | null
   uri?: string | null
   guildId: string
-  listenerIds: string[] // Tất cả userId đang có mặt trong VC khi bài kết thúc
+  listenerIds: string[]
   botId: string
-  playedAt: string // ISO string
+  playedAt: string
 }
 
 /**
- * Ghi nhận 1 lượt phát vào Redis buffer.
- * Dữ liệu sẽ được flush vào PostgreSQL định kỳ.
+ * Records a track play by pushing it into the Redis buffer.
+ * @param {object} trackInfo - Metadata about the track.
+ * @param {string} guildId - The guild ID where the track was played.
+ * @param {string[]} listenerIds - List of user IDs currently in the voice channel.
+ * @param {string} botId - The bot ID that played the track.
  */
 export async function recordTrackPlay(
   trackInfo: {
@@ -95,19 +105,16 @@ export async function recordTrackPlay(
   }
 }
 
-// ─── Flush Logic ──────────────────────────────────────────────────────────────
-
 /**
- * Đọc toàn bộ records từ Redis buffer và batch-insert vào PostgreSQL.
+ * Flushes all pending play records from Redis and persists them to the PostgreSQL database.
  */
 async function flushPendingPlays(): Promise<void> {
   if (!redis) return
 
-  // Lấy số lượng records đang chờ
   const count = await redis.llen(REDIS_KEY)
   if (count === 0) return
 
-  // Lấy tất cả records và xoá khỏi Redis (atomic)
+  // Atomically fetch and clear the buffer.
   const pipeline = redis.pipeline()
   pipeline.lrange(REDIS_KEY, 0, -1)
   pipeline.del(REDIS_KEY)
@@ -138,32 +145,28 @@ async function flushPendingPlays(): Promise<void> {
 }
 
 /**
- * Cascading lookup + upsert cho 1 record.
- *   1. source:identifier
- *   2. ISRC
- *   3. normalizedTitle + normalizedArtist
+ * Updates or inserts a play record, handling track normalization and listener association.
+ * @param {PlayRecord} record - The play record to persist.
  */
 async function upsertPlayRecord(record: PlayRecord): Promise<void> {
   const sourceId = `${record.sourceName}:${record.identifier}`
   const normTitle = normalizeString(record.title)
   const normArtist = normalizeString(record.author)
 
-  // Bước 1: source:identifier
+  // Try to find the track by source ID, ISRC, or normalized title/artist.
   let track = await prisma.track.findUnique({ where: { id: sourceId } })
 
-  // Bước 2: ISRC
   if (!track && record.isrc) {
     track = await prisma.track.findFirst({ where: { isrc: record.isrc } })
   }
 
-  // Bước 3: normalizedTitle + normalizedArtist
   if (!track && normTitle && normArtist) {
     track = await prisma.track.findFirst({
       where: { normalizedTitle: normTitle, normalizedArtist: normArtist }
     })
   }
 
-  // Tạo mới nếu chưa có
+  // Create the track entry if it doesn't exist.
   if (!track) {
     track = await prisma.track.create({
       data: {
@@ -181,7 +184,7 @@ async function upsertPlayRecord(record: PlayRecord): Promise<void> {
     })
   }
 
-  // Ghi lịch sử phát
+  // Create the play history entry linked to the track.
   const playHistory = await prisma.playHistory.create({
     data: {
       trackId: track.id,
@@ -191,7 +194,7 @@ async function upsertPlayRecord(record: PlayRecord): Promise<void> {
     }
   })
 
-  // Ghi danh sách người nghe
+  // Record who was listening to this play.
   if (record.listenerIds.length > 0) {
     await prisma.playListener.createMany({
       data: record.listenerIds.map((userId) => ({

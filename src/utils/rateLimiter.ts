@@ -1,43 +1,47 @@
 /**
- * Redis-backed sliding-window rate limiter with progressive ban.
- *
- * Rate limit: 1 command per 2 seconds (per user).
- * Progressive ban (applied when user spams while already rate-limited):
- *   > 10 violations → banned 1 hour
- *   > 20 violations → banned 6 hours
- *   > 30 violations → banned 12 hours
- *
- * Redis keys:
- *   ratelimit:<userId>   — LIST of invocation timestamps (ms)
- *   violations:<userId>  — INT counter of rate-limit-hit events
- *   ban:<userId>         — STRING "1" present while user is banned; TTL = ban duration
+ * @file rateLimiter.ts
+ * @description Sliding-window rate limiter using Redis to prevent spam and implement progressive banning.
  */
 import type { Redis } from 'ioredis'
 
-const WINDOW_MS = 2_000 // 2 seconds
-const MAX_USES = 1 // max commands per window
+/** Time window for rate limiting (2 seconds). */
+const WINDOW_MS = 2_000
+/** Maximum allowed uses within the time window. */
+const MAX_USES = 1
 
-// Progressive ban thresholds (violation count → ban duration in ms)
+/** Progressive ban tiers: [violation_count, duration_ms]. */
 const BAN_TIERS: [number, number][] = [
-  [30, 12 * 60 * 60 * 1000], // > 30 → 12h
-  [20, 6 * 60 * 60 * 1000], // > 20 → 6h
-  [10, 1 * 60 * 60 * 1000] // > 10 → 1h
+  [30, 12 * 60 * 60 * 1000], // 12 hours
+  [20, 6 * 60 * 60 * 1000], // 6 hours
+  [10, 1 * 60 * 60 * 1000] // 1 hour
 ]
 
 let redis: Redis | null = null
 
+/**
+ * Sets the Redis client instance to be used by the rate limiter.
+ * @param {Redis} client - The Redis client.
+ */
 export function setRedisClient(client: Redis) {
   redis = client
 }
 
-/** Returns remaining ban duration in ms, or 0 if not banned. */
+/**
+ * Returns the remaining ban duration for a user.
+ * @param {string} userId - The Discord user ID.
+ * @returns {Promise<number>} - Remaining duration in milliseconds, or 0 if not banned.
+ */
 export async function getBanRemainingMs(userId: string): Promise<number> {
   if (!redis) return 0
   const ttl = await redis.pttl(`ban:${userId}`)
   return ttl > 0 ? ttl : 0
 }
 
-/** Check sliding-window rate limit. Also handles progressive banning on repeated violations. */
+/**
+ * Checks if a user is rate-limited and handles progressive banning logic.
+ * @param {string} userId - The Discord user ID.
+ * @returns {Promise<{ limited: boolean; remainingMs: number }>} - Limit status and remaining time.
+ */
 export async function checkRateLimit(
   userId: string
 ): Promise<{ limited: boolean; remainingMs: number }> {
@@ -49,6 +53,7 @@ export async function checkRateLimit(
   const now = Date.now()
   const windowStart = now - WINDOW_MS
 
+  // Fetch recent request timestamps from the sliding window.
   const timestamps: string[] = await redis.lrange(key, 0, -1)
   const recent = timestamps.map(Number).filter((t) => t > windowStart)
 
@@ -56,13 +61,12 @@ export async function checkRateLimit(
     const oldest = recent[0]
     const remainingMs = WINDOW_MS - (now - oldest)
 
-    // Increment violation counter
+    // Log a violation and check for automatic banning.
     const violationsKey = `violations:${userId}`
     const violations = await redis.incr(violationsKey)
-    // Keep violation counter alive for 24 hours from last violation
+
     await redis.expire(violationsKey, 24 * 60 * 60)
 
-    // Apply progressive ban if threshold crossed
     for (const [threshold, banMs] of BAN_TIERS) {
       if (violations > threshold) {
         await redis.set(`ban:${userId}`, '1', 'PX', banMs)
@@ -73,7 +77,7 @@ export async function checkRateLimit(
     return { limited: true, remainingMs }
   }
 
-  // Rebuild list with new timestamp
+  // Update request timestamps in Redis.
   const pipeline = redis.pipeline()
   pipeline.del(key)
   for (const t of recent) {

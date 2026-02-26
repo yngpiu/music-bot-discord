@@ -1,5 +1,20 @@
+/**
+ * @file stringUtil.ts
+ * @description Utilities for string manipulation, duration formatting, and display optimization.
+ */
+
+/**
+ * Joins multiple strings with newlines.
+ * @param {...string[]} args - Strings to join.
+ * @returns {string} - Combined string.
+ */
 export const lines = (...args: string[]) => args.join('\n')
 
+/**
+ * Formats a duration in milliseconds to a human-readable HH:MM:SS or MM:SS format.
+ * @param {number} ms - Duration in milliseconds.
+ * @returns {string} - Formatted duration string.
+ */
 export const formatDuration = (ms: number): string => {
   const totalSeconds = Math.floor(ms / 1000)
 
@@ -10,15 +25,21 @@ export const formatDuration = (ms: number): string => {
 
   const pad = (n: number) => n.toString().padStart(2, '0')
 
-  // < 1 hour → mm:ss
   if (hours === 0) {
     return `${pad(minutes)}:${pad(seconds)}`
   }
 
-  // >= 1 hour → hh:mm:ss
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
 
+/**
+ * Formats a track's metadata into a consistent display string (Markdown link or bold text).
+ * @param {object} item - Track metadata object.
+ * @param {string} item.title - Track title.
+ * @param {string} [item.trackLink] - Optional URL for the track.
+ * @param {string} [item.author] - Optional author name.
+ * @returns {string} - Formatted track string.
+ */
 export function formatTrack(item: {
   title: string
   trackLink?: string | null
