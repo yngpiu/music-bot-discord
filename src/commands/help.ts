@@ -146,7 +146,7 @@ class HelpCommand extends BaseCommand {
       .setColor(0x00c2e6)
       .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: bot.user?.displayAvatarURL() })
       .setDescription(
-        'Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\nBạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại trang https://6music.edgeone.app.'
+        '- Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\n- Bạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại **[TRANG HƯỚNG DẪN CHI TIẾT](https://yngpiu.github.io/music-bot-discord/docs/help.html)**.'
       )
       .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
   }

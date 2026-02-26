@@ -172,6 +172,25 @@ const commands = [
       ['info', '']
     ]
   },
+  {
+    name: 'favorite',
+    aliases: ['fav'],
+    desc: 'Quản lý bài hát yêu thích của bạn. Thêm bài đang phát, xoá bài cũ, xem danh sách cá nhân và phát toàn bộ danh sách yêu thích dễ dàng trực tiếp.',
+    category: 'music',
+    options: [
+      {
+        name: 'add / remove / play / (hiển thị danh sách)',
+        required: false,
+        desc: 'Sử dụng `add` để lưu nhạc đang phát, `remove` kèm theo vị trí để xoá, hoặc để trống để hiển thị danh sách có sẵn để bạn tuỳ chọn.'
+      }
+    ],
+    examples: [
+      ['favorite add', ''],
+      ['fav rm', '1-3'],
+      ['fav play', ''],
+      ['favorite', '']
+    ]
+  },
 
   // QUEUE CATEGORY
   {
