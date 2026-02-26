@@ -13,7 +13,6 @@ const command: Command = {
   name: 'play',
   aliases: ['p'],
   description: 'Phát một bài hát hoặc danh sách phát.',
-  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     logger.info(

@@ -689,7 +689,6 @@ async function handlePlaylistSearch(
 const command: Command = {
   name: 'search',
   description: 'Tìm kiếm bài hát, album, hoặc playlist.',
-  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     if (!message.guild) return

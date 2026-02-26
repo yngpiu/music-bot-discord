@@ -272,7 +272,6 @@ const command: Command = {
   name: 'leaderboard',
   aliases: ['lb', 'top'],
   description: 'Xem bảng xếp hạng bài hát và bot.',
-  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     let currentView: LeaderboardView = 'personal' // default: cá nhân

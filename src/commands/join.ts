@@ -12,7 +12,6 @@ const command: Command = {
   name: 'join',
   aliases: ['j'],
   description: 'Gọi bot vào kênh thoại hiện tại.',
-  requiresVoice: true,
 
   async execute(bot: BotClient, message: Message) {
     if (!message.guild) return
