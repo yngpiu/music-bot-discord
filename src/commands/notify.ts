@@ -26,7 +26,7 @@ class NotifyCommand extends BaseCommand {
    * @param {Message} message - The command message.
    * @param {string[]} args - Command arguments containing the announcement content.
    */
-  async execute(bot: BotClient, message: Message, args: string[]) {
+  async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     // Permission check: only developers or server owners can broadcast.
     if (!isDeveloperOrServerOwner(message)) {
       throw new BotError('Bạn không có quyền sử dụng lệnh này.')

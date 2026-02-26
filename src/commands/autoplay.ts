@@ -28,7 +28,7 @@ class AutoplayCommand extends BaseCommand {
    * @param {string[]} _args - Command arguments (unused).
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: autoplay] User ${message.author.tag} requested to toggle autoplay state`)
 
     const currentAutoplay = player.get<boolean>('autoplay') ?? false

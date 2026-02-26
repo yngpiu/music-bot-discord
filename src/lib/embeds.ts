@@ -45,7 +45,7 @@ export function buildAddedItemEmbed(
   botAvatarUrl?: string,
   positionOverride?: number,
   estimatedMsOverride?: number
-) {
+): { embeds: EmbedBuilder[]; files: never[]; } {
   const isPlaylist = type === 'playlist'
   const totalDurationMs = item.tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
 

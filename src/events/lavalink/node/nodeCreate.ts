@@ -20,7 +20,7 @@ class NodeCreateEvent extends LavalinkEvent {
    * @param {BotClient} _bot - The Discord client instance (unused).
    * @param {LavalinkNode} node - The created Lavalink node.
    */
-  async execute(_bot: BotClient, node: LavalinkNode) {
+  async execute(_bot: BotClient, node: LavalinkNode): Promise<void> {
     logger.info(`[Lavalink Node: ${node.id}] Initialized new node`)
   }
 }

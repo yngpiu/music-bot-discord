@@ -53,7 +53,7 @@ class QueueCommand extends BaseCommand {
    * @param {string} emoji - The raw emoji string.
    * @returns {any} - The parsed emoji object or string.
    */
-  private parseEmoji(emoji: string) {
+  private parseEmoji(emoji: string): string | { animated: boolean; name: string; id: string; } {
     const match = emoji.match(/^<(a?):(\w+):(\d+)>$/)
     if (match) return { animated: !!match[1], name: match[2], id: match[3] }
     return emoji
@@ -182,7 +182,7 @@ class QueueCommand extends BaseCommand {
    * @param {string[]} _args - Command arguments (unused).
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {

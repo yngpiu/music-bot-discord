@@ -20,7 +20,7 @@ class NodeConnectEvent extends LavalinkEvent {
    * @param {BotClient} bot - The Discord client instance.
    * @param {LavalinkNode} node - The connected Lavalink node.
    */
-  async execute(bot: BotClient, node: LavalinkNode) {
+  async execute(bot: BotClient, node: LavalinkNode): Promise<void> {
     logger.info(`[Lavalink Node: ${node.id}] Successfully connected to audio server!`)
   }
 }

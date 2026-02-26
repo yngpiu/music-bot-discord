@@ -23,7 +23,7 @@ class QueueEndEvent extends LavalinkEvent {
    * @param {Track | null} track - The last track that played.
    * @param {TrackEndEvent} payload - The track end event data.
    */
-  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackEndEvent) {
+  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackEndEvent): Promise<void> {
     logger.debug(
       `[Player: ${player.guildId}] queueEnd event triggered because the last track finished`
     )

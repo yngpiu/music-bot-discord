@@ -29,7 +29,7 @@ class InsertCommand extends BaseCommand {
    * @param {Message} message - The command message.
    * @param {string[]} args - Command arguments: [position, ...query].
    */
-  async execute(bot: BotClient, message: Message, args: string[]) {
+  async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     logger.info(
       `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
     )

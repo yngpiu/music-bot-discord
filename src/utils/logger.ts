@@ -19,7 +19,7 @@ const levelColors: Record<string, (text: string) => string> = {
   silly: gray
 }
 
-const extractTags = (message: string) => {
+const extractTags = (message: string): { tags: string; content: string; } => {
   const tagRegex = /^(\[\s*[^\]]+\s*\]\s*)+/
   const match = message.match(tagRegex)
   if (!match) return { tags: '', content: message }

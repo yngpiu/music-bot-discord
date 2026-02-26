@@ -16,7 +16,7 @@ import { logger } from '~/utils/logger.js'
 export const deleteMessage = (
   messages: (Message | null | undefined)[],
   timeoutMs: number = TIME.SHORT
-) => {
+): void => {
   if (!messages || messages.length === 0) return
 
   setTimeout(() => {

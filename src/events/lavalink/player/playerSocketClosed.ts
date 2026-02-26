@@ -23,7 +23,7 @@ class PlayerSocketClosedEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {WebSocketClosedEvent} payload - The WebSocket close event payload.
    */
-  async execute(bot: BotClient, player: Player, payload: WebSocketClosedEvent) {
+  async execute(bot: BotClient, player: Player, payload: WebSocketClosedEvent): Promise<void> {
     // 4014 usually means the bot was kicked or disconnected normally.
     if (payload.code === 4014) return
 

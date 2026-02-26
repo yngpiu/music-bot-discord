@@ -23,7 +23,7 @@ class PlayerQueueEmptyStartEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {number} delayMs - The delay in milliseconds before the bot leaves.
    */
-  async execute(bot: BotClient, player: Player, delayMs: number) {
+  async execute(bot: BotClient, player: Player, delayMs: number): Promise<void> {
     logger.info(
       `[Player: ${player.guildId}] Queue empty, starting timer to leave channel (${delayMs}ms)`
     )

@@ -141,7 +141,7 @@ class HelpCommand extends BaseCommand {
    * @param {BotClient} bot - The Discord client instance.
    * @returns {EmbedBuilder} - The main help embed.
    */
-  private buildMainEmbed(bot: BotClient) {
+  private buildMainEmbed(bot: BotClient): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: bot.user?.displayAvatarURL() })
@@ -256,7 +256,7 @@ class HelpCommand extends BaseCommand {
    * @param {BotClient} bot - The Discord client instance.
    * @param {Message} message - The command message.
    */
-  async execute(bot: BotClient, message: Message) {
+  async execute(bot: BotClient, message: Message): Promise<void> {
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 
     const { select, row } = this.buildSelectMenu()

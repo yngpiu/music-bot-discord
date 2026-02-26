@@ -29,7 +29,7 @@ class SkiptoCommand extends BaseCommand {
    * @param {string[]} args - Command arguments containing the target position.
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(
       `[Lệnh: skipto] Người dùng ${message.author.tag} yêu cầu chuyển tới bài số ${args[0] || 'trống'}`
     )

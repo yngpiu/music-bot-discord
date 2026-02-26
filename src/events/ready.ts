@@ -20,7 +20,7 @@ class ReadyEvent extends BotEvent {
    * Initializes Lavalink for the bot instance.
    * @param {BotClient} bot - The ready bot client instance.
    */
-  async execute(bot: BotClient) {
+  async execute(bot: BotClient): Promise<void> {
     await bot.lavalink.init({ ...bot.user!, shards: 'auto' })
     logger.info(`[System] Bot ${bot.user?.tag} is ready and successfully initialized Lavalink!`)
   }

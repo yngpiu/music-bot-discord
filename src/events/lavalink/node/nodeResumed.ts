@@ -28,7 +28,7 @@ class NodeResumedEvent extends LavalinkEvent {
     payload: { resumed: boolean; sessionId: string; op: 'ready' },
 
     _players: LavalinkPlayer[]
-  ) {
+  ): Promise<void> {
     logger.info(`[Lavalink Node: ${node.id}] Successfully resumed session: ${payload.sessionId}`)
   }
 }

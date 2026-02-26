@@ -156,7 +156,7 @@ class PlayCommand extends BaseCommand {
     message: Message,
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
-  ) {
+  ): Promise<void> {
     logger.info(
       `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild!.id}`
     )

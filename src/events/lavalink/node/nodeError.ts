@@ -22,7 +22,7 @@ class NodeErrorEvent extends LavalinkEvent {
    * @param {Error} error - The error object.
    * @param {unknown} _payload - Additional error payload (unused).
    */
-  async execute(_bot: BotClient, node: LavalinkNode, error: Error, _payload: unknown) {
+  async execute(_bot: BotClient, node: LavalinkNode, error: Error, _payload: unknown): Promise<void> {
     logger.error(`[Lavalink Node: ${node.id}] Node error:`, error)
   }
 }

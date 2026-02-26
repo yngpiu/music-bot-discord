@@ -43,7 +43,7 @@ class SearchCommand extends BaseCommand {
    * @param {string} query - The search query.
    * @param {Player} player - The player instance.
    */
-  private async handleTrackSearch(bot: BotClient, message: Message, query: string, player: Player) {
+  private async handleTrackSearch(bot: BotClient, message: Message, query: string, player: Player): Promise<void> {
     const result = await player.search({ query, source: 'dzsearch' }, message.author)
 
     let tracks = result.tracks.slice(0, 10)
@@ -275,7 +275,7 @@ class SearchCommand extends BaseCommand {
    * @param {string} query - The search query.
    * @param {Player} player - The player instance.
    */
-  private async handleAlbumSearch(bot: BotClient, message: Message, query: string, player: Player) {
+  private async handleAlbumSearch(bot: BotClient, message: Message, query: string, player: Player): Promise<void> {
     let albums: any[] = []
 
     const pageCache = new Map<number, any[]>()
@@ -492,7 +492,7 @@ class SearchCommand extends BaseCommand {
     message: Message,
     query: string,
     player: Player
-  ) {
+  ): Promise<void> {
     let playlists: any[] = []
 
     const pageCache = new Map<number, any[]>()
@@ -706,7 +706,7 @@ class SearchCommand extends BaseCommand {
     message: Message,
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
-  ) {
+  ): Promise<void> {
     if (!message.guild) return
     logger.info(
       `[Command: search] User ${message.author.tag} requested to search: ${args.join(' ')}`

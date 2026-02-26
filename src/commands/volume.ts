@@ -29,7 +29,7 @@ class VolumeCommand extends BaseCommand {
    * @param {string[]} args - Command arguments containing the target volume percentage.
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: volume] User ${message.author.tag} requested to change volume`)
 
     // If no argument is provided, show current volume.

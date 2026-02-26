@@ -22,7 +22,7 @@ class PlayerQueueEmptyEndEvent extends LavalinkEvent {
    * @param {BotClient} bot - The Discord client instance.
    * @param {Player} player - The Lavalink player instance.
    */
-  async execute(bot: BotClient, player: Player) {
+  async execute(bot: BotClient, player: Player): Promise<void> {
     logger.info(`[Player: ${player.guildId}] No new tracks, leaving channel`)
 
     const channel = bot.channels.cache.get(player.textChannelId!)

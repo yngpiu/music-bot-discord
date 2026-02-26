@@ -20,7 +20,7 @@ class NodeReconnectingEvent extends LavalinkEvent {
    * @param {BotClient} bot - The Discord client instance.
    * @param {LavalinkNode} node - The Lavalink node that is reconnecting.
    */
-  async execute(bot: BotClient, node: LavalinkNode) {
+  async execute(bot: BotClient, node: LavalinkNode): Promise<void> {
     logger.info(`[Lavalink Node: ${node.id}] Reconnecting...`)
   }
 }

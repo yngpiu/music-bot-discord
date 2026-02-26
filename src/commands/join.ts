@@ -130,7 +130,7 @@ class JoinCommand extends BaseCommand {
     message: Message,
     _args: string[],
     { vcId, player: existingPlayer }: CommandContext
-  ) {
+  ): Promise<void> {
     if (!message.guild) return
     logger.info(`[Command: join] User ${message.author.tag} requested bot to join channel`)
 

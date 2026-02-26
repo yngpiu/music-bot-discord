@@ -191,9 +191,9 @@ function extractId(input: string | undefined, type: SpotifyType): string {
   return idMatch ? idMatch[1] || '' : clean
 }
 
-export const extractPlaylistId = (input?: string) => extractId(input, 'playlist')
-export const extractAlbumId = (input?: string) => extractId(input, 'album')
-export const extractTrackId = (input?: string) => extractId(input, 'track')
+export const extractPlaylistId = (input?: string): string => extractId(input, 'playlist')
+export const extractAlbumId = (input?: string): string => extractId(input, 'album')
+export const extractTrackId = (input?: string): string => extractId(input, 'track')
 
 export function detectSpotifyType(input: string): SpotifyType | null {
   const decoded = decodeURIComponent(input).trim()
@@ -218,7 +218,7 @@ function getBiggestImage(images: RawImage[]): RawImage | undefined {
  * @param {RawImage | undefined} img - The raw image.
  * @returns {object[]} - An array containing the formatted image.
  */
-function formatImage(img: RawImage | undefined) {
+function formatImage(img: RawImage | undefined): { url: string; height: number | undefined; width: number | undefined; }[] {
   if (!img) return []
   return [{ url: img.url, height: img.height, width: img.width }]
 }
@@ -382,7 +382,7 @@ let redisClient: Redis | null = null
  * Sets the Redis client instance for token caching.
  * @param {Redis} client - The Redis client.
  */
-export function setSpotifyRedisClient(client: Redis) {
+export function setSpotifyRedisClient(client: Redis): void {
   redisClient = client
 }
 
@@ -408,14 +408,14 @@ class SpotifyTokenHandler {
   /**
    * Initializes the handler by loading cached tokens.
    */
-  async init() {
+  async init(): Promise<void> {
     await this.loadCache()
   }
 
   /**
    * Loads the token from Redis cache.
    */
-  private async loadCache() {
+  private async loadCache(): Promise<void> {
     if (!redisClient) return
     try {
       const raw = await redisClient.get(REDIS_KEY)
@@ -436,7 +436,7 @@ class SpotifyTokenHandler {
   /**
    * Saves the current token to Redis cache.
    */
-  private async saveCache() {
+  private async saveCache(): Promise<void> {
     if (!redisClient) return
     try {
       const ttlMs = this.accessTokenExpirationTimestampMs - Date.now()
@@ -460,7 +460,7 @@ class SpotifyTokenHandler {
   /**
    * Schedules an automatic token refresh before the current one expires.
    */
-  private scheduleRefresh() {
+  private scheduleRefresh(): void {
     if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
     if (!this.accessToken) return
 
@@ -486,7 +486,7 @@ class SpotifyTokenHandler {
   /**
    * Launches a headless browser instance to scrape the token.
    */
-  private async launchBrowser() {
+  private async launchBrowser(): Promise<void> {
     if (this.browser) return
     this.browser = await chromium.launch({
       headless: true,
@@ -515,7 +515,7 @@ class SpotifyTokenHandler {
   /**
    * Closes the headless browser.
    */
-  private async closeBrowser() {
+  private async closeBrowser(): Promise<void> {
     if (this.browser) {
       await this.browser.close()
       this.browser = null
@@ -665,7 +665,7 @@ const spotifyTokenHandler = new SpotifyTokenHandler()
 /**
  * Initializes the Spotify token subsystem.
  */
-export async function initSpotifyToken() {
+export async function initSpotifyToken(): Promise<void> {
   await spotifyTokenHandler.init()
 }
 

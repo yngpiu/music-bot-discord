@@ -49,7 +49,7 @@ const AVAILABLE_FILTERS = [
  * Resets all active filters and equalizers.
  * @param {FilterManager} filterManager - The player's filter manager.
  */
-async function resetAll(filterManager: FilterManager) {
+async function resetAll(filterManager: FilterManager): Promise<void> {
   await filterManager.resetFilters()
   await filterManager.clearEQ()
 }
@@ -179,7 +179,7 @@ class FilterCommand extends BaseCommand {
    * @param {string[]} args - Command arguments.
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(
       `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
     )

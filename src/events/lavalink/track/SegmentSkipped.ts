@@ -24,7 +24,7 @@ class SegmentSkippedEvent extends LavalinkEvent {
    * @param {Track} track - The track where the segment was skipped.
    * @param {SponsorBlockSegmentSkipped} payload - Details about the skipped segment.
    */
-  async execute(bot: BotClient, player: Player, track: Track, payload: SponsorBlockSegmentSkipped) {
+  async execute(bot: BotClient, player: Player, track: Track, payload: SponsorBlockSegmentSkipped): Promise<void> {
     logger.info(
       `[Player: ${player.guildId}] Automatically skipped ${payload.segment.category} segment in the track`
     )

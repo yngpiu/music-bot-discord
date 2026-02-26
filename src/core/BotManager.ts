@@ -43,7 +43,7 @@ export class BotManager {
   /**
    * Connects to Redis, initializes plugins, and spawns bot instances.
    */
-  async start() {
+  async start(): Promise<void> {
     try {
       await this.redis.connect()
       setRedisClient(this.redis)
@@ -325,7 +325,7 @@ export class BotManager {
    * @param {any} player - The Lavalink player instance.
    * @param {any[]} tracks - The list of tracks added.
    */
-  private async sendAutoplayEmbed(bot: BotClient, player: any, tracks: any[]) {
+  private async sendAutoplayEmbed(bot: BotClient, player: any, tracks: any[]): Promise<void> {
     const channel = (
       player.textChannelId ? bot.channels.cache.get(player.textChannelId) : undefined
     ) as TextChannel | undefined

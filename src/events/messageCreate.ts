@@ -213,7 +213,7 @@ class MessageCreateEvent extends BotEvent {
    * @param {BotManager} manager - The bot manager.
    * @param {Message} message - The received message.
    */
-  async execute(bot: BotClient, manager: BotManager, message: Message) {
+  async execute(bot: BotClient, manager: BotManager, message: Message): Promise<void> {
     const parsed = this.parseCommand(bot, message)
     if (!parsed) return
 

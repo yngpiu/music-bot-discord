@@ -25,7 +25,7 @@ class TrackStuckHandler extends LavalinkEvent {
    * @param {Track | null} track - The track that is stuck.
    * @param {TrackStuckEvent} payload - Details about the threshold and duration of the stuck track.
    */
-  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackStuckEvent) {
+  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackStuckEvent): Promise<void> {
     logger.error(
       `[Player: ${player.guildId}] Track stuck: ${track?.info?.title || 'Unknown'} (Stuck threshold: ${payload.thresholdMs}ms)`
     )

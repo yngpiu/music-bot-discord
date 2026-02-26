@@ -23,7 +23,7 @@ class PlayerDestroyEvent extends LavalinkEvent {
    * @param {Player} player - The destroyed player.
    * @param {string} [reason] - The reason for destruction.
    */
-  async execute(bot: BotClient, player: Player, reason?: string) {
+  async execute(bot: BotClient, player: Player, reason?: string): Promise<void> {
     logger.warn(`[Player: ${player.guildId}] Player destroyed. Reason: ${reason || 'Unknown'}`)
     const channel = bot.channels.cache.get(player.textChannelId!)
     if (!channel?.isTextBased() || !('send' in channel)) return

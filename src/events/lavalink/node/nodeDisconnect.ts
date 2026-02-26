@@ -21,7 +21,7 @@ class NodeDisconnectEvent extends LavalinkEvent {
    * @param {LavalinkNode} node - The disconnected Lavalink node.
    * @param {object} reason - The disconnect reason and status code.
    */
-  async execute(bot: BotClient, node: LavalinkNode, reason: { code?: number; reason?: string }) {
+  async execute(bot: BotClient, node: LavalinkNode, reason: { code?: number; reason?: string }): Promise<void> {
     logger.warn(
       `[Lavalink Node: ${node.id}] Node disconnected. Reason: ${reason.reason || 'Unknown'} (Code: ${reason.code || 'None'})`
     )

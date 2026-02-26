@@ -22,7 +22,7 @@ let redis: Redis | null = null
  * Sets the Redis client instance to be used by the rate limiter.
  * @param {Redis} client - The Redis client.
  */
-export function setRedisClient(client: Redis) {
+export function setRedisClient(client: Redis): void {
   redis = client
 }
 

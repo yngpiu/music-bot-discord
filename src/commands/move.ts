@@ -29,7 +29,7 @@ class MoveCommand extends BaseCommand {
    * @param {string[]} args - Command arguments: [from position, to position (optional)].
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(
       `[Command: move] User ${message.author.tag} requested to move track ${args[0]} to position ${args[1] || 1}`
     )

@@ -20,7 +20,7 @@ let flushTimer: ReturnType<typeof setInterval> | null = null
  * Initializes the track tracking service.
  * @param {Redis} redisClient - The Redis client instance.
  */
-export function initTrackService(redisClient: Redis) {
+export function initTrackService(redisClient: Redis): void {
   redis = redisClient
 
   if (flushTimer) clearInterval(flushTimer)

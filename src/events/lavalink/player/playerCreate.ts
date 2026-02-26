@@ -20,7 +20,7 @@ class PlayerCreateEvent extends LavalinkEvent {
    * @param {BotClient} bot - The Discord client instance.
    * @param {Player} player - The newly created Lavalink player.
    */
-  async execute(bot: BotClient, player: Player) {
+  async execute(bot: BotClient, player: Player): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Initialized player for server`)
 
     // Temporary ignore voice state updates during initialization to prevent race conditions.

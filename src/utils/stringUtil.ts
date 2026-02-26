@@ -8,7 +8,7 @@
  * @param {...string[]} args - Strings to join.
  * @returns {string} - Combined string.
  */
-export const lines = (...args: string[]) => args.join('\n')
+export const lines = (...args: string[]): string => args.join('\n')
 
 /**
  * Formats a duration in milliseconds to a human-readable HH:MM:SS or MM:SS format.
@@ -44,7 +44,7 @@ export function formatTrack(item: {
   title: string
   trackLink?: string | null
   author?: string | null
-}) {
+}): string {
   const isYouTube =
     item.trackLink &&
     (item.trackLink.includes('youtube.com') || item.trackLink.includes('youtu.be'))

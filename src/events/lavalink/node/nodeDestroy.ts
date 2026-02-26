@@ -20,7 +20,7 @@ class NodeDestroyEvent extends LavalinkEvent {
    * @param {BotClient} _bot - The Discord client instance (unused).
    * @param {LavalinkNode} node - The destroyed Lavalink node.
    */
-  async execute(_bot: BotClient, node: LavalinkNode) {
+  async execute(_bot: BotClient, node: LavalinkNode): Promise<void> {
     logger.warn(`[Lavalink Node: ${node.id}] Node has been destroyed`)
   }
 }

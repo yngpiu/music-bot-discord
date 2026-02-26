@@ -68,7 +68,7 @@ class RemoveCommand extends BaseCommand {
    * @param {string[]} args - Command arguments containing positions or ranges.
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
 
     if (player.queue.tracks.length === 0) {

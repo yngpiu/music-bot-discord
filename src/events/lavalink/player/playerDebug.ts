@@ -21,7 +21,7 @@ class PlayerDebugEvent extends LavalinkEvent {
    * @param {string} eventKey - The type of debug event.
    * @param {any} eventData - The associated debug data.
    */
-  async execute(_bot: BotClient, eventKey: string, eventData: any) {
+  async execute(_bot: BotClient, eventKey: string, eventData: any): Promise<void> {
     // Suppress noisy startup warnings.
     if (
       eventKey === DebugEvents.NoAudioDebug &&

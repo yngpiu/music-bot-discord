@@ -24,7 +24,7 @@ class PlayerDeafChangeEvent extends LavalinkEvent {
    * @param {boolean} selfDeaf - Whether the bot deafened itself.
    * @param {boolean} serverDeaf - Whether the bot was server-deafened.
    */
-  async execute(bot: BotClient, player: Player, selfDeaf: boolean, serverDeaf: boolean) {
+  async execute(bot: BotClient, player: Player, selfDeaf: boolean, serverDeaf: boolean): Promise<void> {
     // Ignore updates if the player is in an initialization or protected state.
     if (player.get('ignore_voice_state')) return
 

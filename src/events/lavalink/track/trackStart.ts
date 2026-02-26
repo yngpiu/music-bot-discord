@@ -24,7 +24,7 @@ class TrackStartEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {Track} track - The track that started playing.
    */
-  async execute(bot: BotClient, player: Player, track: Track) {
+  async execute(bot: BotClient, player: Player, track: Track): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Started playing track: ${track?.info?.title}`)
     if (!track || !player.textChannelId) return
 

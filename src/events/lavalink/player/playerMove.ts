@@ -29,7 +29,7 @@ class PlayerMoveEvent extends LavalinkEvent {
     player: Player,
     oldVoiceChannelId: string,
     newVoiceChannelId: string
-  ) {
+  ): Promise<void> {
     logger.info(
       `[Player: ${player.guildId}] Moved from ${oldVoiceChannelId} to ${newVoiceChannelId}`
     )

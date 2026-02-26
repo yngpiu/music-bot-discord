@@ -23,7 +23,7 @@ class PlayerReconnectEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {string} voiceChannelId - The ID of the reconnected voice channel.
    */
-  async execute(bot: BotClient, player: Player, voiceChannelId: string) {
+  async execute(bot: BotClient, player: Player, voiceChannelId: string): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Reconnected to voice channel ${voiceChannelId}`)
     const channel = bot.channels.cache.get(player.textChannelId!)
     if (!channel?.isTextBased() || !('send' in channel)) return

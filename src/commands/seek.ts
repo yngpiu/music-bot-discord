@@ -44,7 +44,7 @@ class SeekCommand extends BaseCommand {
    * @param {string[]} args - Command arguments containing the target time.
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }

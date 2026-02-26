@@ -30,7 +30,7 @@ class TrackErrorEvent extends LavalinkEvent {
     player: Player,
     track: Track | UnresolvedTrack | null,
     payload: TrackExceptionEvent | Error
-  ) {
+  ): Promise<void> {
     logger.error(
       `[Player: ${player.guildId}] Error playing track: ${track?.info?.title || 'Unknown'}`,
       payload

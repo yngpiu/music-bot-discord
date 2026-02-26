@@ -29,7 +29,7 @@ class ShuffleCommand extends BaseCommand {
    * @param {string[]} _args - Command arguments (unused).
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: shuffle] User ${message.author.tag} requested to shuffle queue`)
 
     // Ensure there are at least two tracks in the queue to shuffle.

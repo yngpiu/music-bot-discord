@@ -29,7 +29,7 @@ class PauseCommand extends BaseCommand {
    * @param {string[]} _args - Command arguments (unused).
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
+  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
 
     // Verify player state before attempting to pause.

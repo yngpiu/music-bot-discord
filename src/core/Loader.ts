@@ -48,16 +48,16 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
       logger.error('[System] Error replying error message to user:', error.message)
       return null
     })
-    if (reply) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (reply) {
         reply.delete().catch((error: Error) => {
           logger.error('[System] Error deleting error message:', error.message)
         })
-        target.delete().catch((error: Error) => {
-          logger.error('[System] Error deleting error message:', error.message)
-        })
-      }, TIME.VERY_SHORT)
-    }
+      }
+      target.delete().catch((error: Error) => {
+        logger.error('[System] Error deleting error message:', error.message)
+      })
+    }, TIME.VERY_SHORT)
     return
   }
 
@@ -93,7 +93,7 @@ function findReplyTarget(args: any[]): ReplyTarget | null {
  * @param {function} fn - The function to wrap.
  * @returns {function} - The wrapped function.
  */
-function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>) {
+function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>): (...args: any[]) => Promise<void> {
   return async (...args: any[]) => {
     try {
       await fn(...args)
@@ -125,7 +125,7 @@ export class Loader {
    * Dynamically loads all command files from the commands directory.
    * @param {BotClient} bot - The bot instance to load commands into.
    */
-  static async loadCommands(bot: BotClient) {
+  static async loadCommands(bot: BotClient): Promise<void> {
     const commandsPath = join(__dirname, '../commands')
     const files = readdirSync(commandsPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'))
     for (const file of files) {
@@ -146,7 +146,7 @@ export class Loader {
    * @param {BotClient} bot - The bot instance.
    * @param {BotManager} botManager - The bot manager instance.
    */
-  static async registerEvents(bot: BotClient, botManager: BotManager) {
+  static async registerEvents(bot: BotClient, botManager: BotManager): Promise<void> {
     const eventsPath = join(__dirname, '../events')
     const files = readdirSync(eventsPath).filter(
       (f) => (f.endsWith('.ts') || f.endsWith('.js')) && !f.startsWith('lavalink')
@@ -172,7 +172,7 @@ export class Loader {
    * Recursively discovers and registers all Lavalink manager and node events.
    * @param {BotClient} bot - The bot instance.
    */
-  static async registerLavalinkEvents(bot: BotClient) {
+  static async registerLavalinkEvents(bot: BotClient): Promise<void> {
     const eventsPath = join(__dirname, '../events', 'lavalink')
 
     const getFiles = (dir: string): string[] => {
@@ -214,7 +214,7 @@ export class Loader {
    * Dynamically loads interaction handlers (buttons, modals, autocompletes).
    * @param {BotClient} bot - The bot instance.
    */
-  static async loadInteractions(bot: BotClient) {
+  static async loadInteractions(bot: BotClient): Promise<void> {
     const interactionsPath = join(__dirname, '../interactions')
 
     const dirs = [

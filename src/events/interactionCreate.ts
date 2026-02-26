@@ -20,7 +20,7 @@ class InteractionCreateEvent extends BotEvent {
    * @param {BotManager} _manager - The manager for bot instances.
    * @param {Interaction} interaction - The received interaction.
    */
-  async execute(bot: BotClient, _manager: BotManager, interaction: Interaction) {
+  async execute(bot: BotClient, _manager: BotManager, interaction: Interaction): Promise<void> {
     // Route button interactions.
     if (interaction.isButton()) {
       const handler = bot.buttonHandlers.get(interaction.customId)

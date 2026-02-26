@@ -80,7 +80,7 @@ class FavoriteCommand extends BaseCommand {
    * @param {string[]} args - Command arguments.
    * @param {CommandContext} ctx - Contextual data.
    */
-  async execute(bot: BotClient, message: Message, args: string[]) {
+  async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     const subCommand = args[0]?.toLowerCase()
 
     if (subCommand === 'add') {
@@ -99,7 +99,7 @@ class FavoriteCommand extends BaseCommand {
     return this.handleList(bot, message)
   }
 
-  private async handleAdd(bot: BotClient, message: Message) {
+  private async handleAdd(bot: BotClient, message: Message): Promise<void> {
     if (!message.guildId) return
 
     const player = bot.lavalink.getPlayer(message.guildId)
@@ -146,7 +146,7 @@ class FavoriteCommand extends BaseCommand {
     }
   }
 
-  private async handleRemove(message: Message, args: string[]) {
+  private async handleRemove(message: Message, args: string[]): Promise<void> {
     if (args.length === 0) {
       throw new BotError(
         'Vui lòng cung cấp vị trí muốn xóa (VD: `fav rm 1`, `fav rm 1-3`, `fav rm 1 3`).'
@@ -193,7 +193,7 @@ class FavoriteCommand extends BaseCommand {
     }
   }
 
-  private async handleList(bot: BotClient, message: Message) {
+  private async handleList(bot: BotClient, message: Message): Promise<void> {
     const favorites = await prisma.favoriteTrack.findMany({
       where: { userId: message.author.id },
       orderBy: { addedAt: 'asc' }
@@ -398,7 +398,7 @@ class FavoriteCommand extends BaseCommand {
     })
   }
 
-  private async handlePlay(bot: BotClient, message: Message) {
+  private async handlePlay(bot: BotClient, message: Message): Promise<void> {
     if (!message.guild) return
     const vcId = message.guild.members.cache.get(message.author.id)?.voice.channelId
 

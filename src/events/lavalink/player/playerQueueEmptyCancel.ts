@@ -20,7 +20,7 @@ class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
    * @param {BotClient} bot - The Discord client instance.
    * @param {Player} player - The Lavalink player instance.
    */
-  async execute(bot: BotClient, player: Player) {
+  async execute(bot: BotClient, player: Player): Promise<void> {
     logger.info(
       `[Player: ${player.guildId}] Cancelled leave channel schedule because a new track was added`
     )

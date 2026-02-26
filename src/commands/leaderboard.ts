@@ -173,7 +173,7 @@ const MAX_ITEMS = 100
  * @param {boolean} disabled - Whether the buttons should be disabled.
  * @returns {ActionRowBuilder<ButtonBuilder>} - The buttons action row.
  */
-function buildNavButtons(page: number, totalPages: number, disabled = false) {
+function buildNavButtons(page: number, totalPages: number, disabled = false): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('lb_first')
@@ -204,7 +204,7 @@ function buildNavButtons(page: number, totalPages: number, disabled = false) {
  * @param {boolean} disabled - Whether the menu should be disabled.
  * @returns {ActionRowBuilder<StringSelectMenuBuilder>} - The select menu action row.
  */
-function buildViewSelect(currentView: LeaderboardView, disabled = false) {
+function buildViewSelect(currentView: LeaderboardView, disabled = false): ActionRowBuilder<StringSelectMenuBuilder> {
   const select = new StringSelectMenuBuilder()
     .setCustomId('lb_view')
     .setPlaceholder('Chọn bảng xếp hạng...')
@@ -250,7 +250,7 @@ function buildTrackEmbed(
   totalPages: number,
   guild: Guild,
   title: string
-) {
+): EmbedBuilder {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -284,7 +284,7 @@ function buildTrackEmbed(
  * @param {Guild} guild - The guild object.
  * @returns {EmbedBuilder} - The constructed embed.
  */
-function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, guild: Guild) {
+function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, guild: Guild): EmbedBuilder {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -317,7 +317,7 @@ function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, gu
  * @param {Guild} guild - The guild object.
  * @returns {EmbedBuilder} - The constructed embed.
  */
-function buildUserEmbed(entries: UserEntry[], page: number, totalPages: number, guild: Guild) {
+function buildUserEmbed(entries: UserEntry[], page: number, totalPages: number, guild: Guild): EmbedBuilder {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -355,7 +355,7 @@ class LeaderboardCommand extends BaseCommand {
    * @param {BotClient} bot - The Discord client instance.
    * @param {Message} message - The command message.
    */
-  async execute(bot: BotClient, message: Message) {
+  async execute(bot: BotClient, message: Message): Promise<void> {
     let currentView: LeaderboardView = 'personal'
     let currentPage = 0
 

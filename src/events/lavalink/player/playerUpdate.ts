@@ -18,7 +18,7 @@ class PlayerUpdateEvent extends LavalinkEvent {
    * @param {BotClient} _bot - The Discord client instance.
    * @param {Player} _player - The Lavalink player instance.
    */
-  async execute(_bot: BotClient, _player: Player) {}
+  async execute(_bot: BotClient, _player: Player): Promise<void> {}
 }
 
 export default new PlayerUpdateEvent()

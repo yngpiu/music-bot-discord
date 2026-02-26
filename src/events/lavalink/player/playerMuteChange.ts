@@ -24,7 +24,7 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
    * @param {boolean} selfMuted - Whether the bot muted itself.
    * @param {boolean} serverMuted - Whether the bot was server-muted.
    */
-  async execute(bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean) {
+  async execute(bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Server mute change: ${serverMuted}`)
 
     // Automatically pause playback if server-muted by an admin.

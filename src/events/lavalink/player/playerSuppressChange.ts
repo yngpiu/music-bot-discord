@@ -23,7 +23,7 @@ class PlayerSuppressChangeEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {boolean} suppress - Whether the bot is currently suppressed.
    */
-  async execute(bot: BotClient, player: Player, suppress: boolean) {
+  async execute(bot: BotClient, player: Player, suppress: boolean): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Suppress change: ${suppress}`)
 
     if (suppress) {

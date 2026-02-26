@@ -20,7 +20,7 @@ class RawEvent extends BotEvent {
    * @param {BotManager} _manager - The bot manager.
    * @param {unknown} data - The raw event data from Discord.
    */
-  async execute(bot: BotClient, _manager: BotManager, data: unknown) {
+  async execute(bot: BotClient, _manager: BotManager, data: unknown): Promise<void> {
     bot.lavalink.sendRawData(data as any)
   }
 }

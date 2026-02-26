@@ -23,7 +23,7 @@ class TrackEndHandler extends LavalinkEvent {
    * @param {Track | null} track - The track that ended.
    * @param {TrackEndEvent} payload - The track end event data.
    */
-  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackEndEvent) {
+  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackEndEvent): Promise<void> {
     logger.debug(
       `[Player: ${player.guildId}] Track ended: ${track?.info?.title || 'Unknown'} (Reason: ${payload.reason})`
     )

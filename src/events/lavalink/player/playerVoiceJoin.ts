@@ -19,7 +19,7 @@ class PlayerVoiceJoinEvent extends LavalinkEvent {
    * @param {Player} _player - The Lavalink player instance.
    * @param {string} _userId - The ID of the joining user.
    */
-  async execute(_bot: BotClient, _player: Player, _userId: string) {}
+  async execute(_bot: BotClient, _player: Player, _userId: string): Promise<void> {}
 }
 
 export default new PlayerVoiceJoinEvent()

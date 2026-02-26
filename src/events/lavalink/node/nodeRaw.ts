@@ -21,7 +21,7 @@ class NodeRawEvent extends LavalinkEvent {
    * @param {LavalinkNode} node - The Lavalink node that sent the payload.
    * @param {unknown} payload - The raw payload data.
    */
-  async execute(bot: BotClient, node: LavalinkNode, payload: unknown) {
+  async execute(bot: BotClient, node: LavalinkNode, payload: unknown): Promise<void> {
     logger.debug(`[Lavalink Node: ${node.id}] Received raw payload:`, payload)
   }
 }

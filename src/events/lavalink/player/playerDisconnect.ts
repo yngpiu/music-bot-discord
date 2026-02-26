@@ -23,7 +23,7 @@ class PlayerDisconnectEvent extends LavalinkEvent {
    * @param {Player} player - The Lavalink player instance.
    * @param {string} voiceChannelId - The ID of the voice channel that was left.
    */
-  async execute(bot: BotClient, player: Player, voiceChannelId: string) {
+  async execute(bot: BotClient, player: Player, voiceChannelId: string): Promise<void> {
     logger.warn(`[Player: ${player.guildId}] Disconnected from voice channel ${voiceChannelId}`)
     const channel = bot.channels.cache.get(player.textChannelId!)
     if (!channel?.isTextBased() || !('send' in channel)) return
