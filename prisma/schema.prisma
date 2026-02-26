@@ -58,3 +58,20 @@ model PlayListener {
   @@index([userId])
   @@index([historyId])
 }
+
+model FavoriteTrack {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  author     String
+  uri        String?
+  identifier String
+  sourceName String
+  artworkUrl String?
+  duration   Int      @default(0)
+  isrc       String?
+  addedAt    DateTime @default(now())
+
+  @@unique([userId, identifier, sourceName])
+  @@index([userId])
+}
