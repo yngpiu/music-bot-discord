@@ -253,12 +253,15 @@ export class BotManager {
   /**
    * Core routing — follows bots_flow.md:
    *
-   * Voice commands:
+   * All commands:
+   *   Priority 0 — Specific bot requested (targetBotId)
    *   Priority 1 — Bot already in user's VC
+   *
+   * Voice commands (fallback):
    *   Priority 2 — Any idle bot
    *   Fallback    — null (all busy)
    *
-   * Non-voice commands:
+   * Non-voice commands (fallback):
    *   Distribute evenly using message ID hash (no state needed)
    */
   getOrAssignBot(
@@ -275,35 +278,35 @@ export class BotManager {
 
     let chosenBot: BotClient | null = null
 
-    if (requiresVoice) {
-      if (targetBotId) {
-        // Find the specific bot requested
-        chosenBot = this.bots.find((b) => b.user?.id === targetBotId) ?? null
-      }
+    if (targetBotId) {
+      // Find the specific bot requested
+      chosenBot = this.bots.find((b) => b.user?.id === targetBotId) ?? null
+    }
 
-      // Priority 1: bot already in user's VC
-      if (!chosenBot && vcId) {
-        for (const bot of this.bots) {
-          const botVcId = bot.guilds.cache.get(guildId)?.members.me?.voice?.channelId
-          if (botVcId && botVcId === vcId) {
-            chosenBot = bot
-            break
-          }
+    // Always check first: bot already in user's VC
+    if (!chosenBot && vcId) {
+      for (const bot of this.bots) {
+        const botVcId = bot.guilds.cache.get(guildId)?.members.me?.voice?.channelId
+        if (botVcId && botVcId === vcId) {
+          chosenBot = bot
+          break
         }
       }
+    }
 
-      // Priority 2: any idle bot
-      if (!chosenBot) {
+    if (!chosenBot) {
+      if (requiresVoice) {
+        // Voice command: pick any idle bot
         const idleBots = this.bots.filter((bot) => this.isIdle(bot, guildId))
         if (idleBots.length > 0) {
           const randomIndex = Math.floor(Math.random() * idleBots.length)
           chosenBot = idleBots[randomIndex]
         }
+      } else {
+        // Non-voice: distribute using message ID hash
+        const idx = getDeterministicIndexFromId(messageId, this.bots.length)
+        chosenBot = this.bots[idx] ?? this.bots[0] ?? null
       }
-    } else {
-      // Non-voice: distribute using message ID hash
-      const idx = getDeterministicIndexFromId(messageId, this.bots.length)
-      chosenBot = this.bots[idx] ?? this.bots[0] ?? null
     }
 
     // Cache the decision to prevent duplicate bot replies
