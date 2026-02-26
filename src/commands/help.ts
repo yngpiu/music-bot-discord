@@ -17,99 +17,84 @@ export const commandsByCategory = {
   Track: [
     {
       name: 'play',
-      aliases: ['p'],
       args: '<tên bài/link>',
       desc: 'Phát nhạc từ tên bài hát hoặc link.'
     },
     {
       name: 'search',
-      aliases: ['find'],
       args: '[(album|alb|ab)/(playlist|pls|pl)] <tên>',
       desc: 'Tìm và chọn bài hát, album hoặc playlist.'
     },
-    { name: 'pause', aliases: ['ps'], args: '', desc: 'Tạm dừng nhạc.' },
+    { name: 'pause', args: '', desc: 'Tạm dừng nhạc.' },
     {
       name: 'resume',
-      aliases: ['rs', 'unpause', 'continue'],
       args: '',
       desc: 'Tiếp tục phát nhạc.'
     },
     {
       name: 'skipto',
-      aliases: ['st', 'nextto', 'nt'],
       args: '<vị trí>',
       desc: 'Bỏ qua đến bài số X.'
     },
-    { name: 'skip', aliases: ['s', 'n', 'next'], args: '', desc: 'Bỏ qua bài hiện tại.' },
-    { name: 'back', aliases: ['b', 'prev', 'previous'], args: '', desc: 'Phát lại bài trước đó.' },
+    { name: 'skip', args: '', desc: 'Bỏ qua bài hiện tại.' },
+    { name: 'back', args: '', desc: 'Phát lại bài trước đó.' },
     {
       name: 'seek',
-      aliases: ['fw', 'rw'],
       args: '<thời gian>',
       desc: 'Tua đến thời gian cụ thể (vd: 1:20).'
     },
-    { name: 'replay', aliases: ['rp', 'restart'], args: '', desc: 'Phát lại bài hiện tại từ đầu.' },
+    { name: 'replay', args: '', desc: 'Phát lại bài hiện tại từ đầu.' },
     {
       name: 'volume',
-      aliases: ['v', 'vol'],
       args: '[0-100]',
       desc: 'Xem hoặc điều chỉnh âm lượng.'
     },
     {
       name: 'filter',
-      aliases: ['f', 'fx', 'effects'],
       args: '[(bassboost, 8d, echo, flanger, karaoke, nightcore, vaporwave) | (clear, off)]',
       desc: 'Hiển thị/chọn hiệu ứng âm thanh.'
     },
     {
       name: 'nowplaying',
-      aliases: ['np', 'current'],
       args: '',
       desc: 'Hiển thị bài hát đang phát.'
     },
-    { name: 'status', aliases: ['state', 'info'], args: '', desc: 'Xem trạng thái của player.' }
+    { name: 'status', args: '', desc: 'Xem trạng thái của player.' }
   ],
   Queue: [
-    { name: 'queue', aliases: ['q', 'list'], args: '[trang]', desc: 'Xem danh sách chờ.' },
+    { name: 'queue', args: '[trang]', desc: 'Xem danh sách chờ.' },
     {
       name: 'clear',
-      aliases: ['c', 'cq', 'empty'],
       args: '',
       desc: 'Xóa toàn bộ nhạc trong hàng chờ.'
     },
     {
       name: 'loop',
-      aliases: ['l', 'repeat'],
       args: '[off/track/queue]',
       desc: 'Thiết lập chế độ lặp lại.'
     },
     {
       name: 'shuffle',
-      aliases: ['sh', 'mix', 'random'],
       args: '',
       desc: 'Trộn bài trong hàng chờ.'
     },
     {
       name: 'move',
-      aliases: ['m'],
       args: '<từ> <đến>',
       desc: 'Di chuyển một bài hát trong hàng chờ.'
     },
     {
       name: 'remove',
-      aliases: ['rm', 'del', 'delete'],
       args: '<vị trí> | <vị trí> <vị trí> ... | <từ> <đến>',
       desc: 'Xóa một bài hát khỏi hàng chờ.'
     },
     {
       name: 'insert',
-      aliases: ['i', 'add', 'playnext', 'pn'],
       args: '<tên bài/link>',
       desc: 'Chèn bài hát lên ngay sau bài hiện tại.'
     },
     {
       name: 'autoplay',
-      aliases: ['ap', 'endless'],
       args: '',
       desc: 'Bật/tắt tự động phát nhạc tương tự.'
     }
@@ -117,20 +102,17 @@ export const commandsByCategory = {
   General: [
     {
       name: 'join',
-      aliases: ['j'],
       args: '<tag bot>',
       desc: 'Gọi bot vào kênh thoại, nếu không tag thì tự động chọn bot.'
     },
     {
       name: 'leave',
-      aliases: ['lv', 'dc', 'disconnect', 'stop'],
       args: '',
       desc: 'Đuổi bot khỏi kênh thoại và dừng nhạc.'
     },
-    { name: 'help', aliases: ['h'], args: '', desc: 'Hiển thị danh sách lệnh.' },
+    { name: 'help', args: '', desc: 'Hiển thị danh sách lệnh.' },
     {
       name: 'leaderboard',
-      aliases: ['lb', 'top'],
       args: '',
       desc: 'Xem bảng xếp hạng bài hát và bot.'
     }
@@ -151,7 +133,9 @@ const command: Command = {
         name: 'Danh sách hướng dẫn',
         iconURL: bot.user?.displayAvatarURL()
       })
-      .setDescription('Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.')
+      .setDescription(
+        'Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\nBạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại trang https://6music.edgeone.app.'
+      )
       .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
 
     const select = new StringSelectMenuBuilder()
@@ -192,7 +176,6 @@ const command: Command = {
       const desc = cmds
         .map((cmd, index) => {
           let str = `${index + 1}. **${cmd.name}**`
-          if (cmd.aliases.length > 0) str += ` (${cmd.aliases.map((a) => a).join(', ')})`
           if (cmd.args) str += ` ${cmd.args}`
           str += `\n> ${cmd.desc}`
           return str

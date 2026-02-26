@@ -770,9 +770,9 @@ const template = `<!DOCTYPE html>
             <input type="text" id="searchInput" placeholder="Tìm kiếm lệnh...">
             <select id="categorySelect">
                 <option value="all">Tất cả danh mục</option>
-                <option value="music">🎵 Âm nhạc</option>
-                <option value="queue">📄 Hàng chờ</option>
-                <option value="info">⚙️ Tuỳ chỉnh</option>
+                <option value="music">Âm nhạc</option>
+                <option value="queue">Hàng chờ</option>
+                <option value="info">Khác</option>
             </select>
         </div>
 
