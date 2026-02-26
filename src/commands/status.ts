@@ -1,17 +1,18 @@
 import { EmbedBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatTrack } from '~/utils/stringUtil'
 
-const command: Command = {
-  name: 'status',
-  aliases: ['state', 'info'],
-  description: 'Hiển thị các trạng thái của trình phát nhạc (lặp, tự động phát, âm lượng, ...).',
-  requiresVoice: true,
+class StatusCommand extends BaseCommand {
+  name = 'status'
+  aliases = ['state', 'info']
+  description = 'Hiển thị các trạng thái của trình phát nhạc (lặp, tự động phát, âm lượng, ...).'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
@@ -78,4 +79,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new StatusCommand()

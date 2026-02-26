@@ -2,6 +2,7 @@ import { ContainerBuilder, Message, VoiceChannel } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
@@ -9,11 +10,11 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
-const command: Command = {
-  name: 'claim',
-  aliases: ['c'],
-  description: 'Lấy quyền kiểm soát player nếu người dùng trước đó đã rời kênh thoại.',
-  requiresVoiceMatch: true,
+class ClaimCommand extends BaseCommand {
+  name = 'claim'
+  aliases = ['c']
+  description = 'Lấy quyền kiểm soát player nếu người dùng trước đó đã rời kênh thoại.'
+  requiresVoiceMatch = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: claim] User ${message.author.tag} requested to claim player control`)
@@ -91,4 +92,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new ClaimCommand()

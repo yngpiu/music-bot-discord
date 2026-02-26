@@ -2,16 +2,17 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'autoplay',
-  aliases: ['ap', 'endless'],
-  description: 'Bật/tắt chế độ tự động phát nhạc đề xuất khi hết danh sách chờ.',
-  requiresVoice: true,
+class AutoplayCommand extends BaseCommand {
+  name = 'autoplay'
+  aliases = ['ap', 'endless']
+  description = 'Bật/tắt chế độ tự động phát nhạc đề xuất khi hết danh sách chờ.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: autoplay] User ${message.author.tag} requested to toggle autoplay state`)
@@ -49,4 +50,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new AutoplayCommand()

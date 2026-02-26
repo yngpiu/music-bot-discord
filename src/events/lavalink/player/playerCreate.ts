@@ -3,8 +3,12 @@ import { Player } from 'lavalink-client'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player) => {
+class PlayerCreateEvent extends LavalinkEvent {
+  name = 'playerCreate'
+
+  async execute(bot: BotClient, player: Player) {
   logger.info(`[Player: ${player.guildId}] Initialized player for server`)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const owner = player.get<string | null>('owner')
@@ -31,3 +35,6 @@ export default async (bot: BotClient, player: Player) => {
     logger.warn(`[Player: ${player.guildId}] Error enabling SponsorBlock:`, e)
   }
 }
+}
+
+export default new PlayerCreateEvent()

@@ -3,52 +3,53 @@ import { Player, Track, TrackStuckEvent } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatTrack, lines } from '~/utils/stringUtil.js'
 
-export default async (
-  bot: BotClient,
-  player: Player,
-  track: Track | null,
+class TrackStuckHandler extends LavalinkEvent {
+  name = 'trackStuck'
 
-  payload: TrackStuckEvent
-) => {
-  logger.error(
-    `[Player: ${player.guildId}] Track stuck: ${track?.info?.title || 'Unknown'} (Stuck threshold: ${payload.thresholdMs}ms)`
-  )
+  async execute(bot: BotClient, player: Player, track: Track | null, payload: TrackStuckEvent) {
+    logger.error(
+      `[Player: ${player.guildId}] Track stuck: ${track?.info?.title || 'Unknown'} (Stuck threshold: ${payload.thresholdMs}ms)`
+    )
 
-  if (!track || !player.textChannelId) return
+    if (!track || !player.textChannelId) return
 
-  const channel = bot.channels.cache.get(player.textChannelId)
+    const channel = bot.channels.cache.get(player.textChannelId)
 
-  if (!channel?.isTextBased() || !('send' in channel)) return
+    if (!channel?.isTextBased() || !('send' in channel)) return
 
-  const trackDisplay = formatTrack({
-    title: track.info.title,
-    trackLink: track.info.uri,
-    author: track.info.author
-  })
+    const trackDisplay = formatTrack({
+      title: track.info.title,
+      trackLink: track.info.uri,
+      author: track.info.author
+    })
 
-  const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-    t.setContent(
-      lines(
-        `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bỏ qua ${trackDisplay} do lỗi.`
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        lines(
+          `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bỏ qua ${trackDisplay} do lỗi.`
+        )
       )
     )
-  )
 
-  await channel
-    .send({
-      components: [container],
-      flags: ['IsComponentsV2']
-    })
+    await channel
+      .send({
+        components: [container],
+        flags: ['IsComponentsV2']
+      })
 
-    .catch((e) => {
-      logger.warn(`[Player: ${player.guildId}] Error sending track stuck notification:`, e)
-      return null
-    })
+      .catch((e) => {
+        logger.warn(`[Player: ${player.guildId}] Error sending track stuck notification:`, e)
+        return null
+      })
 
-  // Skip the stuck track
-  await player.skip()
+    // Skip the stuck track
+    await player.skip()
+  }
 }
+
+export default new TrackStuckHandler()

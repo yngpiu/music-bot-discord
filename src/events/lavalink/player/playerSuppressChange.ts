@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, suppress: boolean) => {
+class PlayerSuppressChangeEvent extends LavalinkEvent {
+  name = 'playerSuppressChange'
+
+  async execute(bot: BotClient, player: Player, suppress: boolean) {
   logger.info(`[Player: ${player.guildId}] Suppress change: ${suppress}`)
   if (suppress) {
     player.set('paused_of_servermute', true) // Reusing the same flag since the effect is identical (can't speak)
@@ -40,3 +44,6 @@ export default async (bot: BotClient, player: Player, suppress: boolean) => {
       return null
     })
 }
+}
+
+export default new PlayerSuppressChangeEvent()

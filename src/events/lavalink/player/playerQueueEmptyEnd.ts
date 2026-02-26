@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player) => {
+class PlayerQueueEmptyEndEvent extends LavalinkEvent {
+  name = 'playerQueueEmptyEnd'
+
+  async execute(bot: BotClient, player: Player) {
   logger.info(`[Player: ${player.guildId}] No new tracks, leaving channel`)
 
   const channel = bot.channels.cache.get(player.textChannelId!)
@@ -34,3 +38,6 @@ export default async (bot: BotClient, player: Player) => {
     }
   }
 }
+}
+
+export default new PlayerQueueEmptyEndEvent()

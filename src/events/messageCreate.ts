@@ -3,7 +3,9 @@ import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
 
 import { EMOJI } from '~/constants/emoji'
+import type { BaseCommand } from '~/core/BaseCommand'
 import type { BotClient } from '~/core/BotClient'
+import { BotEvent } from '~/core/BotEvent.js'
 import type { BotManager } from '~/core/BotManager'
 import { BotError } from '~/core/errors.js'
 
@@ -12,21 +14,41 @@ import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
 import { lines } from '~/utils/stringUtil'
 
-export default {
-  name: Events.MessageCreate,
-  async execute(bot: BotClient, manager: BotManager, message: Message) {
-    if (message.author.bot || !message.guild) return
-    if (!message.content.startsWith(config.prefix)) return
+class MessageCreateEvent extends BotEvent {
+  name = Events.MessageCreate
+
+  // ─── Parse ────────────────────────────────────────────────────────────────
+
+  private parseCommand(
+    bot: BotClient,
+    message: Message
+  ): { command: BaseCommand; args: string[]; commandName: string } | null {
+    if (message.author.bot || !message.guild) return null
+    if (!message.content.startsWith(config.prefix)) return null
 
     const args = message.content.slice(config.prefix.length).trim().split(/\s+/)
     const commandName = args.shift()?.toLowerCase()
-    if (!commandName) return
+    if (!commandName) return null
 
     const command = bot.commands.get(commandName)
-    if (!command) return
+    if (!command) return null
 
-    // ─── Bot Routing (must run FIRST to avoid duplicate responses) ─────────
-    const member = message.guild.members.cache.get(message.author.id) as GuildMember
+    return { command, args, commandName }
+  }
+
+  // ─── Bot Routing ──────────────────────────────────────────────────────────
+
+  /**
+   * Returns the assigned bot for this guild, or responds & returns null if all bots are busy / bad target.
+   */
+  private async routeBot(
+    bot: BotClient,
+    manager: BotManager,
+    message: Message,
+    command: BaseCommand,
+    commandName: string
+  ): Promise<BotClient | null> {
+    const member = message.guild!.members.cache.get(message.author.id) as GuildMember
     const vcId = member?.voice?.channelId ?? undefined
 
     const targetBotId =
@@ -34,7 +56,7 @@ export default {
         ? message.mentions.users.filter((u) => u.bot).first()?.id
         : undefined
 
-    const chosenBot = manager.getOrAssignBot(message.guild.id, {
+    const chosenBot = manager.getOrAssignBot(message.guild!.id, {
       vcId,
       messageId: message.id,
       requiresVoice:
@@ -43,100 +65,109 @@ export default {
     })
 
     if (!chosenBot) {
-      if (targetBotId) {
-        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-          t.setContent(`${EMOJI.ANIMATED_CAT_NO_IDEA} Đó không phải là **bot** đâu nhé...`)
-        )
-        const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
-        if (bot.botIndex === randomBotIndex) {
-          await message.reply({ components: [container], flags: ['IsComponentsV2'] })
-        }
-        return
-      }
+      await this.replyAllBusy(bot, manager, message, targetBotId)
+      return null
+    }
 
-      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-        t.setContent(
-          lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
-        )
+    return chosenBot
+  }
+
+  private async replyAllBusy(
+    bot: BotClient,
+    manager: BotManager,
+    message: Message,
+    targetBotId: string | undefined
+  ): Promise<void> {
+    const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
+    if (bot.botIndex !== randomBotIndex) return
+
+    const text = targetBotId
+      ? `${EMOJI.ANIMATED_CAT_NO_IDEA} Đó không phải là **bot** đâu nhé...`
+      : lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
+
+    const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(text))
+    await message.reply({ components: [container], flags: ['IsComponentsV2'] })
+  }
+
+  // ─── Guard Checks ─────────────────────────────────────────────────────────
+
+  /**
+   * Returns true if the message should be blocked (user is banned).
+   */
+  private async checkBan(message: Message): Promise<boolean> {
+    const banRemainingMs = await getBanRemainingMs(message.author.id)
+    if (banRemainingMs <= 0) return false
+
+    const banHours = (banRemainingMs / 3_600_000).toFixed(1)
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
       )
-      const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
-      if (bot.botIndex === randomBotIndex) {
-        await message.reply({ components: [container], flags: ['IsComponentsV2'] })
-      }
-      return
+    )
+    const reply = await message
+      .reply({ components: [container], flags: ['IsComponentsV2'] })
+      .catch(() => null)
+
+    if (reply) {
+      setTimeout(() => {
+        reply.delete().catch(() => {})
+        message.delete().catch(() => {})
+      }, 10000)
     }
+    return true
+  }
 
-    // Not the chosen bot — skip entirely (no rate limit, no reply)
-    if (chosenBot.user?.id !== bot.user?.id) return
+  /**
+   * Returns true if the message should be blocked (rate limited).
+   */
+  private async checkRateLimit(message: Message): Promise<boolean> {
+    const { limited, remainingMs } = await checkRateLimit(message.author.id)
+    if (!limited) return false
 
-    // ─── Owner bypass — skip rate limit & ban checks ──────────────────────
-    const isOwner = isDeveloperOrServerOwner(message)
+    const remaining = (remainingMs / 1000).toFixed(1)
+    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(
+        `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
+      )
+    )
+    const reply = await message
+      .reply({ components: [container], flags: ['IsComponentsV2'] })
+      .catch(() => null)
 
-    // ─── Ban check ────────────────────────────────────────────────────────────
-    if (!isOwner) {
-      const banRemainingMs = await getBanRemainingMs(message.author.id)
-      if (banRemainingMs > 0) {
-        const banHours = (banRemainingMs / 3_600_000).toFixed(1)
-        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-          t.setContent(
-            `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
-          )
-        )
-        const reply = await message
-          .reply({ components: [container], flags: ['IsComponentsV2'] })
-          .catch(() => null)
-        if (reply) {
-          setTimeout(() => {
-            reply.delete().catch(() => {})
-            message.delete().catch(() => {})
-          }, 10000)
-        }
-        return
-      }
+    if (reply) {
+      setTimeout(() => {
+        reply.delete().catch(() => {})
+        message.delete().catch(() => {})
+      }, remainingMs)
     }
+    return true
+  }
 
-    // ─── Rate Limit ───────────────────────────────────────────────────────────
-    if (!isOwner) {
-      const { limited, remainingMs } = await checkRateLimit(message.author.id)
-      if (limited) {
-        const remaining = (remainingMs / 1000).toFixed(1)
-        const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-          t.setContent(
-            `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
-          )
-        )
-        const reply = await message
-          .reply({ components: [container], flags: ['IsComponentsV2'] })
-          .catch(() => null)
-        if (reply) {
-          setTimeout(() => {
-            reply.delete().catch(() => {})
-            message.delete().catch(() => {})
-          }, remainingMs)
-        }
-        return
-      }
-    }
+  // ─── Command Context ───────────────────────────────────────────────────────
 
-    // ─── Command Guards ────────────────────────────────────────────────────────
-    let player: Player | null = null
-    let userVcId: string | null = null
+  /**
+   * Validates command guards and builds the CommandContext.
+   * Throws BotError if any guard fails.
+   */
+  private buildCommandContext(
+    bot: BotClient,
+    message: Message,
+    command: BaseCommand
+  ): CommandContext {
+    const member = message.guild!.members.cache.get(message.author.id) as GuildMember
+    const player: Player | null = bot.lavalink.getPlayer(message.guild!.id) ?? null
+    const userVcId: string | null = member?.voice?.channelId ?? null
 
-    // requiresVoice / requiresVoiceMatch / requiresOwner all need an active player
     if (command.requiresVoice || command.requiresVoiceMatch || command.requiresOwner) {
-      player = bot.lavalink.getPlayer(message.guild.id) ?? null
       if (!player) throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
     }
 
-    // requiresVoiceMatch: user must be in a voice channel and same as bot
     if (command.requiresVoiceMatch) {
-      userVcId = member?.voice?.channelId ?? null
       if (!userVcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
       if (player!.voiceChannelId !== userVcId)
         throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
     }
 
-    // requiresOwner: caller must own the player session
     if (command.requiresOwner) {
       const sessionOwner = player!.get<string | null>('owner')
       if (sessionOwner && message.author.id !== sessionOwner)
@@ -145,13 +176,32 @@ export default {
         )
     }
 
-    // Build context — safe casts: middleware above guarantees these are set
-    // when the corresponding flags are true
-    const ctx: CommandContext = {
+    return {
       player: player as Player,
       vcId: userVcId as string
     }
+  }
 
+  // ─── Main Handler ─────────────────────────────────────────────────────────
+
+  async execute(bot: BotClient, manager: BotManager, message: Message) {
+    const parsed = this.parseCommand(bot, message)
+    if (!parsed) return
+
+    const { command, args, commandName } = parsed
+
+    const chosenBot = await this.routeBot(bot, manager, message, command, commandName)
+    if (!chosenBot) return
+    if (chosenBot.user?.id !== bot.user?.id) return
+
+    const isOwner = isDeveloperOrServerOwner(message)
+
+    if (!isOwner && (await this.checkBan(message))) return
+    if (!isOwner && (await this.checkRateLimit(message))) return
+
+    const ctx = this.buildCommandContext(bot, message, command)
     await command.execute(bot, message, args, ctx)
   }
 }
+
+export default new MessageCreateEvent()

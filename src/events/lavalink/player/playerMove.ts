@@ -5,13 +5,15 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (
-  bot: BotClient,
+class PlayerMoveEvent extends LavalinkEvent {
+  name = 'playerMove'
+
+  async execute(bot: BotClient,
   player: Player,
   oldVoiceChannelId: string,
-  newVoiceChannelId: string
-) => {
+  newVoiceChannelId: string) {
   logger.info(`[Player: ${player.guildId}] Moved from ${oldVoiceChannelId} to ${newVoiceChannelId}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -33,3 +35,6 @@ export default async (
       return null
     })
 }
+}
+
+export default new PlayerMoveEvent()

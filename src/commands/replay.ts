@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'replay',
-  aliases: ['restart', 'rp'],
-  description: 'Phát lại bài hát hiện tại từ đầu (0:00).',
-  requiresVoice: true,
+class ReplayCommand extends BaseCommand {
+  name = 'replay'
+  aliases = ['restart', 'rp']
+  description = 'Phát lại bài hát hiện tại từ đầu (0:00).'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: replay] User ${message.author.tag} requested to replay track`)
@@ -51,4 +52,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new ReplayCommand()

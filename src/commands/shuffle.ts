@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'shuffle',
-  aliases: ['sh', 'mix', 'random'],
-  description: 'Trộn ngẫu nhiên các bài hát trong danh sách chờ.',
-  requiresVoice: true,
+class ShuffleCommand extends BaseCommand {
+  name = 'shuffle'
+  aliases = ['sh', 'mix', 'random']
+  description = 'Trộn ngẫu nhiên các bài hát trong danh sách chờ.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: shuffle] User ${message.author.tag} requested to shuffle queue`)
@@ -46,4 +47,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new ShuffleCommand()

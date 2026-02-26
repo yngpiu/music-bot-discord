@@ -4,13 +4,15 @@ import { BotClient } from '~/core/BotClient.js'
 import { recordTrackPlay } from '~/lib/trackService.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (
-  bot: BotClient,
+class QueueEndEvent extends LavalinkEvent {
+  name = 'queueEnd'
+
+  async execute(bot: BotClient,
   player: Player,
   track: Track | null,
-  payload: TrackEndEvent
-) => {
+  payload: TrackEndEvent) {
   logger.debug(
     `[Player: ${player.guildId}] queueEnd event triggered because the last track finished`
   )
@@ -49,3 +51,6 @@ export default async (
     bot.user!.id
   )
 }
+}
+
+export default new QueueEndEvent()

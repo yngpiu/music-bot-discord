@@ -174,29 +174,25 @@ export class Loader {
     )
 
     for (const filePath of eventFiles) {
-      const event = await import(filePath)
-      const execute = event.default || event
+      const mod = await import(filePath)
+      const instance = mod.default ?? mod
 
-      if (typeof execute === 'function') {
-        const eventName =
-          filePath
-            .split('/')
-            .pop()
-            ?.replace(/\.(js|ts)$/, '') || ''
+      const eventName = instance.name
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const wrappedHandler = safeExecute(eventName, (...args: any[]) =>
+        instance.execute(bot, ...args)
+      )
+
+      if (filePath.includes('/node/')) {
+        let nodeEventName = eventName.replace(/^node/, '')
+        nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const wrappedHandler = safeExecute(eventName, (...args: any[]) => execute(bot, ...args))
-
-        if (filePath.includes('/node/')) {
-          let nodeEventName = eventName.replace(/^node/, '')
-          nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          bot.lavalink.nodeManager.on(nodeEventName as any, wrappedHandler)
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          bot.lavalink.on(eventName as any, wrappedHandler)
-        }
+        bot.lavalink.nodeManager.on(nodeEventName as any, wrappedHandler)
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        bot.lavalink.on(eventName as any, wrappedHandler)
       }
     }
   }

@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'volume',
-  aliases: ['vol', 'v'],
-  description: 'Chỉnh mức âm lượng của bot.',
-  requiresOwner: true,
+class VolumeCommand extends BaseCommand {
+  name = 'volume'
+  aliases = ['vol', 'v']
+  description = 'Chỉnh mức âm lượng của bot.'
+  requiresOwner = true
 
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(`[Command: volume] User ${message.author.tag} requested to change volume`)
@@ -54,4 +55,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new VolumeCommand()

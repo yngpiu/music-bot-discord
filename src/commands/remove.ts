@@ -2,6 +2,7 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
@@ -48,11 +49,11 @@ function parsePositions(args: string[], maxLength: number): number[] {
   return [...positions].sort((a, b) => a - b)
 }
 
-const command: Command = {
-  name: 'remove',
-  aliases: ['rm', 'delete', 'del'],
-  description: 'Xóa bài hát khỏi danh sách chờ (VD: `remove 1`, `remove 2 7 4`, `remove 2-7`).',
-  requiresVoice: true,
+class RemoveCommand extends BaseCommand {
+  name = 'remove'
+  aliases = ['rm', 'delete', 'del']
+  description = 'Xóa bài hát khỏi danh sách chờ (VD: `remove 1`, `remove 2 7 4`, `remove 2-7`).'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
@@ -108,4 +109,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new RemoveCommand()

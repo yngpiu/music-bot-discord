@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'back',
-  aliases: ['b', 'previous', 'prev'],
-  description: 'Quay lại bài hát trước đó.',
-  requiresVoice: true,
+class BackCommand extends BaseCommand {
+  name = 'back'
+  aliases = ['b', 'previous', 'prev']
+  description = 'Quay lại bài hát trước đó.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: back] User ${message.author.tag} requested to play previous track`)
@@ -59,4 +60,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new BackCommand()

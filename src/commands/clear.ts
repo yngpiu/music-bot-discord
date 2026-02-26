@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'clear',
-  aliases: ['c', 'cq', 'empty'],
-  description: 'Xóa toàn bộ bài hát trong sách chờ.',
-  requiresOwner: true,
+class ClearCommand extends BaseCommand {
+  name = 'clear'
+  aliases = ['c', 'cq', 'empty']
+  description = 'Xóa toàn bộ bài hát trong sách chờ.'
+  requiresOwner = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
@@ -55,4 +56,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new ClearCommand()

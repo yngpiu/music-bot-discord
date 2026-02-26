@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'leave',
-  aliases: ['lv', 'dc', 'disconnect', 'stop'],
-  description: 'Yêu cầu bot rời khỏi kênh thoại hiện tại.',
-  requiresVoiceMatch: true,
-  requiresOwner: true,
+class LeaveCommand extends BaseCommand {
+  name = 'leave'
+  aliases = ['lv', 'dc', 'disconnect', 'stop']
+  description = 'Yêu cầu bot rời khỏi kênh thoại hiện tại.'
+  requiresVoiceMatch = true
+  requiresOwner = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: leave] User ${message.author.tag} requested bot to leave channel`)
@@ -43,4 +44,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new LeaveCommand()

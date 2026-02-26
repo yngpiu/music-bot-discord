@@ -6,8 +6,12 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatDuration, formatTrack, lines } from '~/utils/stringUtil'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, track: Track) => {
+class TrackStartEvent extends LavalinkEvent {
+  name = 'trackStart'
+
+  async execute(bot: BotClient, player: Player, track: Track) {
   logger.info(`[Player: ${player.guildId}] Started playing track: ${track?.info?.title}`)
   if (!track || !player.textChannelId) return
 
@@ -43,3 +47,6 @@ export default async (bot: BotClient, player: Player, track: Track) => {
       return null
     })
 }
+}
+
+export default new TrackStartEvent()

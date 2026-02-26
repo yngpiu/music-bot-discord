@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, reason?: string) => {
+class PlayerDestroyEvent extends LavalinkEvent {
+  name = 'playerDestroy'
+
+  async execute(bot: BotClient, player: Player, reason?: string) {
   logger.warn(`[Player: ${player.guildId}] Player destroyed. Reason: ${reason || 'Unknown'}`)
   const channel = bot.channels.cache.get(player.textChannelId!)
   if (!channel?.isTextBased() || !('send' in channel)) return
@@ -26,3 +30,6 @@ export default async (bot: BotClient, player: Player, reason?: string) => {
       return null
     })
 }
+}
+
+export default new PlayerDestroyEvent()

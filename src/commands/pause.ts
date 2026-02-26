@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'pause',
-  aliases: ['ps'],
-  description: 'Tạm dừng bài hát hiện tại.',
-  requiresVoiceMatch: true,
+class PauseCommand extends BaseCommand {
+  name = 'pause'
+  aliases = ['ps']
+  description = 'Tạm dừng bài hát hiện tại.'
+  requiresVoiceMatch = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
@@ -53,4 +54,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new PauseCommand()

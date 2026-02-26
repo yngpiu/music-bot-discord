@@ -1,16 +1,17 @@
 import { EmbedBuilder, type Message, type TextChannel } from 'discord.js'
 
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
-const command: Command = {
-  name: 'notify',
-  aliases: ['thongbao'],
-  description: 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho Owner).',
-  requiresVoice: false,
+class NotifyCommand extends BaseCommand {
+  name = 'notify'
+  aliases = ['thongbao']
+  description = 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho Owner).'
+  requiresVoice = false
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     // Kiểm tra quyền Owner
@@ -71,4 +72,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new NotifyCommand()

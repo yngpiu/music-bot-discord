@@ -6,13 +6,15 @@ import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { formatTrack, lines } from '~/utils/stringUtil.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (
-  bot: BotClient,
+class TrackErrorEvent extends LavalinkEvent {
+  name = 'trackError'
+
+  async execute(bot: BotClient,
   player: Player,
   track: Track | UnresolvedTrack | null,
-  payload: TrackExceptionEvent | Error
-) => {
+  payload: TrackExceptionEvent | Error) {
   logger.error(
     `[Player: ${player.guildId}] Error playing track: ${track?.info?.title || 'Unknown'}`,
     payload
@@ -53,3 +55,6 @@ export default async (
       return null
     })
 }
+}
+
+export default new TrackErrorEvent()

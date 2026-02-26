@@ -1,6 +1,7 @@
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 import { buildAddedItemEmbed } from '~/lib/embeds.js'
@@ -9,11 +10,11 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'insert',
-  aliases: ['i', 'add', 'playnext', 'pn'],
-  description: 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.',
-  requiresVoice: true,
+class InsertCommand extends BaseCommand {
+  name = 'insert'
+  aliases = ['i', 'add', 'playnext', 'pn']
+  description = 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, args: string[]) {
     logger.info(
@@ -160,4 +161,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new InsertCommand()

@@ -5,13 +5,15 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (
-  bot: BotClient,
+class SegmentSkippedEvent extends LavalinkEvent {
+  name = 'SegmentSkipped'
+
+  async execute(bot: BotClient,
   player: Player,
   track: Track,
-  payload: SponsorBlockSegmentSkipped
-) => {
+  payload: SponsorBlockSegmentSkipped) {
   logger.info(
     `[Player: ${player.guildId}] Automatically skipped ${payload.segment.category} segment in the track`
   )
@@ -46,3 +48,6 @@ export default async (
       return null
     })
 }
+}
+
+export default new SegmentSkippedEvent()

@@ -9,6 +9,7 @@ import {
 } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
@@ -268,10 +269,10 @@ function buildUserEmbed(entries: UserEntry[], page: number, totalPages: number, 
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-const command: Command = {
-  name: 'leaderboard',
-  aliases: ['lb', 'top'],
-  description: 'Xem bảng xếp hạng bài hát và bot.',
+class LeaderboardCommand extends BaseCommand {
+  name = 'leaderboard'
+  aliases = ['lb', 'top']
+  description = 'Xem bảng xếp hạng bài hát và bot.'
 
   async execute(bot: BotClient, message: Message) {
     let currentView: LeaderboardView = 'personal' // default: cá nhân
@@ -424,4 +425,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new LeaderboardCommand()

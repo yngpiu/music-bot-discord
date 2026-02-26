@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverDeaf: boolean) => {
+class PlayerDeafChangeEvent extends LavalinkEvent {
+  name = 'playerDeafChange'
+
+  async execute(bot: BotClient, player: Player, selfDeaf: boolean, serverDeaf: boolean) {
   if (player.get('ignore_voice_state')) return
 
   const channel = bot.channels.cache.get(player.textChannelId!)
@@ -29,3 +33,6 @@ export default async (bot: BotClient, player: Player, selfDeaf: boolean, serverD
       return null
     })
 }
+}
+
+export default new PlayerDeafChangeEvent()

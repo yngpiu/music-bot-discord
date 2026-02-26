@@ -8,6 +8,7 @@ import {
 import { config } from '~/config/env.js'
 
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
@@ -119,25 +120,52 @@ export const commandsByCategory = {
   ]
 }
 
-const command: Command = {
-  name: 'help',
-  aliases: ['h'],
-  description: 'Hiển thị danh sách hướng dẫn lệnh.',
-  requiresVoice: false,
+class HelpCommand extends BaseCommand {
+  name = 'help'
+  aliases = ['h']
+  description = 'Hiển thị danh sách hướng dẫn lệnh.'
+  requiresVoice = false
 
-  async execute(bot: BotClient, message: Message) {
-    logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
-    const embed = new EmbedBuilder()
+  // ─── Helpers ────────────────────────────────────────────────────────────
+
+  private buildMainEmbed(bot: BotClient) {
+    return new EmbedBuilder()
       .setColor(0x00c2e6)
-      .setAuthor({
-        name: 'Danh sách hướng dẫn',
-        iconURL: bot.user?.displayAvatarURL()
-      })
+      .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: bot.user?.displayAvatarURL() })
       .setDescription(
         'Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\nBạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại trang https://6music.edgeone.app.'
       )
       .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
+  }
 
+  private buildCategoryEmbed(
+    bot: BotClient,
+    category: keyof typeof commandsByCategory
+  ): EmbedBuilder {
+    const cmds = commandsByCategory[category]
+    const desc = cmds
+      .map((cmd, index) => {
+        let str = `${index + 1}. **${cmd.name}**`
+        if (cmd.args) str += ` ${cmd.args}`
+        str += `\n> ${cmd.desc}`
+        return str
+      })
+      .join('\n\n')
+
+    return new EmbedBuilder()
+      .setColor(0x00c2e6)
+      .setAuthor({
+        name: `Các lệnh thuộc danh mục ${category}`,
+        iconURL: bot.user?.displayAvatarURL()
+      })
+      .setDescription(desc)
+      .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
+  }
+
+  private buildSelectMenu(): {
+    select: StringSelectMenuBuilder
+    row: ActionRowBuilder<StringSelectMenuBuilder>
+  } {
     const select = new StringSelectMenuBuilder()
       .setCustomId('help_category_select')
       .setPlaceholder('Chọn một danh mục...')
@@ -157,9 +185,16 @@ const command: Command = {
       )
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
+    return { select, row }
+  }
 
-    const reply = await message.reply({ embeds: [embed], components: [row] })
-
+  private startCollector(
+    bot: BotClient,
+    message: Message,
+    reply: Message,
+    select: StringSelectMenuBuilder,
+    row: ActionRowBuilder<StringSelectMenuBuilder>
+  ): void {
     const collector = reply.createMessageComponentCollector({
       filter: (i) => i.user.id === message.author.id,
       time: 120000
@@ -169,28 +204,8 @@ const command: Command = {
       if (!interaction.isStringSelectMenu()) return
       if (interaction.customId !== 'help_category_select') return
 
-      const selectedCategory = interaction.values[0] as keyof typeof commandsByCategory
-
-      const cmds = commandsByCategory[selectedCategory]
-
-      const desc = cmds
-        .map((cmd, index) => {
-          let str = `${index + 1}. **${cmd.name}**`
-          if (cmd.args) str += ` ${cmd.args}`
-          str += `\n> ${cmd.desc}`
-          return str
-        })
-        .join('\n\n')
-
-      const updatedEmbed = new EmbedBuilder()
-        .setColor(0x00c2e6)
-        .setAuthor({
-          name: `Các lệnh thuộc danh mục ${selectedCategory}`,
-          iconURL: bot.user?.displayAvatarURL()
-        })
-        .setDescription(desc)
-        .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
-
+      const category = interaction.values[0] as keyof typeof commandsByCategory
+      const updatedEmbed = this.buildCategoryEmbed(bot, category)
       await interaction.update({ embeds: [updatedEmbed], components: [row] })
     })
 
@@ -201,10 +216,20 @@ const command: Command = {
           components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)]
         })
         .catch(() => {})
-
       deleteMessage([reply, message], TIME.SHORT)
     })
   }
+
+  // ─── Execute ────────────────────────────────────────────────────────────
+
+  async execute(bot: BotClient, message: Message) {
+    logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
+
+    const { select, row } = this.buildSelectMenu()
+    const embed = this.buildMainEmbed(bot)
+    const reply = await message.reply({ embeds: [embed], components: [row] })
+    this.startCollector(bot, message, reply, select, row)
+  }
 }
 
-export default command
+export default new HelpCommand()

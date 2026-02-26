@@ -2,16 +2,17 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'loop',
-  aliases: ['l', 'repeat'],
-  description: 'Bật/tắt chế độ lặp lại (lặp 1 bài, lặp toàn bộ hoặc tắt)',
-  requiresVoice: true,
+class LoopCommand extends BaseCommand {
+  name = 'loop'
+  aliases = ['l', 'repeat']
+  description = 'Bật/tắt chế độ lặp lại (lặp 1 bài, lặp toàn bộ hoặc tắt)'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: loop] User ${message.author.tag} requested to toggle loop mode`)
@@ -65,4 +66,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new LoopCommand()

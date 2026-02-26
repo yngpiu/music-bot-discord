@@ -1,6 +1,4 @@
-import type { Message } from 'discord.js'
 import type { Player } from 'lavalink-client'
-import type { BotClient } from '~/BotClient'
 
 declare global {
   /**
@@ -12,19 +10,6 @@ declare global {
     player: Player
     /** Voice channel ID of the user who triggered the command. */
     vcId: string
-  }
-
-  interface Command {
-    name: string
-    aliases?: string[]
-    description?: string
-    /** Player must exist in this guild. */
-    requiresVoice?: boolean
-    /** User must be in the same voice channel as the bot (implies requiresVoice). */
-    requiresVoiceMatch?: boolean
-    /** User must be the player owner (implies requiresVoice). */
-    requiresOwner?: boolean
-    execute(bot: BotClient, message: Message, args: string[], ctx: CommandContext): Promise<void>
   }
 }
 

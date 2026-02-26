@@ -2,6 +2,7 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
@@ -18,11 +19,11 @@ function parseTime(timeStr: string): number {
   return parseInt(timeStr, 10) * 1000
 }
 
-const command: Command = {
-  name: 'seek',
-  aliases: ['fw', 'rw'],
-  description: 'Tua bài hát đến một thời gian cụ thể',
-  requiresVoice: true,
+class SeekCommand extends BaseCommand {
+  name = 'seek'
+  aliases = ['fw', 'rw']
+  description = 'Tua bài hát đến một thời gian cụ thể'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     if (!player.queue.current) {
@@ -72,4 +73,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new SeekCommand()

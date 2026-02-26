@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean) => {
+class PlayerMuteChangeEvent extends LavalinkEvent {
+  name = 'playerMuteChange'
+
+  async execute(bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean) {
   logger.info(`[Player: ${player.guildId}] Server mute change: ${serverMuted}`)
   if (serverMuted) {
     player.set('paused_of_servermute', true)
@@ -40,3 +44,6 @@ export default async (bot: BotClient, player: Player, selfMuted: boolean, server
       return null
     })
 }
+}
+
+export default new PlayerMuteChangeEvent()

@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, delayMs: number) => {
+class PlayerQueueEmptyStartEvent extends LavalinkEvent {
+  name = 'playerQueueEmptyStart'
+
+  async execute(bot: BotClient, player: Player, delayMs: number) {
   logger.info(
     `[Player: ${player.guildId}] Queue empty, starting timer to leave channel (${delayMs}ms)`
   )
@@ -32,3 +36,6 @@ export default async (bot: BotClient, player: Player, delayMs: number) => {
     logger.warn(`[Player: ${player.guildId}] Error sending leave channel timer notification:`, e)
   }
 }
+}
+
+export default new PlayerQueueEmptyStartEvent()

@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'skip',
-  aliases: ['s', 'n', 'next'],
-  description: 'Bỏ qua bài hát hiện tại để phát bài tiếp theo.',
-  requiresVoice: true,
+class SkipCommand extends BaseCommand {
+  name = 'skip'
+  aliases = ['s', 'n', 'next']
+  description = 'Bỏ qua bài hát hiện tại để phát bài tiếp theo.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext) {
     logger.info(`[Command: skip] User ${message.author.tag} requested to skip track`)
@@ -47,4 +48,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new SkipCommand()

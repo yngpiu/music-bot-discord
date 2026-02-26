@@ -5,8 +5,12 @@ import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-export default async (bot: BotClient, player: Player, payload: WebSocketClosedEvent) => {
+class PlayerSocketClosedEvent extends LavalinkEvent {
+  name = 'playerSocketClosed'
+
+  async execute(bot: BotClient, player: Player, payload: WebSocketClosedEvent) {
   // Code 4014 means Discord disconnected the Voice WebSocket. This happens naturally
   // during playerMove and playerDisconnect. We should ignore it to prevent spam.
   if (payload.code === 4014) return
@@ -33,3 +37,6 @@ export default async (bot: BotClient, player: Player, payload: WebSocketClosedEv
       return null
     })
 }
+}
+
+export default new PlayerSocketClosedEvent()

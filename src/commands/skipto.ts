@@ -2,17 +2,18 @@ import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { TIME } from '~/constants/time.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 
-const command: Command = {
-  name: 'skipto',
-  aliases: ['st', 'nextto', 'nt'],
-  description: 'Chuyển đến một bài hát cụ thể trong danh sách chờ.',
-  requiresVoice: true,
+class SkiptoCommand extends BaseCommand {
+  name = 'skipto'
+  aliases = ['st', 'nextto', 'nt']
+  description = 'Chuyển đến một bài hát cụ thể trong danh sách chờ.'
+  requiresVoice = true
 
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
     logger.info(
@@ -62,4 +63,4 @@ const command: Command = {
   }
 }
 
-export default command
+export default new SkiptoCommand()

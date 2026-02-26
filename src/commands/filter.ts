@@ -4,6 +4,7 @@ import { ContainerBuilder, type Message } from 'discord.js'
 import type { FilterManager } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
@@ -37,6 +38,8 @@ const AVAILABLE_FILTERS = [
   'clear',
   'off'
 ]
+
+// --- Filter helpers (module-level, reused by search too) ---
 
 async function resetAll(filterManager: FilterManager) {
   await filterManager.resetFilters()
@@ -73,43 +76,43 @@ async function applyFilter(filterManager: FilterManager, key: FilterKey): Promis
 
 // --- Command ---
 
-const command: Command = {
-  name: 'filter',
-  aliases: ['f', 'effects', 'fx'],
-  description: 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...).',
-  requiresVoice: true,
+class FilterCommand extends BaseCommand {
+  name = 'filter'
+  aliases = ['f', 'effects', 'fx']
+  description = 'Bật/tắt các hiệu ứng âm thanh (bassboost, nightcore, vaporwave, karaoke, 8d, ...).'
+  requiresVoice = true
 
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
-    logger.info(
-      `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
-    )
+  // ─── Helpers ────────────────────────────────────────────────────────────
 
-    const input = args[0]?.toLowerCase()
+  private validateInput(input: string | undefined): string {
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
       throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)
     }
+    return input
+  }
 
-    const { filterManager } = player
-
-    let actionText: string
-
+  private async applyEffect(filterManager: FilterManager, input: string): Promise<string> {
     try {
       if (RESET_ARGS.has(input)) {
         await resetAll(filterManager)
-        actionText = 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản.'
-      } else if (input === 'bassboost') {
-        actionText = await applyBassboost(filterManager)
-      } else {
-        const key = (FILTER_ALIASES[input] ?? input) as FilterKey
-        actionText = await applyFilter(filterManager, key)
+        return 'xoá sạch toàn bộ hiệu ứng, quay về nguyên bản.'
       }
+      if (input === 'bassboost') return applyBassboost(filterManager)
+      const key = (FILTER_ALIASES[input] ?? input) as FilterKey
+      return applyFilter(filterManager, key)
     } catch (e) {
       logger.error('[Command: filter] Error applying filter:', e)
       throw new BotError(
         `Không thể áp dụng hiệu ứng: ${e instanceof Error ? e.message : 'Lỗi không xác định'}.`
       )
     }
+  }
 
+  private async sendConfirmation(
+    bot: BotClient,
+    message: Message,
+    actionText: string
+  ): Promise<void> {
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
         `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName ?? 'Tớ'}** đã ${actionText}.`
@@ -118,7 +121,6 @@ const command: Command = {
 
     const reply = await message
       .reply({ components: [container], flags: ['IsComponentsV2'] })
-
       .catch((e) => {
         logger.warn('[Command: filter] Error sending notification:', e)
         return null
@@ -131,6 +133,18 @@ const command: Command = {
       }, 15_000)
     }
   }
+
+  // ─── Execute ────────────────────────────────────────────────────────────
+
+  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext) {
+    logger.info(
+      `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
+    )
+
+    const input = this.validateInput(args[0]?.toLowerCase())
+    const actionText = await this.applyEffect(player.filterManager, input)
+    await this.sendConfirmation(bot, message, actionText)
+  }
 }
 
-export default command
+export default new FilterCommand()
