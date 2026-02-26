@@ -21,16 +21,14 @@ class PlayerDebugEvent extends LavalinkEvent {
    * @param {string} eventKey - The type of debug event.
    * @param {any} eventData - The associated debug data.
    */
-  async execute(_bot: BotClient, eventKey: string, eventData: any): Promise<void> {
+  async execute(_bot: BotClient, eventKey: string, eventData: unknown): Promise<void> {
+    const data = eventData as Record<string, unknown>
     // Suppress noisy startup warnings.
-    if (
-      eventKey === DebugEvents.NoAudioDebug &&
-      eventData.message === 'Manager is not initated yet'
-    )
+    if (eventKey === DebugEvents.NoAudioDebug && data.message === 'Manager is not initated yet')
       return
 
     // Suppress redundant successful update logs.
-    if (eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === 'log') return
+    if (eventKey === DebugEvents.PlayerUpdateSuccess && data.state === 'log') return
 
     logger.debug(`[Lavalink Debug: ${eventKey}]`, eventData)
   }

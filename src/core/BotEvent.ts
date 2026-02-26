@@ -20,5 +20,5 @@ export abstract class BotEvent {
    * @param {BotManager} manager - The global bot manager.
    * @param {...any[]} args - Variable arguments provided by the event trigger.
    */
-  abstract execute(bot: BotClient, manager: BotManager, ...args: any[]): Promise<void>
+  abstract execute(bot: BotClient, manager: BotManager, ...args: unknown[]): Promise<void>
 }

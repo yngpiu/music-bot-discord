@@ -2,9 +2,6 @@
  * @file playerVoiceJoin.ts
  * @description Event handler for when a user joins the bot's voice channel.
  */
-import { Player } from 'lavalink-client'
-
-import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 /**
@@ -19,7 +16,7 @@ class PlayerVoiceJoinEvent extends LavalinkEvent {
    * @param {Player} _player - The Lavalink player instance.
    * @param {string} _userId - The ID of the joining user.
    */
-  async execute(_bot: BotClient, _player: Player, _userId: string): Promise<void> {}
+  async execute(): Promise<void> {}
 }
 
 export default new PlayerVoiceJoinEvent()

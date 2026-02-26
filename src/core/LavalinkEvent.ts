@@ -16,5 +16,5 @@ export abstract class LavalinkEvent {
    * @param {BotClient} bot - The bot client instance.
    * @param {...any[]} args - Variable arguments provided by Lavalink.
    */
-  abstract execute(bot: BotClient, ...args: any[]): Promise<void>
+  abstract execute(bot: BotClient, ...args: unknown[]): Promise<void>
 }

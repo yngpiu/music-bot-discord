@@ -43,7 +43,12 @@ class SearchCommand extends BaseCommand {
    * @param {string} query - The search query.
    * @param {Player} player - The player instance.
    */
-  private async handleTrackSearch(bot: BotClient, message: Message, query: string, player: Player): Promise<void> {
+  private async handleTrackSearch(
+    bot: BotClient,
+    message: Message,
+    query: string,
+    player: Player
+  ): Promise<void> {
     const result = await player.search({ query, source: 'dzsearch' }, message.author)
 
     let tracks = result.tracks.slice(0, 10)
@@ -123,7 +128,10 @@ class SearchCommand extends BaseCommand {
       spsearch: 'Spotify'
     }
 
-    const buildDescription = (trackList: any[], sourceId: string) => {
+    const buildDescription = (
+      trackList: (import('lavalink-client').Track | import('lavalink-client').UnresolvedTrack)[],
+      sourceId: string
+    ) => {
       if (trackList.length === 0) {
         return lines(
           'ㅤ',
@@ -195,7 +203,10 @@ class SearchCommand extends BaseCommand {
               newResult = { loadType: 'search', tracks: mappedTracks }
             }
           } else {
-            newResult = await player.search({ query, source: newSource as any }, message.author)
+            newResult = await player.search(
+              { query, source: newSource as import('lavalink-client').SearchPlatform },
+              message.author
+            )
           }
 
           if (newResult.loadType === 'error' || newResult.loadType === 'empty') {
@@ -239,7 +250,7 @@ class SearchCommand extends BaseCommand {
             author: track.info.author,
             trackLink: track.info.uri ?? 'https://github.com/yngpiu',
 
-            authorLink: (track as any).pluginInfo?.artistUrl ?? null
+            authorLink: (track as import('lavalink-client').Track).pluginInfo?.artistUrl ?? null
           },
           player,
           message.author,
@@ -275,9 +286,16 @@ class SearchCommand extends BaseCommand {
    * @param {string} query - The search query.
    * @param {Player} player - The player instance.
    */
-  private async handleAlbumSearch(bot: BotClient, message: Message, query: string, player: Player): Promise<void> {
+  private async handleAlbumSearch(
+    bot: BotClient,
+    message: Message,
+    query: string,
+    player: Player
+  ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let albums: any[] = []
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pageCache = new Map<number, any[]>()
 
     const fetchPage = async (page: number) => {
@@ -289,7 +307,7 @@ class SearchCommand extends BaseCommand {
       try {
         albums = await searchSpotifyAlbums(query, 10, page * 10)
         pageCache.set(page, albums)
-      } catch (error) {
+      } catch {
         throw new BotError(
           'Đã có lỗi xảy ra khi lấy danh sách album, vui lòng liên hệ **Ban quản lý**.'
         )
@@ -350,6 +368,7 @@ class SearchCommand extends BaseCommand {
       ]
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildDescription = (albumList: any[], page: number) => {
       const start = page * itemsPerPage
 
@@ -447,6 +466,7 @@ class SearchCommand extends BaseCommand {
               tracks: tracks,
               thumbnailUrl: spotifyAlbum.images[0]?.url ?? album.images[0]?.url ?? null,
 
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               author: album.artists.map((a: any) => a.name).join(', ') || undefined,
               trackLink: loadingQuery
             },
@@ -493,8 +513,10 @@ class SearchCommand extends BaseCommand {
     query: string,
     player: Player
   ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let playlists: any[] = []
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pageCache = new Map<number, any[]>()
 
     const fetchPage = async (page: number) => {
@@ -506,7 +528,7 @@ class SearchCommand extends BaseCommand {
       try {
         playlists = await searchSpotifyPlaylists(query, 10, page * 10)
         pageCache.set(page, playlists)
-      } catch (error) {
+      } catch {
         throw new BotError(
           'Đã có lỗi xảy ra khi lấy danh sách phát, vui lòng liên hệ **Ban quản lý**.'
         )
@@ -563,6 +585,7 @@ class SearchCommand extends BaseCommand {
       ]
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buildDescription = (playlistList: any[], page: number) => {
       const start = page * itemsPerPage
 

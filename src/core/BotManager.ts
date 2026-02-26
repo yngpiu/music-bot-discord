@@ -325,7 +325,11 @@ export class BotManager {
    * @param {any} player - The Lavalink player instance.
    * @param {any[]} tracks - The list of tracks added.
    */
-  private async sendAutoplayEmbed(bot: BotClient, player: any, tracks: any[]): Promise<void> {
+  private async sendAutoplayEmbed(
+    bot: BotClient,
+    player: import('lavalink-client').Player,
+    tracks: (import('lavalink-client').Track | import('lavalink-client').UnresolvedTrack)[]
+  ): Promise<void> {
     const channel = (
       player.textChannelId ? bot.channels.cache.get(player.textChannelId) : undefined
     ) as TextChannel | undefined

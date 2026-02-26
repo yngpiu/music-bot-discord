@@ -230,13 +230,8 @@ class MessageCreateEvent extends BotEvent {
     if (!isOwner && (await this.checkBan(message))) return
     if (!isOwner && (await this.checkRateLimit(message))) return
 
-    try {
-      const ctx = this.buildCommandContext(bot, message, command)
-      await command.execute(bot, message, args, ctx)
-    } catch (err) {
-      // safeExecute in Loader.ts handles the actual error response.
-      throw err
-    }
+    const ctx = this.buildCommandContext(bot, message, command)
+    await command.execute(bot, message, args, ctx)
   }
 }
 

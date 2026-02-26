@@ -21,6 +21,7 @@ class RawEvent extends BotEvent {
    * @param {unknown} data - The raw event data from Discord.
    */
   async execute(bot: BotClient, _manager: BotManager, data: unknown): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bot.lavalink.sendRawData(data as any)
   }
 }

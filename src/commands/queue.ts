@@ -31,7 +31,10 @@ class QueueCommand extends BaseCommand {
    * @param {string} indexStr - The rank/index string (e.g., "1.").
    * @returns {string} - The formatted track string.
    */
-  private buildTrackString(track: any, indexStr: string): string {
+  private buildTrackString(
+    track: import('lavalink-client').Track | import('lavalink-client').UnresolvedTrack,
+    indexStr: string
+  ): string {
     const trackDisplay = formatTrack({
       title: track.info.title,
       trackLink: track.info.uri,
@@ -53,7 +56,7 @@ class QueueCommand extends BaseCommand {
    * @param {string} emoji - The raw emoji string.
    * @returns {any} - The parsed emoji object or string.
    */
-  private parseEmoji(emoji: string): string | { animated: boolean; name: string; id: string; } {
+  private parseEmoji(emoji: string): string | { animated: boolean; name: string; id: string } {
     const match = emoji.match(/^<(a?):(\w+):(\d+)>$/)
     if (match) return { animated: !!match[1], name: match[2], id: match[3] }
     return emoji
@@ -182,7 +185,12 @@ class QueueCommand extends BaseCommand {
    * @param {string[]} _args - Command arguments (unused).
    * @param {CommandContext} context - The command execution context.
    */
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {

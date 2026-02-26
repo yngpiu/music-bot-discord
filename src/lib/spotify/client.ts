@@ -185,7 +185,9 @@ function extractId(input: string | undefined, type: SpotifyType): string {
     const parts = u.pathname.split('/').filter(Boolean)
     const idx = parts.indexOf(type)
     if (idx !== -1 && parts[idx + 1]) return parts[idx + 1] || ''
-  } catch {}
+  } catch {
+    /* ignore */
+  }
 
   const idMatch = clean.match(/^([A-Za-z0-9_-]{8,})$/)
   return idMatch ? idMatch[1] || '' : clean
@@ -218,7 +220,9 @@ function getBiggestImage(images: RawImage[]): RawImage | undefined {
  * @param {RawImage | undefined} img - The raw image.
  * @returns {object[]} - An array containing the formatted image.
  */
-function formatImage(img: RawImage | undefined): { url: string; height: number | undefined; width: number | undefined; }[] {
+function formatImage(
+  img: RawImage | undefined
+): { url: string; height: number | undefined; width: number | undefined }[] {
   if (!img) return []
   return [{ url: img.url, height: img.height, width: img.width }]
 }
@@ -851,7 +855,9 @@ export async function fetchTrack(trackId: string): Promise<SpotifyTrack> {
       if (match?.artists.length) {
         track.artists = match.artists
       }
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   return track

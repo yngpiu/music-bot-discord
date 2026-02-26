@@ -18,7 +18,7 @@ import type { BotManager } from '~/core/BotManager.js'
 /**
  * Interface for specialized interaction handlers.
  */
-type InteractionHandler<T> = (interaction: T, bot: any) => Promise<unknown>
+type InteractionHandler<T> = (interaction: T, bot: BotClient) => Promise<unknown>
 
 /**
  * Extended Discord.js Client to include music and command management functionality.

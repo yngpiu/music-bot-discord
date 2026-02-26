@@ -2,7 +2,7 @@
  * @file nodeResumed.ts
  * @description Event handler for when a Lavalink node session is successfully resumed.
  */
-import { LavalinkNode, LavalinkPlayer } from 'lavalink-client'
+import { LavalinkNode } from 'lavalink-client'
 
 import type { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
@@ -25,9 +25,7 @@ class NodeResumedEvent extends LavalinkEvent {
   async execute(
     _bot: BotClient,
     node: LavalinkNode,
-    payload: { resumed: boolean; sessionId: string; op: 'ready' },
-
-    _players: LavalinkPlayer[]
+    payload: { resumed: boolean; sessionId: string; op: 'ready' }
   ): Promise<void> {
     logger.info(`[Lavalink Node: ${node.id}] Successfully resumed session: ${payload.sessionId}`)
   }

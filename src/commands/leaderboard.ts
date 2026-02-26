@@ -173,7 +173,11 @@ const MAX_ITEMS = 100
  * @param {boolean} disabled - Whether the buttons should be disabled.
  * @returns {ActionRowBuilder<ButtonBuilder>} - The buttons action row.
  */
-function buildNavButtons(page: number, totalPages: number, disabled = false): ActionRowBuilder<ButtonBuilder> {
+function buildNavButtons(
+  page: number,
+  totalPages: number,
+  disabled = false
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('lb_first')
@@ -204,7 +208,10 @@ function buildNavButtons(page: number, totalPages: number, disabled = false): Ac
  * @param {boolean} disabled - Whether the menu should be disabled.
  * @returns {ActionRowBuilder<StringSelectMenuBuilder>} - The select menu action row.
  */
-function buildViewSelect(currentView: LeaderboardView, disabled = false): ActionRowBuilder<StringSelectMenuBuilder> {
+function buildViewSelect(
+  currentView: LeaderboardView,
+  disabled = false
+): ActionRowBuilder<StringSelectMenuBuilder> {
   const select = new StringSelectMenuBuilder()
     .setCustomId('lb_view')
     .setPlaceholder('Chọn bảng xếp hạng...')
@@ -284,7 +291,12 @@ function buildTrackEmbed(
  * @param {Guild} guild - The guild object.
  * @returns {EmbedBuilder} - The constructed embed.
  */
-function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, guild: Guild): EmbedBuilder {
+function buildBotEmbed(
+  entries: BotEntry[],
+  page: number,
+  totalPages: number,
+  guild: Guild
+): EmbedBuilder {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -317,7 +329,12 @@ function buildBotEmbed(entries: BotEntry[], page: number, totalPages: number, gu
  * @param {Guild} guild - The guild object.
  * @returns {EmbedBuilder} - The constructed embed.
  */
-function buildUserEmbed(entries: UserEntry[], page: number, totalPages: number, guild: Guild): EmbedBuilder {
+function buildUserEmbed(
+  entries: UserEntry[],
+  page: number,
+  totalPages: number,
+  guild: Guild
+): EmbedBuilder {
   const start = page * ITEMS_PER_PAGE
   const pageEntries = entries.slice(start, start + ITEMS_PER_PAGE)
 
@@ -478,7 +495,9 @@ class LeaderboardCommand extends BaseCommand {
                 try {
                   const member = await guild.members.fetch(entry.userId)
                   userName = member.displayName || member.user.username
-                } catch {}
+                } catch {
+                  /* ignore */
+                }
                 return { ...entry, userName }
               })
             )
@@ -492,7 +511,9 @@ class LeaderboardCommand extends BaseCommand {
                 try {
                   const user = await bot.users.fetch(entry.botId)
                   botName = user.displayName || user.username
-                } catch {}
+                } catch {
+                  /* ignore */
+                }
                 return { ...entry, botName }
               })
             )

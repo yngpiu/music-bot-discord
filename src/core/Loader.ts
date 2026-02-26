@@ -79,7 +79,7 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
  * @param {any[]} args - List of arguments to search.
  * @returns {ReplyTarget | null} - The found target or null.
  */
-function findReplyTarget(args: any[]): ReplyTarget | null {
+function findReplyTarget(args: unknown[]): ReplyTarget | null {
   for (const arg of args) {
     if (arg instanceof Message) return arg
     if (arg instanceof BaseInteraction) return arg
@@ -93,8 +93,11 @@ function findReplyTarget(args: any[]): ReplyTarget | null {
  * @param {function} fn - The function to wrap.
  * @returns {function} - The wrapped function.
  */
-function safeExecute(eventName: string, fn: (...args: any[]) => Promise<unknown>): (...args: any[]) => Promise<void> {
-  return async (...args: any[]) => {
+function safeExecute(
+  eventName: string,
+  fn: (...args: unknown[]) => Promise<unknown>
+): (...args: unknown[]) => Promise<void> {
+  return async (...args: unknown[]) => {
     try {
       await fn(...args)
     } catch (err) {
@@ -157,12 +160,12 @@ export class Loader {
       if (event.once) {
         bot.once(
           event.name,
-          safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+          safeExecute(event.name, (...args: unknown[]) => event.execute(bot, botManager, ...args))
         )
       } else {
         bot.on(
           event.name,
-          safeExecute(event.name, (...args: any[]) => event.execute(bot, botManager, ...args))
+          safeExecute(event.name, (...args: unknown[]) => event.execute(bot, botManager, ...args))
         )
       }
     }
@@ -194,7 +197,7 @@ export class Loader {
 
       const eventName = instance.name
 
-      const wrappedHandler = safeExecute(eventName, (...args: any[]) =>
+      const wrappedHandler = safeExecute(eventName, (...args: unknown[]) =>
         instance.execute(bot, ...args)
       )
 
@@ -203,8 +206,10 @@ export class Loader {
         let nodeEventName = eventName.replace(/^node/, '')
         nodeEventName = nodeEventName.charAt(0).toLowerCase() + nodeEventName.slice(1)
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bot.lavalink.nodeManager.on(nodeEventName as any, wrappedHandler)
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bot.lavalink.on(eventName as any, wrappedHandler)
       }
     }

@@ -13,7 +13,9 @@ import { formatDuration, formatTrack } from '~/utils/stringUtil'
  * @returns {object} - The track's info.
  */
 function getTrackInfo(track: Track | UnresolvedTrack) {
-  return 'info' in track ? track.info : (track as any).info
+  return 'info' in track
+    ? track.info
+    : (track as import('lavalink-client').Track | import('lavalink-client').UnresolvedTrack).info
 }
 
 export type AddedItemType = 'track' | 'playlist'
@@ -45,7 +47,7 @@ export function buildAddedItemEmbed(
   botAvatarUrl?: string,
   positionOverride?: number,
   estimatedMsOverride?: number
-): { embeds: EmbedBuilder[]; files: never[]; } {
+): { embeds: EmbedBuilder[]; files: never[] } {
   const isPlaylist = type === 'playlist'
   const totalDurationMs = item.tracks.reduce((sum, t) => sum + (getTrackInfo(t).duration ?? 0), 0)
 

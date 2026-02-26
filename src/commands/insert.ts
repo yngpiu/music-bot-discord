@@ -97,7 +97,11 @@ class InsertCommand extends BaseCommand {
       for (let i = 0; i < insertIndex; i++) {
         const track = player.queue.tracks[i]
 
-        const info = 'info' in track ? track.info : (track as any).info
+        const info =
+          'info' in track
+            ? track.info
+            : (track as import('lavalink-client').Track | import('lavalink-client').UnresolvedTrack)
+                .info
         estimatedMsOverride += info?.duration ?? 0
       }
     }

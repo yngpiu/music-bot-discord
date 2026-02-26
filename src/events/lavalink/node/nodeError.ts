@@ -2,8 +2,6 @@
  * @file nodeError.ts
  * @description Event handler for when a Lavalink node encounters an error.
  */
-import { LavalinkNode } from 'lavalink-client'
-
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -22,7 +20,11 @@ class NodeErrorEvent extends LavalinkEvent {
    * @param {Error} error - The error object.
    * @param {unknown} _payload - Additional error payload (unused).
    */
-  async execute(_bot: BotClient, node: LavalinkNode, error: Error, _payload: unknown): Promise<void> {
+  async execute(
+    _bot: BotClient,
+    node: import('lavalink-client').LavalinkNode,
+    error: Error
+  ): Promise<void> {
     logger.error(`[Lavalink Node: ${node.id}] Node error:`, error)
   }
 }
