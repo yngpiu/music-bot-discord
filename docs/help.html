@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commands | Music Bot</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-color: #1a202c;
+            --card-bg: #61292e;
+            --pill-bg: #ffffff;
+            --text-main: #ffffff;
+            --text-pill: #a3353e;
+            --search-bg: #a3353e;
+            --divider: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 15% 50%, rgba(46,65,110,0.1), transparent 50%),
+                              radial-gradient(circle at 85% 30%, rgba(46,65,110,0.1), transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .search-bar {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-bar input, .search-bar select {
+            padding: 14px 20px;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--search-bg);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-bar select {
+            cursor: pointer;
+            appearance: none;
+            padding-right: 40px;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px top 50%;
+            background-size: 12px auto;
+        }
+
+        .search-bar select option {
+            background-color: var(--search-bg);
+            color: white;
+        }
+
+        .command-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .command-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        }
+
+        .command-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .command-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .command-title svg {
+            width: 18px;
+            height: 18px;
+            fill: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+
+        .command-title svg:hover {
+            fill: #fff;
+        }
+
+        .owner-badge {
+            font-size: 11px;
+            background-color: #ffcc00; /* Yellow/Gold for distinction */
+            color: #4a3b00;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            margin-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .highlight-text {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+
+        .command-desc {
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0 0 15px 0;
+            display: flex;
+            gap: 10px;
+            color: #f1f1f1;
+            flex-direction: column;
+        }
+
+        .show-more {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: 700;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            align-self: flex-start;
+            text-transform: uppercase;
+        }
+
+        .show-more:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--divider);
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 800;
+            margin: 0 0 12px 0;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Argument Styles */
+        .arg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .arg-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+        }
+
+        .arg-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .arg-desc {
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: #f1f1f1;
+            padding-left: 2px;
+        }
+
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .pill-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .pill {
+            background-color: var(--pill-bg);
+            color: var(--text-pill);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pill-combo {
+            display: flex;
+            background-color: var(--pill-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--pill-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pill-combo .pill-left {
+            background-color: var(--pill-bg);
+            color: var(--text-pill);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 800;
+            border-right: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .pill-combo .pill-right {
+            background-color: #923a41;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .expanded-content {
+            display: none;
+        }
+
+        .expanded-content.active {
+            display: block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Danh sách lệnh</h1>
+        </header>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm lệnh...">
+            <select id="categorySelect">
+                <option value="all">Tất cả danh mục</option>
+                <option value="music">🎵 Âm nhạc</option>
+                <option value="queue">📄 Hàng chờ</option>
+                <option value="info">⚙️ Tuỳ chỉnh</option>
+            </select>
+        </div>
+
+        <div id="commands-list">
+        
+            <div class="command-card" data-category="music" data-name="play">
+                <div class="command-header">
+                    <h2 class="command-title">play <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Yêu cầu bot tham gia kênh thoại của bạn và phát bài nhạc hoặc toàn bộ danh sách phát. Bạn có thể nhập tên bài hát để tìm kiếm hoặc dán trực tiếp đường dẫn từ các nền tảng âm nhạc khác nhau.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">tên / đường dẫn tới bài hát</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Tên bài hát cần tìm hoặc đường dẫn nhạc hợp lệ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">play</div><div class="pill-right">Nơi này có anh</div></div><div class="pill-combo"><div class="pill-left">play</div><div class="pill-right">https://youtu.be/FN7ALfpGxiI</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">p</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="search">
+                <div class="command-header">
+                    <h2 class="command-title">search <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Tìm kiếm nâng cao cho phép bạn chọn bài hát từ một danh sách kết quả trực quan. Bạn có thể chỉ định tìm kiếm theo bài hát, album hoặc danh sách phát, và chọn kết quả ứng ý từ bảng tùy chọn. Hỗ trợ nhiều nguồn nhạc khác nhau.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">album</div>
+                            <div class="pill-right">TUỲ CHỌN</div>
+                        </div>
+                        
+                    <div class="pill-combo">
+                        <div class="pill-left">gõ tắt</div>
+                        <div class="pill-right">alb, ab</div>
+                    </div>
+                
+                    </div>
+                    <div class="arg-desc">Khoanh vùng tìm kiếm toàn bộ album.</div>
+                </div>
+            
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">playlist</div>
+                            <div class="pill-right">TUỲ CHỌN</div>
+                        </div>
+                        
+                    <div class="pill-combo">
+                        <div class="pill-left">gõ tắt</div>
+                        <div class="pill-right">pls, pll</div>
+                    </div>
+                
+                    </div>
+                    <div class="arg-desc">Khoanh vùng tìm kiếm theo danh sách phát.</div>
+                </div>
+            
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">tên / đường dẫn tới bài hát</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Tên bài hát, album, danh sách phát bạn muốn tìm hoặc đường dẫn hợp lệ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">search</div><div class="pill-right">Nơi này có anh</div></div><div class="pill-combo"><div class="pill-left">search album</div><div class="pill-right">Nơi này có anh</div></div><div class="pill-combo"><div class="pill-left">search playlist</div><div class="pill-right">Nơi này có anh</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">find</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="pause">
+                <div class="command-header">
+                    <h2 class="command-title">pause <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Tạm dừng bài hát đang phát. Bạn cần ở trong cùng kênh thoại với bot để sử dụng lệnh này.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">ps</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="resume">
+                <div class="command-header">
+                    <h2 class="command-title">resume <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Tiếp tục phát bài nhạc đang bị tạm dừng. Yêu cầu bạn phải ở cùng kênh thoại với bot.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">rs</span><span class="pill">unpause</span><span class="pill">continue</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="skipto">
+                <div class="command-header">
+                    <h2 class="command-title">skipto <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Bỏ qua một loạt bài và nhảy thẳng đến một bài hát cụ thể trong hàng chờ.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">vị trí</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Số thứ tự của bài hát trong hàng chờ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">skipto</div><div class="pill-right">5</div></div><div class="pill-combo"><div class="pill-left">st</div><div class="pill-right">3</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">st</span><span class="pill">nextto</span><span class="pill">nt</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="skip">
+                <div class="command-header">
+                    <h2 class="command-title">skip <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Bỏ qua bài hát hiện hành đang phát để chuyển sang phát liền bài tiếp theo trong danh sách chờ.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">s</span><span class="pill">n</span><span class="pill">next</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="back">
+                <div class="command-header">
+                    <h2 class="command-title">back <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Quay lại và phát lại bài hát vừa được phát trước đó. Bài hát hiện tại sẽ được tạm cất lại vào đầu danh sách chờ để nghe tiếp sau khi phát xong thao tác này.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">b</span><span class="pill">previous</span><span class="pill">prev</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="seek">
+                <div class="command-header">
+                    <h2 class="command-title">seek <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Tua bài hát đang phát tới một thời điểm cụ thể. Không hỗ trợ tua đối với các luồng phát trực tiếp.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">thời gian</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Thời gian muốn tua đến.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">seek</div><div class="pill-right">1:30</div></div><div class="pill-combo"><div class="pill-left">seek</div><div class="pill-right">90</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">fw</span><span class="pill">rw</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="replay">
+                <div class="command-header">
+                    <h2 class="command-title">replay <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Phát lại bài nhạc hiện tại từ đầu thời gian (0:00). Không áp dụng cho các chương trình phát trực tiếp.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">restart</span><span class="pill">rp</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="volume">
+                <div class="command-header">
+                    <h2 class="command-title">volume <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> <span class="owner-badge">CHỦ XỊ</span></h2>
+                </div>
+                <div class="command-desc">
+                    Điều chỉnh âm lượng to hoặc nhỏ của bot từ 0% đến 100%.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">mức âm lượng</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Một số nguyên từ 0 đến 100.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">volume</div><div class="pill-right">50</div></div><div class="pill-combo"><div class="pill-left">v</div><div class="pill-right">100</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">vol</span><span class="pill">v</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="filter">
+                <div class="command-header">
+                    <h2 class="command-title">filter <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Áp dụng những hiệu ứng âm thanh thú vị cho bài nhạc. Nhập lệnh với tuỳ chọn báo xoá để khôi phục toàn bộ hiệu ứng trở về ban đầu.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">tên hiệu ứng</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Các hiệu ứng hỗ trợ: nightcore, vaporwave, karaoke, 8d, tremolo, vibrato, lowpass, bassboost, clear, off.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">filter</div><div class="pill-right">nightcore</div></div><div class="pill-combo"><div class="pill-left">filter</div><div class="pill-right">bassboost</div></div><div class="pill-combo"><div class="pill-left">filter</div><div class="pill-right">clear</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">f</span><span class="pill">effects</span><span class="pill">fx</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="nowplaying">
+                <div class="command-header">
+                    <h2 class="command-title">nowplaying <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Hiển thị ngay lập tức thông tin chi tiết về bài hát đang được phát, bao gồm tên bài, tác giả, đường dẫn, thời lượng và ảnh bìa minh họa.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">np</span><span class="pill">current</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="music" data-name="status">
+                <div class="command-header">
+                    <h2 class="command-title">status <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Xem tình trạng hoạt động hiện tại của bot âm nhạc, bao gồm mức âm lượng, hiệu ứng nào đang sử dụng, có đang bật chế độ lặp hay tính năng tự động phát không.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">state</span><span class="pill">info</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="queue">
+                <div class="command-header">
+                    <h2 class="command-title">queue <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Hiển thị các bài hát đang có trong hàng chờ của phòng. Bạn có thể dùng các nút điều hướng để xem các trang tiếp theo một cách dễ dàng.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">số trang</div>
+                            <div class="pill-right">TUỲ CHỌN</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Số trang bạn muốn xem (mặc định là trang 1).</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">queue</div></div><div class="pill-combo"><div class="pill-left">queue</div><div class="pill-right">2</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">q</span><span class="pill">list</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="clear">
+                <div class="command-header">
+                    <h2 class="command-title">clear <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> <span class="owner-badge">CHỦ XỊ</span></h2>
+                </div>
+                <div class="command-desc">
+                    Huỷ bỏ toàn bộ các bài hát đang có trong hàng chờ chung.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">c</span><span class="pill">cq</span><span class="pill">empty</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="loop">
+                <div class="command-header">
+                    <h2 class="command-title">loop <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Thay đổi chế độ vòng lặp nhạc: lặp đi lặp lại 1 bài hiện hành, lặp đi lặp lại toàn bộ danh sách chờ, hoặc thiết lập tắt chế độ lặp.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">chế độ</div>
+                            <div class="pill-right">TUỲ CHỌN</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Tuỳ chọn chế độ lặp: <span class="highlight-text">track</span> (1 bài), <span class="highlight-text">queue</span> (toàn bộ) hoặc <span class="highlight-text">off</span> (tắt). Nếu để trống, bot sẽ tự động chuyển đổi luân phiên giữa các chế độ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">loop</div></div><div class="pill-combo"><div class="pill-left">repeat</div></div><div class="pill-combo"><div class="pill-left">loop</div><div class="pill-right">track</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">l</span><span class="pill">repeat</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="shuffle">
+                <div class="command-header">
+                    <h2 class="command-title">shuffle <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Trộn nhạc hoàn toàn ngẫu nhiên để thay đổi trải nghiệm thứ tự phát của các bài hát trong hàng chờ hiện tại. Yêu cầu có ít nhất 2 bài hát bên trong.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">sh</span><span class="pill">mix</span><span class="pill">random</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="move">
+                <div class="command-header">
+                    <h2 class="command-title">move <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Di chuyển một bài hát nhất định từ vị trí này sang tận vị trí nọ trong hàng đợi một cách gọn gàng, giúp bạn ưu tiên nhạc theo ý thích.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">vị trí hiện tại</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Vị trí của bài hát đang nằm trong hàng chờ.</div>
+                </div>
+            
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">vị trí mới</div>
+                            <div class="pill-right">TUỲ CHỌN</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Vị trí bạn muốn chuyển đến (mặc định là lên đầu hàng chờ).</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">move</div><div class="pill-right">5</div></div><div class="pill-combo"><div class="pill-left">move</div><div class="pill-right">5 2</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">m</span><span class="pill">mv</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="remove">
+                <div class="command-header">
+                    <h2 class="command-title">remove <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Xoá tay một hoặc xoá hàng loạt nhiều bài hát khỏi hàng chờ. Bạn có thể tự do xoá các bài ở vị trí ngắt quãng hoặc xóa liên tiếp một khoảng bài hát.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">vị trí / khoảng</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Các vị trí của bài hát trong hàng chờ cần loại bỏ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">remove</div><div class="pill-right">1</div></div><div class="pill-combo"><div class="pill-left">remove</div><div class="pill-right">2 7 4</div></div><div class="pill-combo"><div class="pill-left">remove</div><div class="pill-right">2-7</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">rm</span><span class="pill">delete</span><span class="pill">del</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="insert">
+                <div class="command-header">
+                    <h2 class="command-title">insert <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Thêm nhanh một bài hát vào danh sách phát nhưng ở thẳng một thứ hạng cụ thể trong hàng chờ thay vì bị xếp nhét vào cuối cùng.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">vị trí</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Vị trí muốn chèn vào trong danh sách chờ.</div>
+                </div>
+            
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">tên / đường dẫn tới bài hát</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Tên bài hát hoặc đường dẫn âm nhạc.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">insert</div><div class="pill-right">1 Nơi này có anh</div></div><div class="pill-combo"><div class="pill-left">playnext</div><div class="pill-right">2 https://youtu.be/FN7ALfpGxiI</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">i</span><span class="pill">add</span><span class="pill">playnext</span><span class="pill">pn</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="queue" data-name="autoplay">
+                <div class="command-header">
+                    <h2 class="command-title">autoplay <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Bật hay tắt tính năng nhạc vô tận tự động. Khi nghe hết danh sách của người dùng, nếu bật tính năng này, bot sẽ tự động tìm kiếm các bài hát liên quan để phát tiếp.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">ap</span><span class="pill">endless</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="join">
+                <div class="command-header">
+                    <h2 class="command-title">join <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Lệnh chủ động gọi bot tham gia vào kênh thoại hiện hành của bạn.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">j</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="leave">
+                <div class="command-header">
+                    <h2 class="command-title">leave <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> <span class="owner-badge">CHỦ XỊ</span></h2>
+                </div>
+                <div class="command-desc">
+                    Ngưng hoàn toàn việc cung cấp nhạc, xoá trắng mọi dữ liệu hiện thời và thoát phòng thoại.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">lv</span><span class="pill">dc</span><span class="pill">disconnect</span><span class="pill">stop</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="claim">
+                <div class="command-header">
+                    <h2 class="command-title">claim <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Tự động chiếm đoạt và lấy lại quyền điều khiển bot. Lệnh này hữu ích vô cùng nếu cựu chủ phòng đã rời máy mà bạn muốn tuỳ chỉnh nhạc nội bộ.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">c</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="help">
+                <div class="command-header">
+                    <h2 class="command-title">help <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Truy xuất thư viện đường dẫn đến trang web danh sách lệnh bot cực kỳ xinh đẹp này.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">h</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="leaderboard">
+                <div class="command-header">
+                    <h2 class="command-title">leaderboard <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Bảng vàng ghi danh các bài nhạc được nghe nhiều nhất của bạn, kỷ lục bài hát của cả máy chủ chung, hoặc vinh danh người dùng nghiện nghe nhạc nhất tại đây.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">lb</span><span class="pill">top</span></div></div>
+            </div>
+  
+            <div class="command-card" data-category="info" data-name="notify">
+                <div class="command-header">
+                    <h2 class="command-title">notify <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> </h2>
+                </div>
+                <div class="command-desc">
+                    Phát thanh một đoạn văn bản thông báo từ Ban Quản Trị đến tất cả các kênh người dùng đang nghe nhạc. Tính năng hạn chế chỉ khả dụng cho chủ sở hữu đích thực của máy chủ.
+                    <button class="show-more" onclick="toggleExpand(this)">mở rộng chi tiết</button>
+                </div>
+                <div class="expanded-content"><div class="divider"></div><h3 class="section-title">tham số đầu vào</h3><div class="arg-list">
+                <div class="arg-item">
+                    <div class="pill-group" style="margin-bottom: 6px;">
+                        <div class="pill-combo">
+                            <div class="pill-left">Mô tả thông báo</div>
+                            <div class="pill-right">BẮT BUỘC</div>
+                        </div>
+                        
+                    </div>
+                    <div class="arg-desc">Đoạn tin nhắn muốn gửi đi toàn bộ cụm máy chủ.</div>
+                </div>
+            </div><div class="divider"></div><h3 class="section-title">ví dụ cách dùng</h3><div class="pill-group"><div class="pill-combo"><div class="pill-left">notify</div><div class="pill-right">Bot sẽ bảo trì trong 5 phút nữa, các bạn nhớ lưu nhạc lại nhé!</div></div></div><div class="divider"></div><h3 class="section-title">lệnh gõ tắt (aliases)</h3><div class="pill-group"><span class="pill">thongbao</span></div></div>
+            </div>
+  
+        </div>
+    </div>
+
+    <script>
+        function toggleExpand(button) {
+            const content = button.parentElement.nextElementSibling;
+            if (content && content.classList.contains('expanded-content')) {
+                content.classList.toggle('active');
+                button.innerText = content.classList.contains('active') ? 'THU GỌN CHI TIẾT' : 'MỞ RỘNG CHI TIẾT';
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const categorySelect = document.getElementById('categorySelect');
+        const cards = document.querySelectorAll('.command-card');
+
+        function filterCommands() {
+            const query = searchInput.value.toLowerCase();
+            const category = categorySelect.value;
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const cat = card.getAttribute('data-category');
+                const aliases = Array.from(card.querySelectorAll('.pill')).map(p => p.innerText.toLowerCase());
+                
+                const matchesQuery = name.includes(query) || aliases.some(a => a.includes(query));
+                const matchesCat = category === 'all' || cat === category;
+
+                if (matchesQuery && matchesCat) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterCommands);
+        categorySelect.addEventListener('change', filterCommands);
+    </script>
+</body>
+</html>
