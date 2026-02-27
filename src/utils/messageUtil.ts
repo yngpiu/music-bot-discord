@@ -87,7 +87,8 @@ export async function replySuccessMessage(message: Message, content: string) {
 export async function replySuccessEmbed(
   message: Message,
   embed: EmbedBuilder,
-  components?: ActionRowBuilder<MessageActionRowComponentBuilder>[]
+  components?: ActionRowBuilder<MessageActionRowComponentBuilder>[],
+  timeout?: number
 ) {
   const repliedMessage = await message.reply({
     embeds: [embed],
@@ -99,7 +100,11 @@ export async function replySuccessEmbed(
 
   if (!repliedMessage) return
 
-  deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+  if (timeout && timeout > 0) {
+    deleteMessage([repliedMessage, message], timeout)
+  } else {
+    deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+  }
 
   return repliedMessage
 }
@@ -113,4 +118,25 @@ export async function sendFollowUpEphemeral(interaction: RepliableInteraction, c
     content,
     ephemeral: true
   })
+}
+
+export async function sendFollowUpMessage(
+  interaction: RepliableInteraction,
+  embed: EmbedBuilder,
+  timeout?: number
+) {
+  const followedUpMessage = await interaction.followUp({
+    embeds: [embed],
+    flags: ['SuppressNotifications']
+  })
+
+  if (!followedUpMessage) return
+
+  if (timeout && timeout > 0) {
+    deleteMessage([followedUpMessage], timeout)
+  } else {
+    deleteMessage([followedUpMessage], TIME.VERY_SHORT)
+  }
+
+  return followedUpMessage
 }

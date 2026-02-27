@@ -28,7 +28,8 @@ import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
   replySuccessEmbed,
-  sendFollowUpEphemeral
+  sendFollowUpEphemeral,
+  sendFollowUpMessage
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
 
@@ -156,7 +157,8 @@ class SearchCommand extends BaseCommand {
     const reply = await replySuccessEmbed(
       message,
       embed,
-      getComponents(false, currentSource) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+      getComponents(false, currentSource) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      60000
     )
 
     if (!reply) return
@@ -254,7 +256,7 @@ class SearchCommand extends BaseCommand {
           getBotAvatar(bot)
         )
 
-        await replySuccessEmbed(message, addedEmbed.embeds[0])
+        await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, 60000)
 
         if (!player.playing) await player.play()
 
@@ -383,7 +385,8 @@ class SearchCommand extends BaseCommand {
     const reply = await replySuccessEmbed(
       message,
       buildEmbed(currentPage),
-      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      60000
     )
 
     if (!reply) return
@@ -430,7 +433,7 @@ class SearchCommand extends BaseCommand {
           if (!spotifyAlbum.tracks.items.length) {
             await sendFollowUpEphemeral(
               interaction,
-              `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
+              `${EMOJI.ERROR} Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
             )
             return
           }
@@ -469,13 +472,13 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await replySuccessEmbed(message, addedEmbed.embeds?.[0] as EmbedBuilder)
+          await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
 
           if (!player.playing) await player.play().catch(() => {})
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading album details:', error)
-          await sendFollowUpEphemeral(interaction, `❌ Đã có lỗi xảy ra khi tải album.`)
+          await sendFollowUpEphemeral(interaction, `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải album.`)
         }
       }
     })
@@ -597,7 +600,8 @@ class SearchCommand extends BaseCommand {
     const reply = await replySuccessEmbed(
       message,
       buildEmbed(currentPage),
-      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      60000
     )
 
     if (!reply) return
@@ -644,7 +648,7 @@ class SearchCommand extends BaseCommand {
           if (!spotifyPlaylist.tracks.items.length) {
             await sendFollowUpEphemeral(
               interaction,
-              `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
+              `${EMOJI.ERROR} Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
             )
             return
           }
@@ -681,13 +685,16 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await replySuccessEmbed(message, addedEmbed.embeds?.[0] as EmbedBuilder)
+          await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
 
           if (!player.playing) await player.play().catch(() => {})
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading playlist details:', error)
-          await sendFollowUpEphemeral(interaction, `❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
+          await sendFollowUpEphemeral(
+            interaction,
+            `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải danh sách phát.`
+          )
         }
       }
     })
