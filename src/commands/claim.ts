@@ -34,7 +34,7 @@ class ClaimCommand extends BaseCommand {
 
       await replySuccessMessage(
         message,
-        `Tớ chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha!`
+        `Tớ chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha.`
       )
       return
     }
@@ -60,7 +60,7 @@ class ClaimCommand extends BaseCommand {
     // Transfer ownership.
     player.set('owner', message.author.id)
 
-    await replySuccessMessage(message, `Bạn đã lấy quyền kiểm soát player thành công!`)
+    await replySuccessMessage(message, `Bạn đã lấy quyền kiểm soát player thành công.`)
   }
 }
 

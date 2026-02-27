@@ -120,7 +120,7 @@ class MessageCreateEvent extends BotEvent {
     const remaining = (remainingMs / 1000).toFixed(1)
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh! Vui lòng chờ **${remaining}s** trước khi thử lại.`
+        `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh. Vui lòng chờ **${remaining}s** trước khi thử lại.`
       )
     )
     const reply = await message

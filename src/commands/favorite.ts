@@ -126,7 +126,7 @@ class FavoriteCommand extends BaseCommand {
 
       await replySuccessMessage(
         message,
-        `Đã thêm **${currentTrack.title}** vào danh sách yêu thích!`
+        `Đã thêm **${currentTrack.title}** vào danh sách yêu thích.`
       )
     } catch (error) {
       logger.error('[Command: favorite] Error adding favorite track:', error)
@@ -314,7 +314,7 @@ class FavoriteCommand extends BaseCommand {
           const member = interaction.guild?.members.cache.get(interaction.user.id)
           const vcId = member?.voice.channelId
           if (!vcId) {
-            await sendFollowUpEphemeral(interaction, 'Bạn đang không ở kênh thoại nào cả!')
+            await sendFollowUpEphemeral(interaction, 'Bạn đang không ở kênh thoại nào cả.')
             return
           }
 
@@ -357,7 +357,7 @@ class FavoriteCommand extends BaseCommand {
           const embed = new EmbedBuilder()
             .setColor(0x00c2e6)
             .setDescription(
-              `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi!`
+              `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi.`
             )
           await sendFollowUpMessage(interaction, embed, 60_000)
 
