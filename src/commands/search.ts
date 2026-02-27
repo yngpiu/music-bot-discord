@@ -10,7 +10,6 @@ import {
 } from 'discord.js'
 import { Player, UnresolvedTrack } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
@@ -24,6 +23,7 @@ import {
 } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
+import { reactLoadingMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
 
 // Command for searching music from multiple providers with an interactive UI.
@@ -243,7 +243,8 @@ class SearchCommand extends BaseCommand {
           },
           player,
           message.author,
-          getBotAvatar(bot))
+          getBotAvatar(bot)
+        )
 
         await message.reply(addedEmbed)
 
@@ -454,7 +455,8 @@ class SearchCommand extends BaseCommand {
             },
             player,
             message.author,
-            getBotAvatar(bot))
+            getBotAvatar(bot)
+          )
 
           await loadingMessage.edit({ content: '', ...addedEmbed })
 
@@ -664,7 +666,8 @@ class SearchCommand extends BaseCommand {
             },
             player,
             message.author,
-            getBotAvatar(bot))
+            getBotAvatar(bot)
+          )
 
           await loadingMessage.edit({ content: '', ...addedEmbed })
 
@@ -698,6 +701,7 @@ class SearchCommand extends BaseCommand {
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     if (!message.guild) return
     logger.info(
       `[Command: search] User ${message.author.tag} requested to search: ${args.join(' ')}`

@@ -1,14 +1,12 @@
 // Command to skip to a specific track index in the queue.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command for jumping to a specific position in the queue.
@@ -19,7 +17,13 @@ class SkiptoCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the skipto command.
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(
       `[Lệnh: skipto] Người dùng ${message.author.tag} yêu cầu chuyển tới bài số ${args[0] || 'trống'}`
     )
@@ -44,26 +48,10 @@ class SkiptoCommand extends BaseCommand {
     // Skip to the specified track. Original tracks before it will be removed.
     await player.skip(position)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn(`[Command: skipto] Error sending notification:`, e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

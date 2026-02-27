@@ -3,14 +3,12 @@ import type { Message, User } from 'discord.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js'
 import type { Player } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to display and navigate through the music queue.
@@ -152,6 +150,7 @@ class QueueCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {

@@ -1,14 +1,12 @@
 // Command to adjust the bot's audio volume level.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command for setting the player's volume (0-100).
@@ -19,7 +17,13 @@ class VolumeCommand extends BaseCommand {
   requiresOwner = true
 
   // Executes the volume command.
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: volume] User ${message.author.tag} requested to change volume`)
 
     // If no argument is provided, show current volume.
@@ -38,26 +42,10 @@ class VolumeCommand extends BaseCommand {
 
     await player.setVolume(vol)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn(`[Command: volume] Error sending notification:`, e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

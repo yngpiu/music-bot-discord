@@ -1,14 +1,12 @@
 // Command to move a track from one position to another within the queue.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to rearrange tracks in the music queue.
@@ -19,7 +17,13 @@ class MoveCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the move command, shifting a track to the specified target position.
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(
       `[Command: move] User ${message.author.tag} requested to move track ${args[0]} to position ${args[1] || 1}`
     )
@@ -65,26 +69,10 @@ class MoveCommand extends BaseCommand {
     player.queue.splice(fromIndex, 1)
     player.queue.splice(toIndex, 0, trackToMove)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn('[Command: move] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

@@ -5,6 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 
 // Command to make the bot leave the voice channel and clear its state.
 class LeaveCommand extends BaseCommand {
@@ -21,10 +22,12 @@ class LeaveCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: leave] User ${message.author.tag} requested bot to leave channel`)
 
     // Shutdown the player and disconnect from voice.
     await player.destroy()
+    await replySuccessMessage(message, `Tớ đã rời khỏi kênh thoại.`)
   }
 }
 

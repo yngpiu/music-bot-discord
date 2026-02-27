@@ -1,7 +1,6 @@
 // Command to insert a track or playlist at a specific position in the queue.
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
@@ -9,7 +8,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to add tracks to a specific index in the queue.
@@ -21,6 +20,7 @@ class InsertCommand extends BaseCommand {
 
   // Executes the insert command, searching for the track and placing it at the requested position.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(
       `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
     )

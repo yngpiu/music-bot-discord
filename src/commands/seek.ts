@@ -1,13 +1,11 @@
 // Command to jump/seek to a specific time in the currently playing track.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { formatDuration, getBotName } from '~/utils/stringUtil.js'
 
 // Parses a time string (e.g., "1:30" or "90") into milliseconds.
@@ -35,6 +33,7 @@ class SeekCommand extends BaseCommand {
     args: string[],
     { player }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }
@@ -64,25 +63,10 @@ class SeekCommand extends BaseCommand {
 
     await player.seek(seekMs)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch(() => {
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

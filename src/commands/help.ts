@@ -8,12 +8,11 @@ import {
 } from 'discord.js'
 import { config } from '~/config/env.js'
 
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Commands grouped by category for display in the help menu.
@@ -134,7 +133,7 @@ class HelpCommand extends BaseCommand {
   private buildMainEmbed(bot: BotClient): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(0x00c2e6)
-      .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: getBotAvatar(bot)})
+      .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: getBotAvatar(bot) })
       .setDescription(
         '- Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\n- Bạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại **[TRANG HƯỚNG DẪN CHI TIẾT](https://yngpiu.github.io/music-bot-discord/docs/help.html)**.'
       )
@@ -160,7 +159,8 @@ class HelpCommand extends BaseCommand {
       .setColor(0x00c2e6)
       .setAuthor({
         name: `Các lệnh thuộc danh mục ${category}`,
-        iconURL: getBotAvatar(bot)})
+        iconURL: getBotAvatar(bot)
+      })
       .setDescription(desc)
       .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
   }
@@ -227,6 +227,7 @@ class HelpCommand extends BaseCommand {
 
   // Executes the help command.
   async execute(bot: BotClient, message: Message): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 
     const { select, row } = this.buildSelectMenu()

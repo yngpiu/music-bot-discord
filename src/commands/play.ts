@@ -2,7 +2,7 @@
 import type { Message, VoiceChannel } from 'discord.js'
 import type { Player, SearchResult, UnresolvedSearchResult } from 'lavalink-client'
 
-import { TIME } from '~/constants/time.js'
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
@@ -10,7 +10,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command for searching and playing music.
@@ -109,7 +109,8 @@ class PlayCommand extends BaseCommand {
       },
       player,
       message.author,
-      getBotAvatar(bot))
+      getBotAvatar(bot)
+    )
   }
 
   // Executes the play command.
@@ -119,6 +120,7 @@ class PlayCommand extends BaseCommand {
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(
       `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild!.id}`
     )

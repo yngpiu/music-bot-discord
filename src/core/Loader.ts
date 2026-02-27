@@ -33,6 +33,7 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   const content = `${EMOJI.ERROR} ${text}`
 
   if (target instanceof Message) {
+    await target.reactions.removeAll().catch(() => {})
     const reply = await target.reply(content).catch((error: Error) => {
       logger.error('[System] Error replying error message to user:', error.message)
       return null

@@ -1,14 +1,12 @@
 // Command to clear all tracks from the current music queue.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to empty the queue.
@@ -19,7 +17,13 @@ class ClearCommand extends BaseCommand {
   requiresOwner = true
 
   // Removes all tracks from the player's queue.
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
 
     if (player.queue.tracks.length === 0) {
@@ -39,26 +43,10 @@ class ClearCommand extends BaseCommand {
     // Clear the queue.
     await player.queue.splice(0, trackCount)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn('[Command: clear] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

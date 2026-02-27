@@ -12,15 +12,13 @@ import {
 } from 'discord.js'
 import type { UnresolvedTrack } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
@@ -63,6 +61,7 @@ class FavoriteCommand extends BaseCommand {
 
   // Routes the command to the appropriate handler.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
+    await reactLoadingMessage(message)
     const subCommand = args[0]?.toLowerCase()
 
     if (subCommand === 'add') {
@@ -114,14 +113,10 @@ class FavoriteCommand extends BaseCommand {
         }
       })
 
-      const embed = new EmbedBuilder()
-        .setColor(0x00c2e6)
-        .setDescription(
-          `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${currentTrack.title}** vào danh sách yêu thích!`
-        )
-
-      const replyMessage = await message.reply({ embeds: [embed] })
-      deleteMessage([replyMessage, message], TIME.SHORT)
+      await replySuccessMessage(
+        message,
+        `Đã thêm **${currentTrack.title}** vào danh sách yêu thích!`
+      )
     } catch (error) {
       logger.error('[Command: favorite] Error adding favorite track:', error)
       throw new BotError('Đã có lỗi xảy ra khi thêm bài hát vào danh sách yêu thích.')
@@ -161,14 +156,7 @@ class FavoriteCommand extends BaseCommand {
         ? `đã xóa **${tracksToRemove[0].title}** khỏi danh sách yêu thích.`
         : `đã xóa **${tracksToRemove.length}** bài hát khỏi danh sách yêu thích.`
 
-      const embed = new EmbedBuilder()
-        .setColor(0x00c2e6)
-        .setDescription(
-          `${EMOJI.ANIMATED_CAT_DANCE} **${message.author.displayName}**, ${description}`
-        )
-
-      const replyContent = await message.reply({ embeds: [embed] })
-      deleteMessage([replyContent, message], TIME.SHORT)
+      await replySuccessMessage(message, `**${message.author.displayName}**, ${description}`)
     } catch (error) {
       logger.error('[Command: favorite] Error removing favorite tracks:', error)
       throw new BotError('Đã xảy ra lỗi khi xóa bài hát yêu thích.')
@@ -431,14 +419,10 @@ class FavoriteCommand extends BaseCommand {
 
     await player.queue.add(tracks)
 
-    const embed = new EmbedBuilder()
-      .setColor(0x00c2e6)
-      .setDescription(
-        `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${tracks.length}** bài hát yêu thích vào danh sách chờ.`
-      )
-
-    const replyMsg = await message.reply({ embeds: [embed] })
-    deleteMessage([replyMsg, message], TIME.SHORT)
+    await replySuccessMessage(
+      message,
+      `Đã thêm **${tracks.length}** bài hát yêu thích vào danh sách chờ.`
+    )
 
     if (!player.playing) await player.play()
   }

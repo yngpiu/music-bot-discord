@@ -1,14 +1,12 @@
 // Command to remove one or multiple tracks from the music queue using indices or ranges.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
@@ -51,7 +49,13 @@ class RemoveCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the remove command.
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
 
     if (player.queue.tracks.length === 0) {
@@ -86,23 +90,7 @@ class RemoveCommand extends BaseCommand {
       ? `đã xóa **${removedTitles[0]}** khỏi hàng đợi.`
       : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n\`${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}\``
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** ${description}`
-      )
-    )
-
-    const replyMessage = await message
-      .reply({ components: [container], flags: ['IsComponentsV2'] })
-
-      .catch((e) => {
-        logger.warn('[Command: remove] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
+    await replySuccessMessage(message, `**${getBotName(bot)}** ${description}`)
   }
 }
 

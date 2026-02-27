@@ -1,12 +1,11 @@
 // Command to display the current status of the music player, including volume, filters, and repeat mode.
 import { EmbedBuilder, type Message } from 'discord.js'
 
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show comprehensive player information.
@@ -17,7 +16,13 @@ class StatusCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the status command, gathering state from the player instance.
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
 
     const currentMode = player.repeatMode
@@ -46,7 +51,8 @@ class StatusCommand extends BaseCommand {
       .setColor(0x00c2e6)
       .setAuthor({
         name: 'Trạng thái Trình phát',
-        iconURL: getBotAvatar(bot)})
+        iconURL: getBotAvatar(bot)
+      })
       .addFields(
         { name: 'Trạng thái', value: isPaused ? 'Tạm dừng' : 'Đang phát', inline: true },
         { name: 'Âm lượng', value: `${volume}%`, inline: true },

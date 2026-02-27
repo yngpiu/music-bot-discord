@@ -1,14 +1,11 @@
 // Command to play the previous track in the queue history.
-import { ContainerBuilder, type Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to navigate back to the previous track.
@@ -19,7 +16,13 @@ class BackCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the back command, moving the current track to the front of the queue and playing the previous one.
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: back] User ${message.author.tag} requested to play previous track`)
 
     if (!player.queue.previous || player.queue.previous.length === 0) {
@@ -41,26 +44,10 @@ class BackCommand extends BaseCommand {
     // Play the previous track.
     await player.play({ clientTrack: previousTrack })
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đang phát lại bài **${previousTrack.info.title}**.`
-      )
+    await replySuccessMessage(
+      message,
+      `**${getBotName(bot)}** đang phát lại bài **${previousTrack.info.title}**.`
     )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn('[Command: back] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
   }
 }
 

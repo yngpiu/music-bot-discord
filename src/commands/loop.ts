@@ -1,13 +1,11 @@
 // Command to toggle the player's repeat mode (off, track, or queue).
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to cycle through repeat modes.
@@ -18,7 +16,13 @@ class LoopCommand extends BaseCommand {
   requiresVoice = true
 
   // Executes the loop command, cycling the player's repeat mode.
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: loop] User ${message.author.tag} requested to toggle loop mode`)
 
     const currentMode = player.repeatMode
@@ -40,33 +44,16 @@ class LoopCommand extends BaseCommand {
 
     await player.setRepeatMode(nextMode)
 
-    let messageText = ''
+    let messageText: string
     if (nextMode === 'track') {
-      messageText = `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+      messageText = `**${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
     } else if (nextMode === 'queue') {
-      messageText = `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+      messageText = `**${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
     } else {
-      messageText = `${EMOJI.ANIMATED_CAT_NO_IDEA} **${getBotName(bot)}** đã **tắt** chế độ lặp.`
+      messageText = `**${getBotName(bot)}** đã **tắt** chế độ lặp.`
     }
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(messageText)
-    )
-
-    const replyMessage = await message
-      .reply({
-        components: [container],
-        flags: ['IsComponentsV2']
-      })
-
-      .catch((e) => {
-        logger.warn('[Command: loop] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.SHORT)
-    }
+    await replySuccessMessage(message, messageText)
   }
 }
 

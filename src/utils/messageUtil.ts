@@ -1,6 +1,7 @@
 // Utilities for asynchronous message management and cleanup.
 import { Channel, ContainerBuilder, type Message } from 'discord.js'
 
+import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time.js'
 
 // Immediately deletes multiple messages and waits for the operation to complete.
@@ -56,4 +57,25 @@ export async function sendContainerMessage(
   deleteMessage([sendedMessage], timeoutDeleteMessage)
 
   return sendedMessage
+}
+
+export async function replySuccessMessage(message: Message, content: string) {
+  const container = createContainerMessage(`${EMOJI.SUCCESS}${content}`)
+
+  const repliedMessage = await message.reply({
+    components: [container],
+    flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
+
+  await message.reactions.removeAll().catch(() => {})
+
+  if (!repliedMessage) return
+
+  deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+
+  return repliedMessage
+}
+
+export async function reactLoadingMessage(message: Message) {
+  await message.react(EMOJI.LOADING)
 }

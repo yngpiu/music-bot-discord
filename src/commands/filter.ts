@@ -1,13 +1,13 @@
 // Command to manage audio filters and effects like Bassboost, Nightcore, etc.
-import { ContainerBuilder, type Message } from 'discord.js'
+import type { Message } from 'discord.js'
 import type { FilterManager } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Mapping of filter keys to their toggle methods and display labels.
@@ -116,29 +116,17 @@ class FilterCommand extends BaseCommand {
     message: Message,
     actionText: string
   ): Promise<void> {
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã ${actionText}.`
-      )
-    )
-
-    const reply = await message
-      .reply({ components: [container], flags: ['IsComponentsV2'] })
-      .catch((e) => {
-        logger.warn('[Command: filter] Error sending notification:', e)
-        return null
-      })
-
-    if (reply) {
-      setTimeout(() => {
-        reply.delete().catch(() => {})
-        message.delete().catch(() => {})
-      }, 15_000)
-    }
+    await replySuccessMessage(message, `**${getBotName(bot)}** đã ${actionText}.`)
   }
 
   // Executes the filter command.
-  async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(
       `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
     )

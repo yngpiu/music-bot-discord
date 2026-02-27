@@ -1,14 +1,12 @@
 // Command to take ownership of the music player in a guild.
-import { ContainerBuilder, Message, VoiceChannel } from 'discord.js'
+import { Message } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
 // Command to claim player ownership. Useful when the previous owner has left the channel.
@@ -25,6 +23,7 @@ class ClaimCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
+    await reactLoadingMessage(message)
     logger.info(`[Command: claim] User ${message.author.tag} requested to claim player control`)
 
     const currentOwnerId = player.get<string>('owner')
@@ -33,28 +32,10 @@ class ClaimCommand extends BaseCommand {
     if (!currentOwnerId) {
       player.set('owner', message.author.id)
 
-      const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-        t.setContent(
-          `${EMOJI.ANIMATED_CAT_LOVE_YOU} Tớ chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha!`
-        )
+      await replySuccessMessage(
+        message,
+        `Tớ chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha!`
       )
-
-      if (message.channel.isTextBased() && 'send' in message.channel) {
-        const replyMessage = await message.channel
-          .send({
-            components: [container],
-            flags: ['IsComponentsV2']
-          })
-
-          .catch((e) => {
-            logger.warn('[Command: claim] Error sending notification:', e)
-            return null
-          })
-
-        if (replyMessage) {
-          deleteMessage([replyMessage, message], TIME.MEDIUM)
-        }
-      }
       return
     }
 
@@ -79,26 +60,7 @@ class ClaimCommand extends BaseCommand {
     // Transfer ownership.
     player.set('owner', message.author.id)
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(`${EMOJI.ANIMATED_CAT_LOVE_YOU} Bạn đã lấy quyền kiểm soát player thành công!`)
-    )
-
-    if (message.channel.isTextBased() && 'send' in message.channel) {
-      const replyMessage = await message.channel
-        .send({
-          components: [container],
-          flags: ['IsComponentsV2']
-        })
-
-        .catch((e) => {
-          logger.warn('[Command: claim] Error sending notification:', e)
-          return null
-        })
-
-      if (replyMessage) {
-        deleteMessage([replyMessage, message], TIME.MEDIUM)
-      }
-    }
+    await replySuccessMessage(message, `Bạn đã lấy quyền kiểm soát player thành công!`)
   }
 }
 

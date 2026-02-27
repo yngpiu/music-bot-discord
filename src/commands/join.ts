@@ -1,16 +1,13 @@
 // Command to invite the bot to the user's current voice channel.
-import { ContainerBuilder, type Message, type VoiceChannel } from 'discord.js'
+import { type Message, type VoiceChannel } from 'discord.js'
 import type { Player } from 'lavalink-client'
 
-import { EMOJI } from '~/constants/emoji.js'
-import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage } from '~/utils/messageUtil.js'
-import { getBotName } from '~/utils/stringUtil.js'
+import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
 
 // Command to summon the bot to a voice channel.
 class JoinCommand extends BaseCommand {
@@ -37,12 +34,7 @@ class JoinCommand extends BaseCommand {
       throw new BotError('Tớ đang ở trong kênh thoại này rồi mà.')
     }
 
-    const isTargeted = message.mentions.users.has(bot.user!.id)
-    throw new BotError(
-      isTargeted
-        ? 'Tớ đang bận phục vụ ở kênh khác rồi.'
-        : 'Tớ đang bận phục vụ ở kênh thoại khác mất rồi.'
-    )
+    throw new BotError('Tớ đang bận phục vụ ở kênh thoại khác mất rồi.')
   }
 
   // Retrieves an existing player or creates a new one for the guild.
@@ -71,26 +63,6 @@ class JoinCommand extends BaseCommand {
     return player
   }
 
-  // Sends a confirmation message to the text channel.
-  private async sendJoinConfirmation(bot: BotClient, message: Message): Promise<void> {
-    if (!message.channel.isTextBased() || !('send' in message.channel)) return
-
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${getBotName(bot)}** đã sẵn sàng phát nhạc ở kênh này.`
-      )
-    )
-
-    const replyMessage = await message.channel
-      .send({ components: [container], flags: ['IsComponentsV2'] })
-      .catch((e) => {
-        logger.warn('[Command: join] Error sending notification:', e)
-        return null
-      })
-
-    if (replyMessage) deleteMessage([message], TIME.SHORT)
-  }
-
   // Executes the join command.
   async execute(
     bot: BotClient,
@@ -99,15 +71,17 @@ class JoinCommand extends BaseCommand {
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
     if (!message.guild) return
+    await reactLoadingMessage(message)
     logger.info(`[Command: join] User ${message.author.tag} requested bot to join channel`)
 
     if (!vcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
+
     this.validateVoiceChannel(message, vcId)
 
     this.checkExistingPlayer(bot, message, vcId, existingPlayer)
 
     await this.getOrCreatePlayer(bot, message, vcId, existingPlayer)
-    await this.sendJoinConfirmation(bot, message)
+    await replySuccessMessage(message, `Tớ đã sẵn sàng phát nhạc ở kênh này.`)
   }
 }
 

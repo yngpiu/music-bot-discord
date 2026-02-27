@@ -6,6 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { reactLoadingMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
 // Command for broadcasting announcements to active music bot instances.
@@ -17,6 +18,7 @@ class NotifyCommand extends BaseCommand {
 
   // Executes the notification recruitment broadcast.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
+    await reactLoadingMessage(message)
     // Permission check: only developers or server owners can broadcast.
     if (!isDeveloperOrServerOwner(message)) {
       throw new BotError('Bạn không có quyền sử dụng lệnh này.')

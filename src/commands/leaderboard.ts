@@ -9,12 +9,12 @@ import {
   StringSelectMenuOptionBuilder
 } from 'discord.js'
 
-import { EMOJI } from '~/constants/emoji.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
+import { reactLoadingMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 
 // Types of leaderboard views available.
@@ -302,6 +302,7 @@ class LeaderboardCommand extends BaseCommand {
 
   // Executes the leaderboard command, handling interactions for pagination and view switching.
   async execute(bot: BotClient, message: Message): Promise<void> {
+    await reactLoadingMessage(message)
     let currentView: LeaderboardView = 'personal'
     let currentPage = 0
 
