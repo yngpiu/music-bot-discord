@@ -33,17 +33,20 @@ class InsertCommand extends BaseCommand {
     const vc = member.voice.channel as VoiceChannel
     if (!vc.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
 
-    if (args.length < 2) {
+    if (args.length < 1) {
       throw new BotError(
-        'Vui lòng nhập vị trí và tên bài hát/đường dẫn. (VD: `insert 1 Nơi này có anh`)'
+        'Vui lòng nhập tên bài hát/đường dẫn. (VD: `insert 1 Nơi này có anh` hoặc `insert Nơi này có anh`)'
       )
     }
 
     // Extract position and query.
-    const positionStr = args.shift()
-    const position = parseInt(positionStr || '', 10)
+    let position = 1 // Default to position 1
 
-    if (isNaN(position) || position < 1) {
+    if (!isNaN(parseInt(args[0], 10))) {
+      position = parseInt(args.shift()!, 10)
+    }
+
+    if (position < 1) {
       throw new BotError('Vị trí chèn không hợp lệ, vui lòng nhập số lớn hơn 0.')
     }
 

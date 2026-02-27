@@ -34,7 +34,7 @@ class PlayerSuppressChangeEvent extends LavalinkEvent {
     const channel = bot.channels.cache.get(player.textChannelId!)
 
     const message = suppress
-      ? `${EMOJI.ANIMATED_CAT_NO_IDEA} **${getBotName(bot)}** đã bị đuổi khỏi sân khấu, không thể tiếp tục phát nhạc.`
+      ? `${EMOJI.ANIMATED_CAT_CRYING} **${getBotName(bot)}** đã bị đuổi khỏi sân khấu, không thể tiếp tục phát nhạc.`
       : `${EMOJI.ANIMATED_CAT_LOVE} **${getBotName(bot)}** đã được bế lên sân khấu để phát nhạc.`
 
     await sendContainerMessage(channel, message)

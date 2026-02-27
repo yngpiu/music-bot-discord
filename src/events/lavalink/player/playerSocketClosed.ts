@@ -25,7 +25,7 @@ class PlayerSocketClosedEvent extends LavalinkEvent {
 
     await sendContainerMessage(
       channel,
-      `${EMOJI.ANIMATED_CAT_BYE} **${getBotName(bot)}** đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`
+      `${EMOJI.ERROR} **${getBotName(bot)}** đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`
     )
   }
 }

@@ -6,6 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
+import { deleteMessageNow } from '~/utils/messageUtil'
 
 // Event handler for the 'playerQueueEmptyCancel' event.
 class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
@@ -17,29 +18,16 @@ class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
       `[Player: ${player.guildId}] Cancelled leave channel schedule because a new track was added`
     )
 
+    const channel = bot.channels.cache.get(player.textChannelId!)
+    if (!channel?.isTextBased() || !('send' in channel)) return
+
     const msgId = player.get('queueEmptyMessageId')
-    if (msgId) {
-      const channel = bot.channels.cache.get(player.textChannelId!)
-      if (channel?.isTextBased()) {
-        try {
-          const msg = await (channel as TextChannel).messages.fetch(msgId as string)
-          if (msg?.deletable) {
-            await msg.delete().catch((e: Error) => {
-              logger.warn(
-                `[Player: ${player.guildId}] Error deleting queueEmptyMessageId message:`,
-                e.message
-              )
-            })
-          }
-        } catch (e: unknown) {
-          logger.warn(
-            `[Player: ${player.guildId}] Error fetching queueEmptyMessageId message:`,
-            e.message
-          )
-        }
-      }
-      player.set('queueEmptyMessageId', null)
-    }
+
+    const msg = await (channel as TextChannel).messages.fetch(msgId as string)
+
+    await deleteMessageNow([msg])
+
+    player.set('queueEmptyMessageId', null)
   }
 }
 

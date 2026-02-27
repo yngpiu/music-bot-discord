@@ -19,7 +19,12 @@ class ClaimCommand extends BaseCommand {
   requiresVoiceMatch = true
 
   // Transfers player ownership to the command executor if the current owner is no longer present or if the executor has elevated permissions.
-  async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
+  async execute(
+    bot: BotClient,
+    message: Message,
+    _args: string[],
+    { player }: CommandContext
+  ): Promise<void> {
     logger.info(`[Command: claim] User ${message.author.tag} requested to claim player control`)
 
     const currentOwnerId = player.get<string>('owner')

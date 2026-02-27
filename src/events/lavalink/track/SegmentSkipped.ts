@@ -2,6 +2,7 @@
 import { Player, SponsorBlockSegmentSkipped, Track } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -42,7 +43,7 @@ class SegmentSkippedEvent extends LavalinkEvent {
 
     const message = `${EMOJI.ANIMATED_CAT_BLINK} **${getBotName(bot)}** vừa tự động bỏ qua **đoạn ${category}**.`
 
-    await sendContainerMessage(channel, message)
+    await sendContainerMessage(channel, message, TIME.VERY_SHORT)
   }
 }
 
