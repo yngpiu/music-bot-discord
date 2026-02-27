@@ -1,5 +1,12 @@
 // Utilities for asynchronous message management and cleanup.
-import { Channel, ContainerBuilder, type Message } from 'discord.js'
+import {
+  ActionRowBuilder,
+  Channel,
+  ContainerBuilder,
+  EmbedBuilder,
+  type Message,
+  type MessageActionRowComponentBuilder
+} from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time.js'
@@ -65,6 +72,26 @@ export async function replySuccessMessage(message: Message, content: string) {
   const repliedMessage = await message.reply({
     components: [container],
     flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
+
+  await message.reactions.removeAll().catch(() => {})
+
+  if (!repliedMessage) return
+
+  deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+
+  return repliedMessage
+}
+
+export async function replySuccessEmbed(
+  message: Message,
+  embed: EmbedBuilder,
+  components?: ActionRowBuilder<MessageActionRowComponentBuilder>[]
+) {
+  const repliedMessage = await message.reply({
+    embeds: [embed],
+    components,
+    flags: ['SuppressNotifications']
   })
 
   await message.reactions.removeAll().catch(() => {})

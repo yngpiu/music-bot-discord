@@ -5,11 +5,13 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  type MessageActionRowComponentBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder
 } from 'discord.js'
 import { Player, UnresolvedTrack } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
@@ -23,7 +25,7 @@ import {
 } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
 
 // Command for searching music from multiple providers with an interactive UI.
@@ -147,10 +149,13 @@ class SearchCommand extends BaseCommand {
       .setDescription(buildDescription(tracks, currentSource))
       .setFooter({ text: 'Hãy chọn bài hát hoặc đổi nguồn tìm kiếm (60s).' })
 
-    const reply = await message.reply({
-      embeds: [embed],
-      components: getComponents(false, currentSource)
-    })
+    const reply = await replySuccessEmbed(
+      message,
+      embed,
+      getComponents(false, currentSource) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+    )
+
+    if (!reply) return
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
@@ -372,10 +377,13 @@ class SearchCommand extends BaseCommand {
         .setFooter({ text: 'Hãy chọn album bạn muốn nghe trong vòng 60s.' })
     }
 
-    const reply = await message.reply({
-      embeds: [buildEmbed(currentPage)],
-      components: getComponents(currentPage, false)
-    })
+    const reply = await replySuccessEmbed(
+      message,
+      buildEmbed(currentPage),
+      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+    )
+
+    if (!reply) return
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
@@ -583,10 +591,13 @@ class SearchCommand extends BaseCommand {
         .setFooter({ text: 'Hãy chọn danh sách phát bạn muốn nghe trong vòng 60s.' })
     }
 
-    const reply = await message.reply({
-      embeds: [buildEmbed(currentPage)],
-      components: getComponents(currentPage, false)
-    })
+    const reply = await replySuccessEmbed(
+      message,
+      buildEmbed(currentPage),
+      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[]
+    )
+
+    if (!reply) return
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
