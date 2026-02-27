@@ -259,8 +259,6 @@ class SearchCommand extends BaseCommand {
         await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, 60000)
 
         if (!player.playing) await player.play()
-
-        collector.stop('selected')
       }
     })
 
@@ -475,7 +473,6 @@ class SearchCommand extends BaseCommand {
           await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
 
           if (!player.playing) await player.play().catch(() => {})
-          collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading album details:', error)
           await sendFollowUpEphemeral(interaction, `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải album.`)
@@ -688,7 +685,6 @@ class SearchCommand extends BaseCommand {
           await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
 
           if (!player.playing) await player.play().catch(() => {})
-          collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading playlist details:', error)
           await sendFollowUpEphemeral(
