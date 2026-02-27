@@ -1,15 +1,12 @@
-/**
- * @file rateLimiter.ts
- * @description Sliding-window rate limiter using Redis to prevent spam and implement progressive banning.
- */
+// Sliding-window rate limiter using Redis to prevent spam and implement progressive banning.
 import type { Redis } from 'ioredis'
 
-/** Time window for rate limiting (2 seconds). */
+// Time window for rate limiting (2 seconds).
 const WINDOW_MS = 2_000
-/** Maximum allowed uses within the time window. */
+// Maximum allowed uses within the time window.
 const MAX_USES = 1
 
-/** Progressive ban tiers: [violation_count, duration_ms]. */
+// Progressive ban tiers: [violation_count, duration_ms].
 const BAN_TIERS: [number, number][] = [
   [30, 12 * 60 * 60 * 1000], // 12 hours
   [20, 6 * 60 * 60 * 1000], // 6 hours
@@ -18,30 +15,19 @@ const BAN_TIERS: [number, number][] = [
 
 let redis: Redis | null = null
 
-/**
- * Sets the Redis client instance to be used by the rate limiter.
- * @param {Redis} client - The Redis client.
- */
+// Sets the Redis client instance to be used by the rate limiter.
 export function setRedisClient(client: Redis): void {
   redis = client
 }
 
-/**
- * Returns the remaining ban duration for a user.
- * @param {string} userId - The Discord user ID.
- * @returns {Promise<number>} - Remaining duration in milliseconds, or 0 if not banned.
- */
+// Returns the remaining ban duration for a user.
 export async function getBanRemainingMs(userId: string): Promise<number> {
   if (!redis) return 0
   const ttl = await redis.pttl(`ban:${userId}`)
   return ttl > 0 ? ttl : 0
 }
 
-/**
- * Checks if a user is rate-limited and handles progressive banning logic.
- * @param {string} userId - The Discord user ID.
- * @returns {Promise<{ limited: boolean; remainingMs: number }>} - Limit status and remaining time.
- */
+// Checks if a user is rate-limited and handles progressive banning logic.
 export async function checkRateLimit(
   userId: string
 ): Promise<{ limited: boolean; remainingMs: number }> {

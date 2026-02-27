@@ -1,7 +1,4 @@
-/**
- * @file help.ts
- * @description Command to display a list of available bot commands categorized by function.
- */
+// Command to display a list of available bot commands categorized by function.
 import {
   ActionRowBuilder,
   EmbedBuilder,
@@ -17,10 +14,9 @@ import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotAvatar } from '~/utils/stringUtil.js'
 
-/**
- * Commands grouped by category for display in the help menu.
- */
+// Commands grouped by category for display in the help menu.
 export const commandsByCategory = {
   Track: [
     {
@@ -127,36 +123,25 @@ export const commandsByCategory = {
   ]
 }
 
-/**
- * Command to show help information with an interactive select menu.
- */
+// Command to show help information with an interactive select menu.
 class HelpCommand extends BaseCommand {
   name = 'help'
   aliases = ['h']
   description = 'Hiển thị danh sách hướng dẫn lệnh.'
   requiresVoice = false
 
-  /**
-   * Builds the main landing embed for the help command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @returns {EmbedBuilder} - The main help embed.
-   */
+  // Builds the main landing embed for the help command.
   private buildMainEmbed(bot: BotClient): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(0x00c2e6)
-      .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: bot.user?.displayAvatarURL() })
+      .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: getBotAvatar(bot)})
       .setDescription(
         '- Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\n- Bạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại **[TRANG HƯỚNG DẪN CHI TIẾT](https://yngpiu.github.io/music-bot-discord/docs/help.html)**.'
       )
       .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
   }
 
-  /**
-   * Builds an embed featuring commands from a specific category.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {keyof typeof commandsByCategory} category - The category to display.
-   * @returns {EmbedBuilder} - The category-specific help embed.
-   */
+  // Builds an embed featuring commands from a specific category.
   private buildCategoryEmbed(
     bot: BotClient,
     category: keyof typeof commandsByCategory
@@ -175,16 +160,12 @@ class HelpCommand extends BaseCommand {
       .setColor(0x00c2e6)
       .setAuthor({
         name: `Các lệnh thuộc danh mục ${category}`,
-        iconURL: bot.user?.displayAvatarURL()
-      })
+        iconURL: getBotAvatar(bot)})
       .setDescription(desc)
       .setFooter({ text: `[ ] : Tùy chọn | < > : Bắt buộc` })
   }
 
-  /**
-   * Constructs the select menu for choosing help categories.
-   * @returns {{ select: StringSelectMenuBuilder, row: ActionRowBuilder<StringSelectMenuBuilder> }} - The menu components.
-   */
+  // Constructs the select menu for choosing help categories.
   private buildSelectMenu(): {
     select: StringSelectMenuBuilder
     row: ActionRowBuilder<StringSelectMenuBuilder>
@@ -211,14 +192,7 @@ class HelpCommand extends BaseCommand {
     return { select, row }
   }
 
-  /**
-   * Starts a collector to handle category selection from the select menu.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The original command message.
-   * @param {Message} reply - The bot's reply containing the menu.
-   * @param {StringSelectMenuBuilder} select - The select menu builder.
-   * @param {ActionRowBuilder<StringSelectMenuBuilder>} row - The action row.
-   */
+  // Starts a collector to handle category selection from the select menu.
   private startCollector(
     bot: BotClient,
     message: Message,
@@ -251,11 +225,7 @@ class HelpCommand extends BaseCommand {
     })
   }
 
-  /**
-   * Executes the help command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   */
+  // Executes the help command.
   async execute(bot: BotClient, message: Message): Promise<void> {
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 

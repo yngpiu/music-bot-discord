@@ -1,7 +1,4 @@
-/**
- * @file leaderboard.ts
- * @description Command to display various music-related leaderboards (top tracks, listeners, bots).
- */
+// Command to display various music-related leaderboards (top tracks, listeners, bots).
 import type { Guild, Message } from 'discord.js'
 import {
   ActionRowBuilder,
@@ -18,16 +15,12 @@ import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatTrack } from '~/utils/stringUtil.js'
+import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 
-/**
- * Types of leaderboard views available.
- */
+// Types of leaderboard views available.
 type LeaderboardView = 'personal' | 'tracks' | 'listeners' | 'bots'
 
-/**
- * Represents a track entry in the leaderboard.
- */
+// Represents a track entry in the leaderboard.
 interface TrackEntry {
   title: string
   artist: string
@@ -35,31 +28,21 @@ interface TrackEntry {
   playCount: number
 }
 
-/**
- * Represents a bot entry in the leaderboard.
- */
+// Represents a bot entry in the leaderboard.
 interface BotEntry {
   botId: string
   botName: string
   playCount: number
 }
 
-/**
- * Represents a user entry in the leaderboard.
- */
+// Represents a user entry in the leaderboard.
 interface UserEntry {
   userId: string
   userName: string
   playCount: number
 }
 
-/**
- * Fetches the top tracks for a specific user in a guild.
- * @param {number} limit - Maximum number of entries to return.
- * @param {string} guildId - The ID of the guild.
- * @param {string} userId - The ID of the user.
- * @returns {Promise<TrackEntry[]>} - A list of top tracks.
- */
+// Fetches the top tracks for a specific user in a guild.
 async function getPersonalTopTracks(
   limit: number,
   guildId: string,
@@ -86,12 +69,7 @@ async function getPersonalTopTracks(
   }))
 }
 
-/**
- * Fetches the overall top tracks in a guild.
- * @param {number} limit - Maximum number of entries to return.
- * @param {string} guildId - The ID of the guild.
- * @returns {Promise<TrackEntry[]>} - A list of top tracks.
- */
+// Fetches the overall top tracks in a guild.
 async function getTopTracks(limit: number, guildId: string): Promise<TrackEntry[]> {
   const results = await prisma.$queryRaw<
     { title: string; artist: string; uri: string | null; playCount: bigint }[]
@@ -113,12 +91,7 @@ async function getTopTracks(limit: number, guildId: string): Promise<TrackEntry[
   }))
 }
 
-/**
- * Fetches the top-performing bots in a guild.
- * @param {number} limit - Maximum number of entries to return.
- * @param {string} guildId - The ID of the guild.
- * @returns {Promise<{ botId: string, playCount: number }[]>} - A list of top bots.
- */
+// Fetches the top-performing bots in a guild.
 async function getTopBots(
   limit: number,
   guildId: string
@@ -138,12 +111,7 @@ async function getTopBots(
   }))
 }
 
-/**
- * Fetches the most active listeners in a guild.
- * @param {number} limit - Maximum number of entries to return.
- * @param {string} guildId - The ID of the guild.
- * @returns {Promise<{ userId: string, playCount: number }[]>} - A list of top listeners.
- */
+// Fetches the most active listeners in a guild.
 async function getTopListeners(
   limit: number,
   guildId: string
@@ -166,13 +134,7 @@ async function getTopListeners(
 const ITEMS_PER_PAGE = 10
 const MAX_ITEMS = 100
 
-/**
- * Builds the navigation buttons (first, prev, next, last) for the leaderboard.
- * @param {number} page - Current page index.
- * @param {number} totalPages - Total number of pages.
- * @param {boolean} disabled - Whether the buttons should be disabled.
- * @returns {ActionRowBuilder<ButtonBuilder>} - The buttons action row.
- */
+// Builds the navigation buttons (first, prev, next, last) for the leaderboard.
 function buildNavButtons(
   page: number,
   totalPages: number,
@@ -202,12 +164,7 @@ function buildNavButtons(
   )
 }
 
-/**
- * Builds the select menu for switching between leaderboard views.
- * @param {LeaderboardView} currentView - The active view.
- * @param {boolean} disabled - Whether the menu should be disabled.
- * @returns {ActionRowBuilder<StringSelectMenuBuilder>} - The select menu action row.
- */
+// Builds the select menu for switching between leaderboard views.
 function buildViewSelect(
   currentView: LeaderboardView,
   disabled = false
@@ -242,15 +199,7 @@ function buildViewSelect(
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
 }
 
-/**
- * Builds an embed for track-based leaderboards.
- * @param {TrackEntry[]} entries - The list of tracks.
- * @param {number} page - The current page.
- * @param {number} totalPages - Total pages.
- * @param {Guild} guild - The guild object.
- * @param {string} title - The embed title.
- * @returns {EmbedBuilder} - The constructed embed.
- */
+// Builds an embed for track-based leaderboards.
 function buildTrackEmbed(
   entries: TrackEntry[],
   page: number,
@@ -276,21 +225,14 @@ function buildTrackEmbed(
   return new EmbedBuilder()
     .setAuthor({
       name: title,
-      iconURL: guild.iconURL() ?? undefined
+      iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
     .setColor(0xffd700)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-/**
- * Builds an embed for the bot leaderboard.
- * @param {BotEntry[]} entries - The list of bots.
- * @param {number} page - The current page.
- * @param {number} totalPages - Total pages.
- * @param {Guild} guild - The guild object.
- * @returns {EmbedBuilder} - The constructed embed.
- */
+// Builds an embed for the bot leaderboard.
 function buildBotEmbed(
   entries: BotEntry[],
   page: number,
@@ -314,21 +256,14 @@ function buildBotEmbed(
   return new EmbedBuilder()
     .setAuthor({
       name: `BXH bot theo tổng lượt phát ở ${guild.name}`,
-      iconURL: guild.iconURL() ?? undefined
+      iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
     .setColor(0x00c2e6)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-/**
- * Builds an embed for the user listener leaderboard.
- * @param {UserEntry[]} entries - The list of users.
- * @param {number} page - The current page.
- * @param {number} totalPages - Total pages.
- * @param {Guild} guild - The guild object.
- * @returns {EmbedBuilder} - The constructed embed.
- */
+// Builds an embed for the user listener leaderboard.
 function buildUserEmbed(
   entries: UserEntry[],
   page: number,
@@ -352,26 +287,20 @@ function buildUserEmbed(
   return new EmbedBuilder()
     .setAuthor({
       name: `BXH người nghe nhiều nhất ở ${guild.name}`,
-      iconURL: guild.iconURL() ?? undefined
+      iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
     .setColor(0x9b59b6)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
-/**
- * Command to display music statistics and leaderboards.
- */
+// Command to display music statistics and leaderboards.
 class LeaderboardCommand extends BaseCommand {
   name = 'leaderboard'
   aliases = ['lb', 'top']
   description = 'Xem bảng xếp hạng bài hát và bot.'
 
-  /**
-   * Executes the leaderboard command, handling interactions for pagination and view switching.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   */
+  // Executes the leaderboard command, handling interactions for pagination and view switching.
   async execute(bot: BotClient, message: Message): Promise<void> {
     let currentView: LeaderboardView = 'personal'
     let currentPage = 0
@@ -390,9 +319,7 @@ class LeaderboardCommand extends BaseCommand {
     // Fetch initial data for personal top tracks.
     personalEntries = await getPersonalTopTracks(MAX_ITEMS, guild.id, userId)
 
-    /**
-     * Gets the entries for the active view.
-     */
+    // Gets the entries for the active view.
     const getEntries = () => {
       if (currentView === 'personal') return personalEntries
       if (currentView === 'tracks') return trackEntries
@@ -400,14 +327,10 @@ class LeaderboardCommand extends BaseCommand {
       return botEntries
     }
 
-    /**
-     * Calculates total pages for the current data set.
-     */
+    // Calculates total pages for the current data set.
     const getTotalPages = () => Math.max(1, Math.ceil(getEntries().length / ITEMS_PER_PAGE))
 
-    /**
-     * Generates the appropriate embed based on current view and page.
-     */
+    // Generates the appropriate embed based on current view and page.
     const getEmbed = () => {
       const totalPages = getTotalPages()
       if (currentView === 'personal') {
@@ -434,9 +357,7 @@ class LeaderboardCommand extends BaseCommand {
       return buildBotEmbed(botEntries, currentPage, totalPages, guild)
     }
 
-    /**
-     * Retrieves the UI components (buttons and select menu).
-     */
+    // Retrieves the UI components (buttons and select menu).
     const getComponents = (disabled = false) => [
       buildNavButtons(currentPage, getTotalPages(), disabled),
       buildViewSelect(currentView, disabled)

@@ -1,20 +1,12 @@
-/**
- * @file stringUtil.ts
- * @description Utilities for string manipulation, duration formatting, and display optimization.
- */
+// Utilities for string manipulation, duration formatting, and display optimization.
+import { Guild } from 'discord.js'
 
-/**
- * Joins multiple strings with newlines.
- * @param {...string[]} args - Strings to join.
- * @returns {string} - Combined string.
- */
+import { type BotClient } from '~/core/BotClient'
+
+// Joins multiple strings with newlines.
 export const lines = (...args: string[]): string => args.join('\n')
 
-/**
- * Formats a duration in milliseconds to a human-readable HH:MM:SS or MM:SS format.
- * @param {number} ms - Duration in milliseconds.
- * @returns {string} - Formatted duration string.
- */
+// Formats a duration in milliseconds to a human-readable HH:MM:SS or MM:SS format.
 export const formatDuration = (ms: number): string => {
   const totalSeconds = Math.floor(ms / 1000)
 
@@ -32,14 +24,7 @@ export const formatDuration = (ms: number): string => {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 }
 
-/**
- * Formats a track's metadata into a consistent display string (Markdown link or bold text).
- * @param {object} item - Track metadata object.
- * @param {string} item.title - Track title.
- * @param {string} [item.trackLink] - Optional URL for the track.
- * @param {string} [item.author] - Optional author name.
- * @returns {string} - Formatted track string.
- */
+// Formats a track's metadata into a consistent display string (Markdown link or bold text).
 export function formatTrack(item: {
   title: string
   trackLink?: string | null
@@ -52,4 +37,16 @@ export function formatTrack(item: {
   const label = item.author && !isYouTube ? `${item.title} - ${item.author}` : item.title
 
   return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
+}
+
+export function getBotName(bot: BotClient): string {
+  return bot.user?.displayName || bot.user?.username || 'Tớ'
+}
+
+export function getBotAvatar(bot: BotClient): string {
+  return bot.user?.displayAvatarURL() || bot.user?.avatarURL() || ''
+}
+
+export function getGuildIcon(guild: Guild): string | undefined {
+  return guild.iconURL() ?? undefined
 }

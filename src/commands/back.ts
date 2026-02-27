@@ -1,7 +1,4 @@
-/**
- * @file back.ts
- * @description Command to play the previous track in the queue history.
- */
+// Command to play the previous track in the queue history.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to navigate back to the previous track.
- */
+// Command to navigate back to the previous track.
 class BackCommand extends BaseCommand {
   name = 'back'
   aliases = ['b', 'previous', 'prev']
   description = 'Quay lại bài hát trước đó.'
   requiresVoice = true
 
-  /**
-   * Executes the back command, moving the current track to the front of the queue and playing the previous one.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the back command, moving the current track to the front of the queue and playing the previous one.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: back] User ${message.author.tag} requested to play previous track`)
 
@@ -53,7 +43,7 @@ class BackCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đang phát lại bài **${previousTrack.info.title}**.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đang phát lại bài **${previousTrack.info.title}**.`
       )
     )
 

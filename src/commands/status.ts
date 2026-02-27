@@ -1,7 +1,4 @@
-/**
- * @file status.ts
- * @description Command to display the current status of the music player, including volume, filters, and repeat mode.
- */
+// Command to display the current status of the music player, including volume, filters, and repeat mode.
 import { EmbedBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
@@ -10,24 +7,16 @@ import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { formatTrack } from '~/utils/stringUtil'
+import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
-/**
- * Command to show comprehensive player information.
- */
+// Command to show comprehensive player information.
 class StatusCommand extends BaseCommand {
   name = 'status'
   aliases = ['state', 'info']
   description = 'Hiển thị các trạng thái của trình phát nhạc (lặp, tự động phát, âm lượng, ...).'
   requiresVoice = true
 
-  /**
-   * Executes the status command, gathering state from the player instance.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the status command, gathering state from the player instance.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
 
@@ -57,8 +46,7 @@ class StatusCommand extends BaseCommand {
       .setColor(0x00c2e6)
       .setAuthor({
         name: 'Trạng thái Trình phát',
-        iconURL: bot.user?.displayAvatarURL()
-      })
+        iconURL: getBotAvatar(bot)})
       .addFields(
         { name: 'Trạng thái', value: isPaused ? 'Tạm dừng' : 'Đang phát', inline: true },
         { name: 'Âm lượng', value: `${volume}%`, inline: true },

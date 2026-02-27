@@ -1,7 +1,4 @@
-/**
- * @file insert.ts
- * @description Command to insert a track or playlist at a specific position in the queue.
- */
+// Command to insert a track or playlist at a specific position in the queue.
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
@@ -13,22 +10,16 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotAvatar } from '~/utils/stringUtil.js'
 
-/**
- * Command to add tracks to a specific index in the queue.
- */
+// Command to add tracks to a specific index in the queue.
 class InsertCommand extends BaseCommand {
   name = 'insert'
   aliases = ['i', 'add', 'playnext', 'pn']
   description = 'Chèn một bài hát hoặc danh sách phát vào vị trí cụ thể trong danh sách chờ.'
   requiresVoice = true
 
-  /**
-   * Executes the insert command, searching for the track and placing it at the requested position.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments: [position, ...query].
-   */
+  // Executes the insert command, searching for the track and placing it at the requested position.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     logger.info(
       `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
@@ -163,7 +154,7 @@ class InsertCommand extends BaseCommand {
       },
       player,
       message.author,
-      bot.user?.displayAvatarURL(),
+      getBotAvatar(bot),
       positionOverride,
       estimatedMsOverride
     )

@@ -1,7 +1,4 @@
-/**
- * @file Loader.ts
- * @description Provides static methods for hot-loading commands, events, and interactions.
- */
+// Provides static methods for hot-loading commands, events, and interactions.
 import { Prisma } from '@prisma/client'
 import { BaseInteraction, Message } from 'discord.js'
 import { readdirSync } from 'fs'
@@ -20,11 +17,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 type ReplyTarget = Message | BaseInteraction
 
-/**
- * Checks if an error is a Prisma-related database error.
- * @param {unknown} err - The error object to check.
- * @returns {boolean} - True if it's a Prisma error.
- */
+// Checks if an error is a Prisma-related database error.
 function isPrismaError(err: unknown): boolean {
   return (
     err instanceof Prisma.PrismaClientKnownRequestError ||
@@ -35,11 +28,7 @@ function isPrismaError(err: unknown): boolean {
   )
 }
 
-/**
- * Sends an error message to a user and handles cleanup.
- * @param {ReplyTarget} target - The message or interaction to reply to.
- * @param {string} text - The error message text.
- */
+// Sends an error message to a user and handles cleanup.
 async function replyError(target: ReplyTarget, text: string): Promise<void> {
   const content = `${EMOJI.ERROR} ${text}`
 
@@ -74,11 +63,7 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
   }
 }
 
-/**
- * Helper function to find a replyable target from a list of arguments.
- * @param {any[]} args - List of arguments to search.
- * @returns {ReplyTarget | null} - The found target or null.
- */
+// Helper function to find a replyable target from a list of arguments.
 function findReplyTarget(args: unknown[]): ReplyTarget | null {
   for (const arg of args) {
     if (arg instanceof Message) return arg
@@ -87,12 +72,7 @@ function findReplyTarget(args: unknown[]): ReplyTarget | null {
   return null
 }
 
-/**
- * Wraps a function with a global error handler that notifies users and logs errors.
- * @param {string} eventName - The name of the event/action being executed.
- * @param {function} fn - The function to wrap.
- * @returns {function} - The wrapped function.
- */
+// Wraps a function with a global error handler that notifies users and logs errors.
 function safeExecute(
   eventName: string,
   fn: (...args: unknown[]) => Promise<unknown>
@@ -124,10 +104,7 @@ function safeExecute(
 }
 
 export class Loader {
-  /**
-   * Dynamically loads all command files from the commands directory.
-   * @param {BotClient} bot - The bot instance to load commands into.
-   */
+  // Dynamically loads all command files from the commands directory.
   static async loadCommands(bot: BotClient): Promise<void> {
     const commandsPath = join(__dirname, '../commands')
     const files = readdirSync(commandsPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'))
@@ -144,11 +121,7 @@ export class Loader {
     }
   }
 
-  /**
-   * Dynamically registers all standard Discord events from the events directory.
-   * @param {BotClient} bot - The bot instance.
-   * @param {BotManager} botManager - The bot manager instance.
-   */
+  // Dynamically registers all standard Discord events from the events directory.
   static async registerEvents(bot: BotClient, botManager: BotManager): Promise<void> {
     const eventsPath = join(__dirname, '../events')
     const files = readdirSync(eventsPath).filter(
@@ -171,10 +144,7 @@ export class Loader {
     }
   }
 
-  /**
-   * Recursively discovers and registers all Lavalink manager and node events.
-   * @param {BotClient} bot - The bot instance.
-   */
+  // Recursively discovers and registers all Lavalink manager and node events.
   static async registerLavalinkEvents(bot: BotClient): Promise<void> {
     const eventsPath = join(__dirname, '../events', 'lavalink')
 
@@ -215,10 +185,7 @@ export class Loader {
     }
   }
 
-  /**
-   * Dynamically loads interaction handlers (buttons, modals, autocompletes).
-   * @param {BotClient} bot - The bot instance.
-   */
+  // Dynamically loads interaction handlers (buttons, modals, autocompletes).
   static async loadInteractions(bot: BotClient): Promise<void> {
     const interactionsPath = join(__dirname, '../interactions')
 

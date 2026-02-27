@@ -1,7 +1,4 @@
-/**
- * @file pause.ts
- * @description Command to pause the current audio playback.
- */
+// Command to pause the current audio playback.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to pause the Lavalink player.
- */
+// Command to pause the Lavalink player.
 class PauseCommand extends BaseCommand {
   name = 'pause'
   aliases = ['ps']
   description = 'Tạm dừng bài hát hiện tại.'
   requiresVoiceMatch = true
 
-  /**
-   * Executes the pause command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the pause command.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
 
@@ -45,7 +35,7 @@ class PauseCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_NO_IDEA} **${bot.user?.displayName || 'tớ'}** đã tạm dừng phát nhạc.`
+        `${EMOJI.ANIMATED_CAT_NO_IDEA} **${getBotName(bot)}** đã tạm dừng phát nhạc.`
       )
     )
 

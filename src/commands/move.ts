@@ -1,7 +1,4 @@
-/**
- * @file move.ts
- * @description Command to move a track from one position to another within the queue.
- */
+// Command to move a track from one position to another within the queue.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to rearrange tracks in the music queue.
- */
+// Command to rearrange tracks in the music queue.
 class MoveCommand extends BaseCommand {
   name = 'move'
   aliases = ['m', 'mv']
   description = 'Di chuyển vị trí của một bài hát trong danh sách chờ.'
   requiresVoice = true
 
-  /**
-   * Executes the move command, shifting a track to the specified target position.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments: [from position, to position (optional)].
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the move command, shifting a track to the specified target position.
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(
       `[Command: move] User ${message.author.tag} requested to move track ${args[0]} to position ${args[1] || 1}`
@@ -77,7 +67,7 @@ class MoveCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
       )
     )
 

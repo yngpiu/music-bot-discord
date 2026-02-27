@@ -1,7 +1,4 @@
-/**
- * @file skipto.ts
- * @description Command to skip to a specific track index in the queue.
- */
+// Command to skip to a specific track index in the queue.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command for jumping to a specific position in the queue.
- */
+// Command for jumping to a specific position in the queue.
 class SkiptoCommand extends BaseCommand {
   name = 'skipto'
   aliases = ['st', 'nextto', 'nt']
   description = 'Chuyển đến một bài hát cụ thể trong danh sách chờ.'
   requiresVoice = true
 
-  /**
-   * Executes the skipto command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments containing the target position.
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the skipto command.
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(
       `[Lệnh: skipto] Người dùng ${message.author.tag} yêu cầu chuyển tới bài số ${args[0] || 'trống'}`
@@ -56,7 +46,7 @@ class SkiptoCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
       )
     )
 

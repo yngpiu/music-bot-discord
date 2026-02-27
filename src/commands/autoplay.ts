@@ -1,7 +1,4 @@
-/**
- * @file autoplay.ts
- * @description Command to toggle the autoplay feature, which automatically adds recommended tracks when the queue is empty.
- */
+// Command to toggle the autoplay feature, which automatically adds recommended tracks when the queue is empty.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -11,23 +8,16 @@ import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to enable or disable the autoplay mode.
- */
+// Command to enable or disable the autoplay mode.
 class AutoplayCommand extends BaseCommand {
   name = 'autoplay'
   aliases = ['ap', 'endless']
   description = 'Bật/tắt chế độ tự động phát nhạc đề xuất khi hết danh sách chờ.'
   requiresVoice = true
 
-  /**
-   * Toggles the 'autoplay' state in the player's data store.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Toggles the 'autoplay' state in the player's data store.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: autoplay] User ${message.author.tag} requested to toggle autoplay state`)
 
@@ -44,7 +34,7 @@ class AutoplayCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã ${actionText}.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã ${actionText}.`
       )
     )
 

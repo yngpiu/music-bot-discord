@@ -1,19 +1,16 @@
-/**
- * @file client.ts
- * @description A high-level Spotify client that uses Playwright to scrape anonymous access tokens and partner APIs for metadata.
- */
+// A high-level Spotify client that uses Playwright to scrape anonymous access tokens and partner APIs for metadata.
 import type { Redis } from 'ioredis'
 import { type Browser, type BrowserContext, type Page, type Response, chromium } from 'playwright'
 
 import { logger } from '~/utils/logger.js'
 
-/** The base URL for Spotify's internal Pathfinder API. */
+// The base URL for Spotify's internal Pathfinder API.
 const SPOTIFY_API_BASE = 'https://api-partner.spotify.com/pathfinder/v2/query'
-/** Common desktop user agent to avoid bot detection. */
+// Common desktop user agent to avoid bot detection.
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-/** Operation hashes for Spotify's GraphQL-like persisted queries. */
+// Operation hashes for Spotify's GraphQL-like persisted queries.
 const HASHES = {
   fetchPlaylist: 'bb67e0af06e8d6f52b531f97468ee4acd44cd0f82b988e15c2ea47b1148efc77',
   getAlbum: 'b9bfabef66ed756e5e13f68a942deb60bd4125ec1f1be8cc42769dc0259b4b10',
@@ -24,7 +21,7 @@ const HASHES = {
   searchAlbums: '5e7d2724fbef31a25f714844bf1313ffc748ebd4bd199eaad50628a4f246a7ab'
 }
 
-/** Represents a Spotify access token and its metadata. */
+// Represents a Spotify access token and its metadata.
 export interface SpotifyToken {
   accessToken: string
   clientId: string
@@ -33,7 +30,7 @@ export interface SpotifyToken {
   expiresIn?: number
 }
 
-/** Internal unified track representation. */
+// Internal unified track representation.
 export interface SpotifyTrack {
   id: string
   name: string
@@ -49,7 +46,7 @@ export interface SpotifyTrack {
   isrc?: string
 }
 
-/** Internal Spotify playlist representation. */
+// Internal Spotify playlist representation.
 export interface SpotifyPlaylist {
   id: string
   name: string
@@ -61,7 +58,7 @@ export interface SpotifyPlaylist {
   }
 }
 
-/** Internal Spotify album representation. */
+// Internal Spotify album representation.
 export interface SpotifyAlbum {
   id: string
   name: string
@@ -74,7 +71,7 @@ export interface SpotifyAlbum {
   }
 }
 
-/** Recommended tracks returned by Spotify. */
+// Recommended tracks returned by Spotify.
 export interface SpotifyRecommendations {
   seeds: { id: string; type: string; href: null }[]
   tracks: SpotifyTrack[]
@@ -163,12 +160,7 @@ interface RawDataResponse {
   }
 }
 
-/**
- * Extracts a Spotify ID from various input formats (URL, URI, or plain ID).
- * @param {string | undefined} input - The raw input string.
- * @param {SpotifyType} type - The expected type of ID.
- * @returns {string} - The cleaned Spotify ID.
- */
+// Extracts a Spotify ID from various input formats (URL, URI, or plain ID).
 function extractId(input: string | undefined, type: SpotifyType): string {
   if (!input) return ''
   const decoded = decodeURIComponent(input).trim()
@@ -205,21 +197,13 @@ export function detectSpotifyType(input: string): SpotifyType | null {
   return null
 }
 
-/**
- * Extracts the single largest image from a list of Spotify raw image objects.
- * @param {RawImage[]} images - The list of raw images.
- * @returns {RawImage | undefined} - The largest image found.
- */
+// Extracts the single largest image from a list of Spotify raw image objects.
 function getBiggestImage(images: RawImage[]): RawImage | undefined {
   if (!images || images.length === 0) return undefined
   return images.reduce((prev, curr) => ((prev.width || 0) > (curr.width || 0) ? prev : curr))
 }
 
-/**
- * Formats a raw image into the unified internal format.
- * @param {RawImage | undefined} img - The raw image.
- * @returns {object[]} - An array containing the formatted image.
- */
+// Formats a raw image into the unified internal format.
 function formatImage(
   img: RawImage | undefined
 ): { url: string; height: number | undefined; width: number | undefined }[] {
@@ -227,11 +211,7 @@ function formatImage(
   return [{ url: img.url, height: img.height, width: img.width }]
 }
 
-/**
- * Maps raw artist data to the unified internal format.
- * @param {RawArtist[]} items - The raw artist list.
- * @returns {object[]} - The formatted artist list.
- */
+// Maps raw artist data to the unified internal format.
 function mapArtists(items: RawArtist[]): { id: string; name: string }[] {
   return (
     items?.map((a) => ({
@@ -241,12 +221,7 @@ function mapArtists(items: RawArtist[]): { id: string; name: string }[] {
   )
 }
 
-/**
- * Maps raw track data to the unified internal format.
- * @param {RawTrack | undefined} track - The raw track object.
- * @param {object} [albumOverride] - Optional album metadata to use if not present on the track.
- * @returns {SpotifyTrack | null} - The formatted track or null.
- */
+// Maps raw track data to the unified internal format.
 function mapTrack(
   track: RawTrack | undefined,
   albumOverride?: RawAlbum | { uri: string; name: string; coverArt: { sources: RawImage[] } }
@@ -270,11 +245,7 @@ function mapTrack(
   }
 }
 
-/**
- * Transforms a raw playlist API response into the internal SpotifyPlaylist format.
- * @param {unknown} response - The raw response.
- * @returns {SpotifyPlaylist} - The formatted playlist.
- */
+// Transforms a raw playlist API response into the internal SpotifyPlaylist format.
 function transformPlaylistResponse(response: unknown): SpotifyPlaylist {
   const data = (response as RawDataResponse)?.data
   const playlist = data?.playlistV2
@@ -302,11 +273,7 @@ function transformPlaylistResponse(response: unknown): SpotifyPlaylist {
   }
 }
 
-/**
- * Transforms a raw album API response into the internal SpotifyPlaylist format.
- * @param {unknown} response - The raw response.
- * @returns {SpotifyPlaylist} - An album represented as a playlist object.
- */
+// Transforms a raw album API response into the internal SpotifyPlaylist format.
 function transformAlbumResponse(response: unknown): SpotifyPlaylist {
   const data = (response as RawDataResponse)?.data
   const album = data?.albumUnion || data?.album
@@ -338,11 +305,7 @@ function transformAlbumResponse(response: unknown): SpotifyPlaylist {
   }
 }
 
-/**
- * Transforms a raw track API response into the internal SpotifyTrack format.
- * @param {unknown} response - The raw response.
- * @returns {SpotifyTrack} - The formatted track.
- */
+// Transforms a raw track API response into the internal SpotifyTrack format.
 function transformTrackResponse(response: unknown): SpotifyTrack {
   const data = (response as RawDataResponse)?.data
   const track = data?.trackUnion || data?.track
@@ -352,12 +315,7 @@ function transformTrackResponse(response: unknown): SpotifyTrack {
   return result
 }
 
-/**
- * Transforms a raw recommendations API response into the internal format.
- * @param {unknown} response - The raw response.
- * @param {string} seedTrackId - The track ID used to generate these seeds.
- * @returns {SpotifyRecommendations} - The formatted recommendations.
- */
+// Transforms a raw recommendations API response into the internal format.
 function transformRecommendationsResponse(
   response: unknown,
   seedTrackId: string
@@ -382,19 +340,14 @@ function transformRecommendationsResponse(
 
 let redisClient: Redis | null = null
 
-/**
- * Sets the Redis client instance for token caching.
- * @param {Redis} client - The Redis client.
- */
+// Sets the Redis client instance for token caching.
 export function setSpotifyRedisClient(client: Redis): void {
   redisClient = client
 }
 
 const REDIS_KEY = 'spotify:token'
 
-/**
- * Handles the lifecycle of Spotify anonymous access tokens, including scraping, caching, and auto-refreshing.
- */
+// Handles the lifecycle of Spotify anonymous access tokens, including scraping, caching, and auto-refreshing.
 class SpotifyTokenHandler {
   private accessToken: string | null = null
   private clientId: string | null = null
@@ -409,16 +362,12 @@ class SpotifyTokenHandler {
 
   constructor() {}
 
-  /**
-   * Initializes the handler by loading cached tokens.
-   */
+  // Initializes the handler by loading cached tokens.
   async init(): Promise<void> {
     await this.loadCache()
   }
 
-  /**
-   * Loads the token from Redis cache.
-   */
+  // Loads the token from Redis cache.
   private async loadCache(): Promise<void> {
     if (!redisClient) return
     try {
@@ -437,9 +386,7 @@ class SpotifyTokenHandler {
     }
   }
 
-  /**
-   * Saves the current token to Redis cache.
-   */
+  // Saves the current token to Redis cache.
   private async saveCache(): Promise<void> {
     if (!redisClient) return
     try {
@@ -461,9 +408,7 @@ class SpotifyTokenHandler {
     }
   }
 
-  /**
-   * Schedules an automatic token refresh before the current one expires.
-   */
+  // Schedules an automatic token refresh before the current one expires.
   private scheduleRefresh(): void {
     if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
     if (!this.accessToken) return
@@ -487,9 +432,7 @@ class SpotifyTokenHandler {
     }, refreshIn)
   }
 
-  /**
-   * Launches a headless browser instance to scrape the token.
-   */
+  // Launches a headless browser instance to scrape the token.
   private async launchBrowser(): Promise<void> {
     if (this.browser) return
     this.browser = await chromium.launch({
@@ -516,9 +459,7 @@ class SpotifyTokenHandler {
     this.page = await this.context.newPage()
   }
 
-  /**
-   * Closes the headless browser.
-   */
+  // Closes the headless browser.
   private async closeBrowser(): Promise<void> {
     if (this.browser) {
       await this.browser.close()
@@ -530,11 +471,7 @@ class SpotifyTokenHandler {
 
   private fetchTokenPromise: Promise<SpotifyToken> | null = null
 
-  /**
-   * Returns a valid access token, fetching a new one if necessary.
-   * @param {boolean} [forceRefresh=false] - Whether to bypass the cache.
-   * @returns {Promise<SpotifyToken>} - The access token.
-   */
+  // Returns a valid access token, fetching a new one if necessary.
   public async getAccessToken(forceRefresh = false): Promise<SpotifyToken> {
     if (
       !forceRefresh &&
@@ -561,9 +498,7 @@ class SpotifyTokenHandler {
     }
   }
 
-  /**
-   * Internal wrapper for fetching tokens with retry logic.
-   */
+  // Internal wrapper for fetching tokens with retry logic.
   private async _getAccessTokenWithRetries(): Promise<SpotifyToken> {
     const maxRetries = 2
     let lastError: unknown
@@ -577,17 +512,13 @@ class SpotifyTokenHandler {
     throw lastError
   }
 
-  /**
-   * Explicitly refreshes the token.
-   */
+  // Explicitly refreshes the token.
   public async refreshToken(): Promise<SpotifyToken> {
     this.accessTokenExpirationTimestampMs = 0
     return this.getAccessToken(true)
   }
 
-  /**
-   * Performs the scraping flow: open Spotify home, intercept token request.
-   */
+  // Performs the scraping flow: open Spotify home, intercept token request.
   private async fetchNewToken(): Promise<SpotifyToken> {
     await this.launchBrowser()
     if (!this.page || !this.context) throw new Error('Browser page not initialized')
@@ -666,20 +597,12 @@ class SpotifyTokenHandler {
 
 const spotifyTokenHandler = new SpotifyTokenHandler()
 
-/**
- * Initializes the Spotify token subsystem.
- */
+// Initializes the Spotify token subsystem.
 export async function initSpotifyToken(): Promise<void> {
   await spotifyTokenHandler.init()
 }
 
-/**
- * Executes a GraphQL-like query against the Spotify Partner API.
- * @param {keyof typeof HASHES} operationName - The pre-hashed operation name.
- * @param {Record<string, unknown>} variables - Query variables.
- * @param {boolean} [isRetry=false] - Whether this is a retry attempt on auth failure.
- * @returns {Promise<unknown>} - The raw API response data.
- */
+// Executes a GraphQL-like query against the Spotify Partner API.
 export async function partnerQuery(
   operationName: keyof typeof HASHES,
   variables: Record<string, unknown>,
@@ -726,12 +649,7 @@ export async function partnerQuery(
   }
 }
 
-/**
- * Fetches full playlist metadata, handling pagination for large playlists.
- * @param {string} playlistId - The Spotify playlist ID.
- * @param {number} [limit] - Optional result limit.
- * @returns {Promise<SpotifyPlaylist>} - The full playlist data.
- */
+// Fetches full playlist metadata, handling pagination for large playlists.
 export async function fetchPlaylist(playlistId: string, limit?: number): Promise<SpotifyPlaylist> {
   const batchSize = 150
   const firstBatch = limit ? Math.min(limit, batchSize) : batchSize
@@ -764,9 +682,7 @@ export async function fetchPlaylist(playlistId: string, limit?: number): Promise
   return initial
 }
 
-/**
- * Fetches a single batch of playlist tracks.
- */
+// Fetches a single batch of playlist tracks.
 async function _fetchPlaylistBatch(
   playlistId: string,
   limit: number,
@@ -781,12 +697,7 @@ async function _fetchPlaylistBatch(
   return transformPlaylistResponse(data)
 }
 
-/**
- * Fetches full album metadata, handling pagination for large albums.
- * @param {string} albumId - The Spotify album ID.
- * @param {number} [limit] - Optional result limit.
- * @returns {Promise<SpotifyPlaylist>} - The album data (represented as a playlist).
- */
+// Fetches full album metadata, handling pagination for large albums.
 export async function fetchAlbum(albumId: string, limit?: number): Promise<SpotifyPlaylist> {
   const batchSize = 50
   const firstBatch = limit ? Math.min(limit, batchSize) : batchSize
@@ -819,9 +730,7 @@ export async function fetchAlbum(albumId: string, limit?: number): Promise<Spoti
   return initial
 }
 
-/**
- * Fetches a single batch of album tracks.
- */
+// Fetches a single batch of album tracks.
 async function _fetchAlbumBatch(
   albumId: string,
   limit: number,
@@ -836,11 +745,7 @@ async function _fetchAlbumBatch(
   return transformAlbumResponse(data)
 }
 
-/**
- * Fetches metadata for a single track.
- * @param {string} trackId - The Spotify track ID.
- * @returns {Promise<SpotifyTrack>} - The track data.
- */
+// Fetches metadata for a single track.
 export async function fetchTrack(trackId: string): Promise<SpotifyTrack> {
   const data = await partnerQuery('getTrack', {
     uri: `spotify:track:${trackId}`
@@ -863,12 +768,7 @@ export async function fetchTrack(trackId: string): Promise<SpotifyTrack> {
   return track
 }
 
-/**
- * Fetches recommended tracks based on a seed track.
- * @param {string} trackId - The seed track ID.
- * @param {number} [limit=5] - Number of recommendations.
- * @returns {Promise<SpotifyRecommendations>} - The recommendations result.
- */
+// Fetches recommended tracks based on a seed track.
 export async function fetchRecommendations(
   trackId: string,
   limit = 5
@@ -880,12 +780,7 @@ export async function fetchRecommendations(
   return transformRecommendationsResponse(data, trackId)
 }
 
-/**
- * Searches for tracks on Spotify.
- * @param {string} query - The search query.
- * @param {number} [limit=10] - Number of results.
- * @returns {Promise<SpotifyTrack[]>} - The list of matching tracks.
- */
+// Searches for tracks on Spotify.
 export async function searchSpotify(query: string, limit = 10): Promise<SpotifyTrack[]> {
   const result = (await partnerQuery('searchTracks', {
     searchTerm: query,
@@ -903,13 +798,7 @@ export async function searchSpotify(query: string, limit = 10): Promise<SpotifyT
   return items.map((item) => mapTrack(item.item.data)).filter((t): t is SpotifyTrack => t !== null)
 }
 
-/**
- * Searches for playlists on Spotify.
- * @param {string} query - The search query.
- * @param {number} [limit=10] - Number of results.
- * @param {number} [offset=0] - Result offset.
- * @returns {Promise<SpotifyPlaylist[]>} - The list of matching playlists.
- */
+// Searches for playlists on Spotify.
 export async function searchSpotifyPlaylists(
   query: string,
   limit = 10,
@@ -957,13 +846,7 @@ export async function searchSpotifyPlaylists(
     .filter((p) => p.id !== '')
 }
 
-/**
- * Searches for albums on Spotify.
- * @param {string} query - The search query.
- * @param {number} [limit=10] - Number of results.
- * @param {number} [offset=0] - Result offset.
- * @returns {Promise<SpotifyAlbum[]>} - The list of matching albums.
- */
+// Searches for albums on Spotify.
 export async function searchSpotifyAlbums(
   query: string,
   limit = 10,
@@ -1015,11 +898,7 @@ export async function searchSpotifyAlbums(
     .filter((a) => a.id !== '')
 }
 
-/**
- * Unified entry point to fetch metadata based on any Spotify link or URI.
- * @param {string} input - The Spotify URL or URI.
- * @returns {Promise<SpotifyResult>} - The fetched metadata.
- */
+// Unified entry point to fetch metadata based on any Spotify link or URI.
 export async function fetchSpotify(input: string): Promise<SpotifyResult> {
   const type = detectSpotifyType(input)
   if (!type) throw new Error(`Cannot detect Spotify type from: "${input}"`)
@@ -1034,16 +913,12 @@ export async function fetchSpotify(input: string): Promise<SpotifyResult> {
   }
 }
 
-/**
- * Returns a valid cached or new anonymous access token.
- */
+// Returns a valid cached or new anonymous access token.
 export async function getAccessToken(): Promise<SpotifyToken> {
   return spotifyTokenHandler.getAccessToken()
 }
 
-/**
- * Forces a refresh and returns a new anonymous access token.
- */
+// Forces a refresh and returns a new anonymous access token.
 export async function refreshToken(): Promise<SpotifyToken> {
   return spotifyTokenHandler.refreshToken()
 }

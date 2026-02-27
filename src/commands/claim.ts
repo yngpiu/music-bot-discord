@@ -1,7 +1,4 @@
-/**
- * @file claim.ts
- * @description Command to take ownership of the music player in a guild.
- */
+// Command to take ownership of the music player in a guild.
 import { ContainerBuilder, Message, VoiceChannel } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -14,22 +11,14 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
-/**
- * Command to claim player ownership. Useful when the previous owner has left the channel.
- */
+// Command to claim player ownership. Useful when the previous owner has left the channel.
 class ClaimCommand extends BaseCommand {
   name = 'claim'
   aliases = ['c']
   description = 'Lấy quyền kiểm soát player nếu người dùng trước đó đã rời kênh thoại.'
   requiresVoiceMatch = true
 
-  /**
-   * Transfers player ownership to the command executor if the current owner is no longer present or if the executor has elevated permissions.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Transfers player ownership to the command executor if the current owner is no longer present or if the executor has elevated permissions.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: claim] User ${message.author.tag} requested to claim player control`)
 

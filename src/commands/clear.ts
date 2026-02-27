@@ -1,7 +1,4 @@
-/**
- * @file clear.ts
- * @description Command to clear all tracks from the current music queue.
- */
+// Command to clear all tracks from the current music queue.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to empty the queue.
- */
+// Command to empty the queue.
 class ClearCommand extends BaseCommand {
   name = 'clear'
   aliases = ['c', 'cq', 'empty']
   description = 'Xóa toàn bộ bài hát trong sách chờ.'
   requiresOwner = true
 
-  /**
-   * Removes all tracks from the player's queue.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Removes all tracks from the player's queue.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: clear] User ${message.author.tag} requested to clear queue`)
 
@@ -51,7 +41,7 @@ class ClearCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
       )
     )
 

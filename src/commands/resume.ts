@@ -1,7 +1,4 @@
-/**
- * @file resume.ts
- * @description Command to resume audio playback if it was previously paused.
- */
+// Command to resume audio playback if it was previously paused.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,27 +9,22 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to unpause the music player.
- */
+// Command to unpause the music player.
 class ResumeCommand extends BaseCommand {
   name = 'resume'
   aliases = ['rs', 'unpause', 'continue']
   description = 'Tiếp tục phát nhạc đang tạm dừng.'
   requiresVoiceMatch = true
 
-  /**
-   * Sends a confirmation message after successfully resuming playback.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The original command message.
-   */
+  // Sends a confirmation message after successfully resuming playback.
   private async sendConfirmation(bot: BotClient, message: Message): Promise<void> {
     if (!message.channel.isTextBased() || !('send' in message.channel)) return
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** sẽ tiếp tục phát nhạc.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** sẽ tiếp tục phát nhạc.`
       )
     )
 
@@ -46,13 +38,7 @@ class ResumeCommand extends BaseCommand {
     if (replyMessage) deleteMessage([message], TIME.SHORT)
   }
 
-  /**
-   * Executes the resume command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the resume command.
   async execute(bot: BotClient, message: Message, _args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: resume] User ${message.author.tag} requested to resume track`)
 

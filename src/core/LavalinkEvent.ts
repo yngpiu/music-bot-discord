@@ -1,20 +1,11 @@
-/**
- * @file LavalinkEvent.ts
- * @description Base class for defining Lavalink-specific events.
- */
+// Base class for defining Lavalink-specific events.
 import type { BotClient } from '~/core/BotClient.js'
 
-/**
- * Abstract class representing a Lavalink manager event.
- */
+// Abstract class representing a Lavalink manager event.
 export abstract class LavalinkEvent {
-  /** The name of the Lavalink event. */
+  // The name of the Lavalink event.
   abstract name: string
 
-  /**
-   * Defines the logic to run when the Lavalink event is triggered.
-   * @param {BotClient} bot - The bot client instance.
-   * @param {...any[]} args - Variable arguments provided by Lavalink.
-   */
+  // Defines the logic to run when the Lavalink event is triggered.
   abstract execute(bot: BotClient, ...args: unknown[]): Promise<void>
 }

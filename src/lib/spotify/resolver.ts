@@ -1,7 +1,4 @@
-/**
- * @file resolver.ts
- * @description Bridges Spotify metadata with Lavalink by building unresolved tracks that can be dynamically resolved by the bot.
- */
+// Bridges Spotify metadata with Lavalink by building unresolved tracks that can be dynamically resolved by the bot.
 import type { Player } from 'lavalink-client'
 import type { UnresolvedSearchResult } from 'lavalink-client'
 
@@ -17,13 +14,7 @@ import {
   fetchTrack
 } from './client.js'
 
-/**
- * Resolves a Spotify link (track, album, or playlist) by fetching its metadata and mapping it to Lavalink-compatible unresolved tracks.
- * @param {Player} player - The current audio player instance.
- * @param {string} query - The Spotify URL or URI to resolve.
- * @param {unknown} requestUser - The user object to associate with the resolved tracks.
- * @returns {Promise<UnresolvedSearchResult>} - The result containing tracks or playlist info.
- */
+// Resolves a Spotify link (track, album, or playlist) by fetching its metadata and mapping it to Lavalink-compatible unresolved tracks.
 export async function spotifySearch(
   player: Player,
   query: string,
@@ -125,11 +116,7 @@ export async function spotifySearch(
   }
 }
 
-/**
- * Checks if a query string is a Spotify-related link or URI.
- * @param {string} query - The query to check.
- * @returns {boolean} - True if it's a Spotify query.
- */
+// Checks if a query string is a Spotify-related link or URI.
 export function isSpotifyQuery(query: string): boolean {
   return query.includes('spotify.com') || query.startsWith('spotify:')
 }

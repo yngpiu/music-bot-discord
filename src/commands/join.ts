@@ -1,7 +1,4 @@
-/**
- * @file join.ts
- * @description Command to invite the bot to the user's current voice channel.
- */
+// Command to invite the bot to the user's current voice channel.
 import { ContainerBuilder, type Message, type VoiceChannel } from 'discord.js'
 import type { Player } from 'lavalink-client'
 
@@ -13,34 +10,21 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command to summon the bot to a voice channel.
- */
+// Command to summon the bot to a voice channel.
 class JoinCommand extends BaseCommand {
   name = 'join'
   aliases = ['j']
   description = 'Gọi bot vào kênh thoại hiện tại.'
 
-  /**
-   * Validates if the bot can actually join the requested voice channel.
-   * @param {Message} message - The command message.
-   * @param {string} vcId - The ID of the voice channel.
-   * @throws {BotError} - If the channel is not joinable.
-   */
+  // Validates if the bot can actually join the requested voice channel.
   private validateVoiceChannel(message: Message, vcId: string): void {
     const vc = message.guild!.channels.cache.get(vcId) as VoiceChannel
     if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
   }
 
-  /**
-   * Checks if a player already exists and if it's already in the target channel or busy elsewhere.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string} vcId - The target voice channel ID.
-   * @param {Player | null} existingPlayer - The current player instance, if any.
-   * @throws {BotError} - If the bot is already in the channel or busy in another channel.
-   */
+  // Checks if a player already exists and if it's already in the target channel or busy elsewhere.
   private checkExistingPlayer(
     bot: BotClient,
     message: Message,
@@ -61,14 +45,7 @@ class JoinCommand extends BaseCommand {
     )
   }
 
-  /**
-   * Retrieves an existing player or creates a new one for the guild.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string} vcId - The voice channel ID to join.
-   * @param {Player | null} existingPlayer - The existing player instance, if any.
-   * @returns {Promise<Player>} - The active player instance.
-   */
+  // Retrieves an existing player or creates a new one for the guild.
   private async getOrCreatePlayer(
     bot: BotClient,
     message: Message,
@@ -94,17 +71,13 @@ class JoinCommand extends BaseCommand {
     return player
   }
 
-  /**
-   * Sends a confirmation message to the text channel.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   */
+  // Sends a confirmation message to the text channel.
   private async sendJoinConfirmation(bot: BotClient, message: Message): Promise<void> {
     if (!message.channel.isTextBased() || !('send' in message.channel)) return
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã sẵn sàng phát nhạc ở kênh này.`
+        `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${getBotName(bot)}** đã sẵn sàng phát nhạc ở kênh này.`
       )
     )
 
@@ -118,13 +91,7 @@ class JoinCommand extends BaseCommand {
     if (replyMessage) deleteMessage([message], TIME.SHORT)
   }
 
-  /**
-   * Executes the join command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} _args - Command arguments (unused).
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the join command.
   async execute(
     bot: BotClient,
     message: Message,

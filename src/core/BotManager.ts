@@ -1,33 +1,28 @@
-/**
- * @file BotManager.ts
- * @description The central coordinator for multiple bot instances, Redis connection, and Lavalink integration.
- */
+// The central coordinator for multiple bot instances, Redis connection, and Lavalink integration.
 import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
+import { initTrackService } from '~/services/trackService.js'
 
 import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 import { Loader } from '~/core/Loader.js'
 import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
-import { initTrackService } from '~/lib/trackService.js'
 
 import { logger } from '~/utils/logger.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
-import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
-/**
- * Manages the lifecycle of multiple bot clients and shared connections (Redis, Lavalink).
- */
+// Manages the lifecycle of multiple bot clients and shared connections (Redis, Lavalink).
 export class BotManager {
-  /** Array of active bot client instances. */
+  // Array of active bot client instances.
   public bots: BotClient[] = []
-  /** Shared Redis client for state management. */
+  // Shared Redis client for state management.
   private redis: Redis
-  /** Tracks which bot is handling specific message contexts. */
+  // Tracks which bot is handling specific message contexts.
   private messageDestinations = new Map<string, string>()
 
   constructor() {
@@ -40,9 +35,7 @@ export class BotManager {
     })
   }
 
-  /**
-   * Connects to Redis, initializes plugins, and spawns bot instances.
-   */
+  // Connects to Redis, initializes plugins, and spawns bot instances.
   async start(): Promise<void> {
     try {
       await this.redis.connect()
@@ -249,12 +242,7 @@ export class BotManager {
     }
   }
 
-  /**
-   * Retrieves an existing bot instance or assigns an idle one based on context.
-   * @param {string} guildId - The Discord guild ID.
-   * @param {object} options - Options for bot selection (voice channel, message context, etc).
-   * @returns {BotClient | null} - The assigned bot client or null.
-   */
+  // Retrieves an existing bot instance or assigns an idle one based on context.
   getOrAssignBot(
     guildId: string,
     options: { vcId?: string; messageId?: string; requiresVoice: boolean; targetBotId?: string }
@@ -308,23 +296,13 @@ export class BotManager {
     return chosenBot
   }
 
-  /**
-   * Checks if a bot instance is currently idle (no active player) in a guild.
-   * @param {BotClient} bot - The bot instance to check.
-   * @param {string} guildId - The guild ID.
-   * @returns {boolean} - True if idle.
-   */
+  // Checks if a bot instance is currently idle (no active player) in a guild.
   isIdle(bot: BotClient, guildId: string): boolean {
     const player = bot.lavalink.getPlayer(guildId)
     return !player
   }
 
-  /**
-   * Sends a beautiful embed notification for tracks added via autoplay.
-   * @param {BotClient} bot - The bot client instance.
-   * @param {any} player - The Lavalink player instance.
-   * @param {any[]} tracks - The list of tracks added.
-   */
+  // Sends a beautiful embed notification for tracks added via autoplay.
   private async sendAutoplayEmbed(
     bot: BotClient,
     player: import('lavalink-client').Player,
@@ -351,8 +329,7 @@ export class BotManager {
       .setColor(0x00c2e6)
       .setAuthor({
         name: 'Thêm tự động',
-        iconURL: bot.user?.displayAvatarURL()
-      })
+        iconURL: getBotAvatar(bot)})
       .setDescription(description)
 
     await channel.send({ embeds: [embed] }).catch((err) => {

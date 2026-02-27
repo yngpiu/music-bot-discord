@@ -1,7 +1,4 @@
-/**
- * @file favorite.ts
- * @description Command to manage favorite tracks (add, remove, list, play).
- */
+// Command to manage favorite tracks (add, remove, list, play).
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -26,14 +23,7 @@ import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
-/**
- * Parses raw command arguments into a sorted list of unique queue positions.
- * Supports individual numbers and ranges (e.g., "1-5").
- * @param {string[]} args - Raw arguments from the user.
- * @param {number} maxLength - Current length of the list for validation.
- * @returns {number[]} - A sorted list of validated positions.
- * @throws {BotError} - If arguments are invalid.
- */
+// Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
 function parsePositions(args: string[], maxLength: number): number[] {
   const positions = new Set<number>()
 
@@ -64,22 +54,14 @@ function parsePositions(args: string[], maxLength: number): number[] {
   return [...positions].sort((a, b) => a - b)
 }
 
-/**
- * Command for managing user's favorite tracks.
- */
+// Command for managing user's favorite tracks.
 class FavoriteCommand extends BaseCommand {
   name = 'favorite'
   aliases = ['fav']
   description = 'Quản lý bài hát yêu thích (add, remove, play hoặc xem danh sách).'
   requiresVoice = false // Subcommands handle their own voice requirements
 
-  /**
-   * Routes the command to the appropriate handler.
-   * @param {BotClient} bot - The Discord client.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments.
-   * @param {CommandContext} ctx - Contextual data.
-   */
+  // Routes the command to the appropriate handler.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     const subCommand = args[0]?.toLowerCase()
 

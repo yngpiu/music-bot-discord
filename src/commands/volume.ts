@@ -1,7 +1,4 @@
-/**
- * @file volume.ts
- * @description Command to adjust the bot's audio volume level.
- */
+// Command to adjust the bot's audio volume level.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -12,23 +9,16 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage } from '~/utils/messageUtil.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Command for setting the player's volume (0-100).
- */
+// Command for setting the player's volume (0-100).
 class VolumeCommand extends BaseCommand {
   name = 'volume'
   aliases = ['vol', 'v']
   description = 'Chỉnh mức âm lượng của bot.'
   requiresOwner = true
 
-  /**
-   * Executes the volume command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments containing the target volume percentage.
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the volume command.
   async execute(bot: BotClient, message: Message, args: string[], { player }: CommandContext): Promise<void> {
     logger.info(`[Command: volume] User ${message.author.tag} requested to change volume`)
 
@@ -50,7 +40,7 @@ class VolumeCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
       )
     )
 

@@ -1,31 +1,59 @@
-/**
- * @file messageUtil.ts
- * @description Utilities for asynchronous message management and cleanup.
- */
-import { type Message } from 'discord.js'
+// Utilities for asynchronous message management and cleanup.
+import { Channel, ContainerBuilder, type Message } from 'discord.js'
 
 import { TIME } from '~/constants/time.js'
 
-import { logger } from '~/utils/logger.js'
+// Immediately deletes multiple messages and waits for the operation to complete.
+export const deleteMessageNow = async (messages: (Message | null | undefined)[]): Promise<void> => {
+  if (!messages || messages.length === 0) return
 
-/**
- * Schedules the deletion of multiple messages after a specified timeout.
- * @param {(Message | null | undefined)[]} messages - The list of messages to delete.
- * @param {number} [timeoutMs=TIME.SHORT] - How long to wait before deletion (in milliseconds).
- */
+  for (const msg of messages) {
+    if (msg && msg.deletable) {
+      await msg.delete().catch()
+    }
+  }
+}
+
+// Schedules the deletion of multiple messages after a specified timeout without blocking.
 export const deleteMessage = (
   messages: (Message | null | undefined)[],
   timeoutMs: number = TIME.SHORT
 ): void => {
   if (!messages || messages.length === 0) return
 
-  setTimeout(() => {
-    messages.forEach((msg) => {
-      if (msg) {
-        msg.delete().catch((e: Error) => {
-          logger.warn(`[System] Failed to delete old messages: ${e.message}`)
-        })
-      }
-    })
-  }, timeoutMs)
+  setTimeout(
+    () => {
+      messages.forEach((msg) => {
+        if (msg && msg.deletable) {
+          msg.delete().catch()
+        }
+      })
+    },
+    Math.max(0, timeoutMs)
+  )
+}
+
+export function createContainerMessage(message: string) {
+  return new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(`${message}`))
+}
+
+export async function sendContainerMessage(
+  channel: Channel | null | undefined,
+  content: string,
+  timeoutDeleteMessage: number = TIME.SHORT
+) {
+  const container = createContainerMessage(content)
+
+  if (!channel || !channel.isTextBased() || !('send' in channel)) return
+
+  const sendedMessage = await channel.send({
+    components: [container],
+    flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
+
+  if (!sendedMessage) return
+
+  deleteMessage([sendedMessage], timeoutDeleteMessage)
+
+  return sendedMessage
 }

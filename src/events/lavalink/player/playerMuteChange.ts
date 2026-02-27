@@ -1,7 +1,4 @@
-/**
- * @file playerMuteChange.ts
- * @description Event handler for when the bot's mute status changes. Automatically pauses/resumes the player on server mute.
- */
+// Event handler for when the bot's mute status changes. Automatically pauses/resumes the player on server mute.
 import { ContainerBuilder } from 'discord.js'
 import { Player } from 'lavalink-client'
 
@@ -10,20 +7,13 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
+import { getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Event handler for the 'playerMuteChange' event.
- */
+// Event handler for the 'playerMuteChange' event.
 class PlayerMuteChangeEvent extends LavalinkEvent {
   name = 'playerMuteChange'
 
-  /**
-   * Handles pausing/resuming logic and sends a notification message when the bot is muted or unmuted.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Player} player - The Lavalink player instance.
-   * @param {boolean} selfMuted - Whether the bot muted itself.
-   * @param {boolean} serverMuted - Whether the bot was server-muted.
-   */
+  // Handles pausing/resuming logic and sends a notification message when the bot is muted or unmuted.
   async execute(bot: BotClient, player: Player, selfMuted: boolean, serverMuted: boolean): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Server mute change: ${serverMuted}`)
 
@@ -45,8 +35,8 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
     if (!channel?.isTextBased() || !('send' in channel)) return
 
     const message = serverMuted
-      ? `${EMOJI.ANIMATED_CAT_CRYING} **${bot.user?.displayName || 'tớ'}** đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
-      : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${bot.user?.displayName || 'tớ'}** đã nói lại được rồi, có thể tiếp tục phát nhạc.`
+      ? `${EMOJI.ANIMATED_CAT_CRYING} **${getBotName(bot)}** đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
+      : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${getBotName(bot)}** đã nói lại được rồi, có thể tiếp tục phát nhạc.`
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(message))
 

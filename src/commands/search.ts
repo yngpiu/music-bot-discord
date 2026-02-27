@@ -1,7 +1,4 @@
-/**
- * @file search.ts
- * @description Advanced search command for finding tracks, albums, and playlists across multiple sources (Spotify, Deezer, etc.).
- */
+// Advanced search command for finding tracks, albums, and playlists across multiple sources (Spotify, Deezer, etc.).
 import type { Message, VoiceChannel } from 'discord.js'
 import {
   ActionRowBuilder,
@@ -27,22 +24,14 @@ import {
 } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration, formatTrack, lines } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
 
-/**
- * Command for searching music from multiple providers with an interactive UI.
- */
+// Command for searching music from multiple providers with an interactive UI.
 class SearchCommand extends BaseCommand {
   name = 'search'
   description = 'Tìm kiếm bài hát, album, hoặc playlist.'
 
-  /**
-   * Handles track-specific searching across different providers.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string} query - The search query.
-   * @param {Player} player - The player instance.
-   */
+  // Handles track-specific searching across different providers.
   private async handleTrackSearch(
     bot: BotClient,
     message: Message,
@@ -254,8 +243,7 @@ class SearchCommand extends BaseCommand {
           },
           player,
           message.author,
-          bot.user?.displayAvatarURL()
-        )
+          getBotAvatar(bot))
 
         await message.reply(addedEmbed)
 
@@ -279,13 +267,7 @@ class SearchCommand extends BaseCommand {
     })
   }
 
-  /**
-   * Handles album-specific searching using the Spotify API.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string} query - The search query.
-   * @param {Player} player - The player instance.
-   */
+  // Handles album-specific searching using the Spotify API.
   private async handleAlbumSearch(
     bot: BotClient,
     message: Message,
@@ -472,8 +454,7 @@ class SearchCommand extends BaseCommand {
             },
             player,
             message.author,
-            bot.user?.displayAvatarURL()
-          )
+            getBotAvatar(bot))
 
           await loadingMessage.edit({ content: '', ...addedEmbed })
 
@@ -500,13 +481,7 @@ class SearchCommand extends BaseCommand {
     })
   }
 
-  /**
-   * Handles playlist-specific searching using the Spotify API.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string} query - The search query.
-   * @param {Player} player - The player instance.
-   */
+  // Handles playlist-specific searching using the Spotify API.
   private async handlePlaylistSearch(
     bot: BotClient,
     message: Message,
@@ -689,8 +664,7 @@ class SearchCommand extends BaseCommand {
             },
             player,
             message.author,
-            bot.user?.displayAvatarURL()
-          )
+            getBotAvatar(bot))
 
           await loadingMessage.edit({ content: '', ...addedEmbed })
 
@@ -717,13 +691,7 @@ class SearchCommand extends BaseCommand {
     })
   }
 
-  /**
-   * Executes the search command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments.
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the search command.
   async execute(
     bot: BotClient,
     message: Message,

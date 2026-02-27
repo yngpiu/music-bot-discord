@@ -1,36 +1,25 @@
-/**
- * @file trackStart.ts
- * @description Event handler for when a track starts playing.
- */
-import { ContainerBuilder } from 'discord.js'
+// Event handler for when a track starts playing.
 import { Player, Track } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { formatDuration, formatTrack, lines } from '~/utils/stringUtil'
+import { sendContainerMessage } from '~/utils/messageUtil'
+import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
-/**
- * Event handler for the 'trackStart' event.
- */
+// Event handler for the 'trackStart' event.
 class TrackStartEvent extends LavalinkEvent {
   name = 'trackStart'
 
-  /**
-   * Logs the start of playback and sends a "Now Playing" notification to the text channel.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Player} player - The Lavalink player instance.
-   * @param {Track} track - The track that started playing.
-   */
+  // Logs the start of playback and sends a "Now Playing" notification to the text channel.
   async execute(bot: BotClient, player: Player, track: Track): Promise<void> {
     logger.info(`[Player: ${player.guildId}] Started playing track: ${track?.info?.title}`)
+
     if (!track || !player.textChannelId) return
-
     const channel = bot.channels.cache.get(player.textChannelId)
-
-    if (!channel?.isTextBased() || !('send' in channel)) return
 
     let stringDuration = ''
     if (track.info.duration) {
@@ -43,24 +32,11 @@ class TrackStartEvent extends LavalinkEvent {
       author: track.info.author
     })
 
-    const container = new ContainerBuilder().addTextDisplayComponents((t) =>
-      t.setContent(
-        lines(
-          `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`
-        )
-      )
+    await sendContainerMessage(
+      channel,
+      `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`,
+      TIME.MEDIUM
     )
-
-    await channel
-      .send({
-        components: [container],
-        flags: ['IsComponentsV2', 'SuppressNotifications']
-      })
-
-      .catch((e) => {
-        logger.warn(`[Player: ${player.guildId}] Error sending track start notification:`, e)
-        return null
-      })
   }
 }
 

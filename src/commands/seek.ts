@@ -1,7 +1,4 @@
-/**
- * @file seek.ts
- * @description Command to jump/seek to a specific time in the currently playing track.
- */
+// Command to jump/seek to a specific time in the currently playing track.
 import { ContainerBuilder, type Message } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -11,13 +8,9 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { deleteMessage } from '~/utils/messageUtil.js'
-import { formatDuration } from '~/utils/stringUtil.js'
+import { formatDuration, getBotName } from '~/utils/stringUtil.js'
 
-/**
- * Parses a time string (e.g., "1:30" or "90") into milliseconds.
- * @param {string} timeStr - The time string to parse.
- * @returns {number} - The equivalent milliseconds.
- */
+// Parses a time string (e.g., "1:30" or "90") into milliseconds.
 function parseTime(timeStr: string): number {
   if (timeStr.includes(':')) {
     const parts = timeStr.split(':')
@@ -28,22 +21,14 @@ function parseTime(timeStr: string): number {
   return parseInt(timeStr, 10) * 1000
 }
 
-/**
- * Command to move the playback position.
- */
+// Command to move the playback position.
 class SeekCommand extends BaseCommand {
   name = 'seek'
   aliases = ['fw', 'rw']
   description = 'Tua bài hát đến một thời gian cụ thể'
   requiresVoice = true
 
-  /**
-   * Executes the seek command.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments containing the target time.
-   * @param {CommandContext} context - The command execution context.
-   */
+  // Executes the seek command.
   async execute(
     bot: BotClient,
     message: Message,
@@ -81,7 +66,7 @@ class SeekCommand extends BaseCommand {
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ANIMATED_CAT_DANCE} **${bot.user?.displayName || 'tớ'}** đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
+        `${EMOJI.ANIMATED_CAT_DANCE} **${getBotName(bot)}** đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
       )
     )
 

@@ -1,17 +1,10 @@
-/**
- * @file embeds.ts
- * @description Utilities for building complex Discord embeds for music-related feedback.
- */
+// Utilities for building complex Discord embeds for music-related feedback.
 import { EmbedBuilder } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
 
 import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
-/**
- * Extracts the info property from either a Track or UnresolvedTrack.
- * @param {Track | UnresolvedTrack} track - The track object.
- * @returns {object} - The track's info.
- */
+// Extracts the info property from either a Track or UnresolvedTrack.
 function getTrackInfo(track: Track | UnresolvedTrack) {
   return 'info' in track
     ? track.info
@@ -20,17 +13,7 @@ function getTrackInfo(track: Track | UnresolvedTrack) {
 
 export type AddedItemType = 'track' | 'playlist'
 
-/**
- * Builds a standardized embed notifying that a track or playlist has been added to the queue.
- * @param {AddedItemType} type - Whether a single track or a playlist was added.
- * @param {object} item - Metadata about the added item.
- * @param {Player} player - The current Lavalink player.
- * @param {object} [requester] - The user who requested the item.
- * @param {string} [botAvatarUrl] - The bot's avatar URL.
- * @param {number} [positionOverride] - Manual queue position override.
- * @param {number} [estimatedMsOverride] - Manual wait time override.
- * @returns {object} - An object containing the embed and any files (for use in channel.send).
- */
+// Builds a standardized embed notifying that a track or playlist has been added to the queue.
 export function buildAddedItemEmbed(
   type: AddedItemType,
   item: {

@@ -1,7 +1,4 @@
-/**
- * @file notify.ts
- * @description Administrative command to broadcast a notification message to all active player text channels.
- */
+// Administrative command to broadcast a notification message to all active player text channels.
 import { EmbedBuilder, type Message, type TextChannel } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
@@ -11,21 +8,14 @@ import { BotError } from '~/core/errors.js'
 import { logger } from '~/utils/logger.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
-/**
- * Command for broadcasting announcements to active music bot instances.
- */
+// Command for broadcasting announcements to active music bot instances.
 class NotifyCommand extends BaseCommand {
   name = 'notify'
   aliases = ['thongbao']
   description = 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho Owner).'
   requiresVoice = false
 
-  /**
-   * Executes the notification recruitment broadcast.
-   * @param {BotClient} bot - The Discord client instance.
-   * @param {Message} message - The command message.
-   * @param {string[]} args - Command arguments containing the announcement content.
-   */
+  // Executes the notification recruitment broadcast.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
     // Permission check: only developers or server owners can broadcast.
     if (!isDeveloperOrServerOwner(message)) {

@@ -1,7 +1,4 @@
-/**
- * @file emoji.ts
- * @description A collection of static and animated emoji strings used throughout the bot for consistent UI.
- */
+// A collection of static and animated emoji strings used throughout the bot for consistent UI.
 
 export const EMOJI = {
   ERROR: '<:error:1476231318466461717>',

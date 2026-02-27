@@ -1,7 +1,4 @@
-/**
- * @file messageCreate.ts
- * @description The core command processor. Handles prefix parsing, bot routing, permission checks, rate limiting, and command execution.
- */
+// The core command processor. Handles prefix parsing, bot routing, permission checks, rate limiting, and command execution.
 import { ContainerBuilder, Events, GuildMember, Message } from 'discord.js'
 import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
@@ -18,19 +15,11 @@ import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
 import { lines } from '~/utils/stringUtil'
 
-/**
- * Event handler for when a message is created.
- * Responsible for delegating logic to the appropriate command and bot instance.
- */
+// Event handler for when a message is created. Responsible for delegating logic to the appropriate command and bot instance.
 class MessageCreateEvent extends BotEvent {
   name = Events.MessageCreate
 
-  /**
-   * Attempts to parse a command and its arguments from a message.
-   * @param {BotClient} bot - The bot client instance.
-   * @param {Message} message - The received message.
-   * @returns {object | null} - Parsed command data or null if not a command.
-   */
+  // Attempts to parse a command and its arguments from a message.
   private parseCommand(
     bot: BotClient,
     message: Message
@@ -48,15 +37,7 @@ class MessageCreateEvent extends BotEvent {
     return { command, args, commandName }
   }
 
-  /**
-   * Routes the command request to the appropriate bot instance in a multi-bot environment.
-   * @param {BotClient} bot - The current bot client instance processing the event.
-   * @param {BotManager} manager - The central bot manager.
-   * @param {Message} message - The original command message.
-   * @param {BaseCommand} command - The command to be executed.
-   * @param {string} commandName - The name used to invoke the command.
-   * @returns {Promise<BotClient | null>} - The chosen bot instance or null if all are busy.
-   */
+  // Routes the command request to the appropriate bot instance in a multi-bot environment.
   private async routeBot(
     bot: BotClient,
     manager: BotManager,
@@ -89,9 +70,7 @@ class MessageCreateEvent extends BotEvent {
     return chosenBot
   }
 
-  /**
-   * Sends a "busy" response if no bot instances are available.
-   */
+  // Sends a "busy" response if no bot instances are available.
   private async replyAllBusy(
     bot: BotClient,
     manager: BotManager,
@@ -109,11 +88,7 @@ class MessageCreateEvent extends BotEvent {
     await message.reply({ components: [container], flags: ['IsComponentsV2'] })
   }
 
-  /**
-   * Checks if a user is currently banned from using the bot.
-   * @param {Message} message - The message context.
-   * @returns {Promise<boolean>} - True if the user is banned.
-   */
+  // Checks if a user is currently banned from using the bot.
   private async checkBan(message: Message): Promise<boolean> {
     const banRemainingMs = await getBanRemainingMs(message.author.id)
     if (banRemainingMs <= 0) return false
@@ -137,11 +112,7 @@ class MessageCreateEvent extends BotEvent {
     return true
   }
 
-  /**
-   * Checks if a user has exceeded the command rate limit.
-   * @param {Message} message - The message context.
-   * @returns {Promise<boolean>} - True if the user is rate limited.
-   */
+  // Checks if a user has exceeded the command rate limit.
   private async checkRateLimit(message: Message): Promise<boolean> {
     const { limited, remainingMs } = await checkRateLimit(message.author.id)
     if (!limited) return false
@@ -165,13 +136,7 @@ class MessageCreateEvent extends BotEvent {
     return true
   }
 
-  /**
-   * Validates voice channel requirements and builds the command execution context.
-   * @param {BotClient} bot - The bot client instance.
-   * @param {Message} message - The message context.
-   * @param {BaseCommand} command - The command being executed.
-   * @returns {CommandContext} - The built execution context.
-   */
+  // Validates voice channel requirements and builds the command execution context.
   private buildCommandContext(
     bot: BotClient,
     message: Message,
@@ -207,12 +172,7 @@ class MessageCreateEvent extends BotEvent {
     }
   }
 
-  /**
-   * Main execution entry for the messageCreate event.
-   * @param {BotClient} bot - The original bot client instance.
-   * @param {BotManager} manager - The bot manager.
-   * @param {Message} message - The received message.
-   */
+  // Main execution entry for the messageCreate event.
   async execute(bot: BotClient, manager: BotManager, message: Message): Promise<void> {
     const parsed = this.parseCommand(bot, message)
     if (!parsed) return

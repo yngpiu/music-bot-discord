@@ -1,7 +1,4 @@
-/**
- * @file index.ts
- * @description The entry point of the application. Initializes and starts the BotManager.
- */
+// The entry point of the application. Initializes and starts the BotManager.
 import 'dotenv/config'
 
 import { BotManager } from '~/core/BotManager'

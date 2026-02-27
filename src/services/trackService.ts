@@ -1,25 +1,21 @@
-/**
- * @file trackService.ts
- * @description Service for tracking track play history, buffering data in Redis before batch-inserting into the DB.
- */
+// Service for tracking track play history, buffering data in Redis before batch-inserting into the DB.
 import type { Redis } from 'ioredis'
+import { Player, Track } from 'lavalink-client'
 
+import { BotClient } from '~/core/BotClient.js'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 
-/** Redis key used for buffering play records. */
+// Redis key used for buffering play records.
 const REDIS_KEY = 'leaderboard:pending_plays'
-/** Interval for flushing buffered data to the database (30 seconds). */
+// Interval for flushing buffered data to the database (30 seconds).
 const FLUSH_INTERVAL_MS = 30_000
 
 let redis: Redis | null = null
 let flushTimer: ReturnType<typeof setInterval> | null = null
 
-/**
- * Initializes the track tracking service.
- * @param {Redis} redisClient - The Redis client instance.
- */
+// Initializes the track tracking service.
 export function initTrackService(redisClient: Redis): void {
   redis = redisClient
 
@@ -31,11 +27,7 @@ export function initTrackService(redisClient: Redis): void {
   }, FLUSH_INTERVAL_MS)
 }
 
-/**
- * Normalizes title and author strings for fuzzy database matching.
- * @param {string} s - The string to normalize.
- * @returns {string} - The normalized string.
- */
+// Normalizes title and author strings for fuzzy database matching.
 function normalizeString(s: string): string {
   return s
     .toLowerCase()
@@ -48,9 +40,7 @@ function normalizeString(s: string): string {
     .trim()
 }
 
-/**
- * Internal record structure for track play tracking.
- */
+// Internal record structure for track play tracking.
 interface PlayRecord {
   sourceName: string
   identifier: string
@@ -65,13 +55,7 @@ interface PlayRecord {
   playedAt: string
 }
 
-/**
- * Records a track play by pushing it into the Redis buffer.
- * @param {object} trackInfo - Metadata about the track.
- * @param {string} guildId - The guild ID where the track was played.
- * @param {string[]} listenerIds - List of user IDs currently in the voice channel.
- * @param {string} botId - The bot ID that played the track.
- */
+// Records a track play by pushing it into the Redis buffer.
 export async function recordTrackPlay(
   trackInfo: {
     sourceName: string
@@ -105,9 +89,41 @@ export async function recordTrackPlay(
   }
 }
 
-/**
- * Flushes all pending play records from Redis and persists them to the PostgreSQL database.
- */
+// Helper to extract voice channel members and capture play statistics for a track.
+export function captureTrackPlay(bot: BotClient, player: Player, track: Track): void {
+  const listenerIds: string[] = []
+  try {
+    const guild = bot.guilds.cache.get(player.guildId)
+    const voiceChannel = guild?.channels.cache.get(player.voiceChannelId!)
+    if (voiceChannel?.isVoiceBased()) {
+      voiceChannel.members.forEach((member) => {
+        if (!member.user.bot) {
+          listenerIds.push(member.id)
+        }
+      })
+    }
+  } catch (e) {
+    logger.warn(`[Player: ${player.guildId}] Could not get VC member list:`, e)
+  }
+
+  // Capture play statistics for the track.
+  recordTrackPlay(
+    {
+      sourceName: track.info.sourceName,
+      identifier: track.info.identifier,
+      isrc: track.info.isrc,
+      title: track.info.title,
+      author: track.info.author,
+      artworkUrl: track.info.artworkUrl,
+      uri: track.info.uri
+    },
+    player.guildId,
+    listenerIds,
+    bot.user?.id || ''
+  )
+}
+
+// Flushes all pending play records from Redis and persists them to the PostgreSQL database.
 async function flushPendingPlays(): Promise<void> {
   if (!redis) return
 
@@ -144,10 +160,7 @@ async function flushPendingPlays(): Promise<void> {
   }
 }
 
-/**
- * Updates or inserts a play record, handling track normalization and listener association.
- * @param {PlayRecord} record - The play record to persist.
- */
+// Updates or inserts a play record, handling track normalization and listener association.
 async function upsertPlayRecord(record: PlayRecord): Promise<void> {
   const sourceId = `${record.sourceName}:${record.identifier}`
   const normTitle = normalizeString(record.title)
