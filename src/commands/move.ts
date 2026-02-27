@@ -1,5 +1,6 @@
 // Command to move a track from one position to another within the queue.
 import type { Message } from 'discord.js'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -35,7 +36,7 @@ class MoveCommand extends BaseCommand {
 
     if (!args[0]) {
       throw new BotError(
-        'Cú pháp không hợp lệ. Ví dụ: `move 5` (đưa bài 5 lên đầu) hoặc `move 5 2` (đưa bài 5 lên vị trí 2)'
+        `Cú pháp: \`${config.prefix}move <vị trí cố định> [vị trí đích]\`\nVD: \`${config.prefix}move 5\` (đưa bài 5 lên đầu) | \`${config.prefix}move 5 2\` (đưa bài 5 lên vị trí 2)`
       )
     }
 
@@ -71,7 +72,7 @@ class MoveCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
+      `${getBotName(bot)} đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
     )
   }
 }

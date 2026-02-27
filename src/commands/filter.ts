@@ -1,6 +1,7 @@
 // Command to manage audio filters and effects like Bassboost, Nightcore, etc.
 import type { Message } from 'discord.js'
 import type { FilterManager } from 'lavalink-client'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -87,7 +88,9 @@ class FilterCommand extends BaseCommand {
   // Validates that the provided filter name is supported.
   private validateInput(input: string | undefined): string {
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
-      throw new BotError(`Vui lòng chọn một hiệu ứng hợp lệ:\n\`${AVAILABLE_FILTERS.join(', ')}\`.`)
+      throw new BotError(
+        `Cú pháp: \`${config.prefix}filter <hiệu ứng>\`\nVD: \`${config.prefix}filter bassboost\`\nHiệu ứng hợp lệ: \`${AVAILABLE_FILTERS.join(', ')}\``
+      )
     }
     return input
   }
@@ -116,7 +119,7 @@ class FilterCommand extends BaseCommand {
     message: Message,
     actionText: string
   ): Promise<void> {
-    await replySuccessMessage(message, `**${getBotName(bot)}** đã ${actionText}.`)
+    await replySuccessMessage(message, `${getBotName(bot)} đã ${actionText}.`)
   }
 
   // Executes the filter command.

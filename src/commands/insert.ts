@@ -1,6 +1,8 @@
 // Command to insert a track or playlist at a specific position in the queue.
 import type { GuildMember, Message, VoiceChannel } from 'discord.js'
+import { config } from '~/config/env'
 
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
@@ -35,7 +37,7 @@ class InsertCommand extends BaseCommand {
 
     if (args.length < 1) {
       throw new BotError(
-        'Vui lòng nhập tên bài hát/đường dẫn. (VD: `insert 1 Nơi này có anh` hoặc `insert Nơi này có anh`)'
+        `Cú pháp: \`${config.prefix}insert [vị trí] <tên bài hát/đường dẫn>\`\nVD: \`${config.prefix}insert 1 Nơi này có anh\` | \`${config.prefix}insert Nơi này có anh\``
       )
     }
 

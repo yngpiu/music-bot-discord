@@ -11,7 +11,9 @@ import {
   type VoiceChannel
 } from 'discord.js'
 import type { UnresolvedTrack } from 'lavalink-client'
+import { config } from '~/config/env'
 
+import { EMOJI } from '~/constants/emoji'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
@@ -126,7 +128,7 @@ class FavoriteCommand extends BaseCommand {
   private async handleRemove(message: Message, args: string[]): Promise<void> {
     if (args.length === 0) {
       throw new BotError(
-        'Vui lòng cung cấp vị trí muốn xóa (VD: `fav rm 1`, `fav rm 1-3`, `fav rm 1 3`).'
+        `Cú pháp: \`${config.prefix}fav rm <vị trí>\`\nVD: \`${config.prefix}fav rm 1\` | \`${config.prefix}fav rm 1-3\` | \`${config.prefix}fav rm 1 3\``
       )
     }
 

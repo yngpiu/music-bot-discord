@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show comprehensive player information.
@@ -48,7 +48,6 @@ class StatusCommand extends BaseCommand {
 
     // Construct status embed.
     const embed = new EmbedBuilder()
-      .setColor(0x00c2e6)
       .setAuthor({
         name: 'Trạng thái Trình phát',
         iconURL: getBotAvatar(bot)
@@ -74,19 +73,7 @@ class StatusCommand extends BaseCommand {
       embed.setDescription('Không có bài hát nào đang phát.')
     }
 
-    const replyMessage = await message
-      .reply({
-        embeds: [embed]
-      })
-
-      .catch((e) => {
-        logger.warn(`[Command: status] Error sending notification:`, e)
-        return null
-      })
-
-    if (replyMessage) {
-      deleteMessage([replyMessage, message], TIME.MEDIUM)
-    }
+    await replySuccessEmbed(message, embed)
   }
 }
 

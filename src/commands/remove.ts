@@ -1,5 +1,6 @@
 // Command to remove one or multiple tracks from the music queue using indices or ranges.
 import type { Message } from 'discord.js'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -64,7 +65,7 @@ class RemoveCommand extends BaseCommand {
 
     if (!args[0]) {
       throw new BotError(
-        'Vui lòng cung cấp vị trí bài hát muốn xóa.\nVD: `remove 1` · `remove 2 7 4` · `remove 2-7`'
+        `Cú pháp: \`${config.prefix}remove <vị trí>\`\nVD: \`${config.prefix}remove 1\` | \`${config.prefix}remove 2 7 4\` | \`${config.prefix}remove 2-7\``
       )
     }
 
@@ -90,7 +91,7 @@ class RemoveCommand extends BaseCommand {
       ? `đã xóa **${removedTitles[0]}** khỏi hàng đợi.`
       : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n\`${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}\``
 
-    await replySuccessMessage(message, `**${getBotName(bot)}** ${description}`)
+    await replySuccessMessage(message, `${getBotName(bot)} ${description}`)
   }
 }
 
