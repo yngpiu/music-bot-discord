@@ -9,6 +9,7 @@ import {
   type Message,
   type MessageActionRowComponentBuilder,
   StringSelectMenuBuilder,
+  StringSelectMenuInteraction,
   StringSelectMenuOptionBuilder,
   type VoiceChannel
 } from 'discord.js'
@@ -282,85 +283,88 @@ class FavoriteCommand extends BaseCommand {
       filter: (i) => i.user.id === message.author.id
     })
 
-    collector.on('collect', async (interaction: ButtonInteraction) => {
-      if (interaction.isButton()) {
-        collector.resetTimer()
-        await interaction.deferUpdate().catch(() => {})
+    collector.on(
+      'collect',
+      async (interaction: ButtonInteraction | StringSelectMenuInteraction) => {
+        if (interaction.isButton()) {
+          collector.resetTimer()
+          await interaction.deferUpdate().catch(() => {})
 
-        if (interaction.customId === 'fav_prev' && currentPage > 0) {
-          currentPage--
-        } else if (interaction.customId === 'fav_next' && currentPage < totalPages - 1) {
-          currentPage++
-        }
+          if (interaction.customId === 'fav_prev' && currentPage > 0) {
+            currentPage--
+          } else if (interaction.customId === 'fav_next' && currentPage < totalPages - 1) {
+            currentPage++
+          }
 
-        await interaction.message.edit({
-          embeds: [buildEmbed(currentPage)],
-          components: getComponents(currentPage)
-        })
-        return
-      }
-
-      if (interaction.isStringSelectMenu()) {
-        const index = parseInt(interaction.values[0])
-        const track = favorites[index]
-
-        if (!track) return
-
-        await interaction.deferUpdate().catch(() => {})
-
-        const member = interaction.guild?.members.cache.get(interaction.user.id)
-        const vcId = member?.voice.channelId
-        if (!vcId) {
-          await sendFollowUpEphemeral(interaction, 'Bạn đang không ở kênh thoại nào cả!')
-          return
-        }
-
-        const vc = interaction.guild!.channels.cache.get(vcId) as VoiceChannel
-        if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
-
-        const player =
-          bot.lavalink.getPlayer(interaction.guildId!) ??
-          bot.lavalink.createPlayer({
-            guildId: interaction.guildId!,
-            voiceChannelId: vcId,
-            textChannelId: interaction.channelId!,
-            selfDeaf: true,
-            selfMute: false,
-            volume: 100
+          await interaction.message.edit({
+            embeds: [buildEmbed(currentPage)],
+            components: getComponents(currentPage)
           })
-
-        if (!player.connected) await player.connect()
-        if (player.voiceChannelId !== vcId) {
-          await sendFollowUpEphemeral(interaction, 'Bạn không ở cùng kênh thoại với tớ.')
           return
         }
 
-        const unresolvedTrack = player.LavalinkManager.utils.buildUnresolvedTrack(
-          {
-            title: track.title,
-            author: track.author,
-            uri: track.uri ?? undefined,
-            identifier: track.identifier,
-            sourceName: track.sourceName as import('lavalink-client').SourceNames,
-            artworkUrl: track.artworkUrl ?? undefined,
-            duration: track.duration,
-            isrc: track.isrc ?? undefined
-          },
-          interaction.user
-        )
+        if (interaction.isStringSelectMenu()) {
+          const index = parseInt(interaction.values[0])
+          const track = favorites[index]
 
-        await player.queue.add(unresolvedTrack)
+          if (!track) return
 
-        const embed = new EmbedBuilder()
-          .setColor(0x00c2e6)
-          .setDescription(
-            `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi!`
+          await interaction.deferUpdate().catch(() => {})
+
+          const member = interaction.guild?.members.cache.get(interaction.user.id)
+          const vcId = member?.voice.channelId
+          if (!vcId) {
+            await sendFollowUpEphemeral(interaction, 'Bạn đang không ở kênh thoại nào cả!')
+            return
+          }
+
+          const vc = interaction.guild!.channels.cache.get(vcId) as VoiceChannel
+          if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
+
+          const player =
+            bot.lavalink.getPlayer(interaction.guildId!) ??
+            bot.lavalink.createPlayer({
+              guildId: interaction.guildId!,
+              voiceChannelId: vcId,
+              textChannelId: interaction.channelId!,
+              selfDeaf: true,
+              selfMute: false,
+              volume: 100
+            })
+
+          if (!player.connected) await player.connect()
+          if (player.voiceChannelId !== vcId) {
+            await sendFollowUpEphemeral(interaction, 'Bạn không ở cùng kênh thoại với tớ.')
+            return
+          }
+
+          const unresolvedTrack = player.LavalinkManager.utils.buildUnresolvedTrack(
+            {
+              title: track.title,
+              author: track.author,
+              uri: track.uri ?? undefined,
+              identifier: track.identifier,
+              sourceName: track.sourceName as import('lavalink-client').SourceNames,
+              artworkUrl: track.artworkUrl ?? undefined,
+              duration: track.duration,
+              isrc: track.isrc ?? undefined
+            },
+            interaction.user
           )
-        await sendFollowUpMessage(interaction, embed, 60_000)
 
-        if (!player.playing) await player.play()
+          await player.queue.add(unresolvedTrack)
+
+          const embed = new EmbedBuilder()
+            .setColor(0x00c2e6)
+            .setDescription(
+              `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi!`
+            )
+          await sendFollowUpMessage(interaction, embed, 60_000)
+
+          if (!player.playing) await player.play()
+        }
       }
-    })
+    )
 
     collector.on(
       'end',
