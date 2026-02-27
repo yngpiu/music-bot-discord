@@ -26,6 +26,7 @@ FROM deps AS builder
 WORKDIR /app
 
 COPY src ./src
+COPY data ./data
 COPY tsconfig.json ./
 
 RUN pnpm run build
@@ -57,6 +58,7 @@ RUN npx playwright install --with-deps chromium
 
 # Copy built code (layer này thay đổi mỗi lần build, nhưng Playwright đã được cache ở trên)
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/data ./data
 
 RUN mkdir -p /app/logs
 

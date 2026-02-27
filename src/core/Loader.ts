@@ -12,6 +12,7 @@ import { BotManager } from '~/core/BotManager.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
+import { createContainerMessage } from '~/utils/messageUtil'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -30,14 +31,16 @@ function isPrismaError(err: unknown): boolean {
 
 // Sends an error message to a user and handles cleanup.
 async function replyError(target: ReplyTarget, text: string): Promise<void> {
-  const content = `${EMOJI.ERROR} ${text}`
+  const content = createContainerMessage(`${EMOJI.ERROR} ${text}`)
 
   if (target instanceof Message) {
     await target.reactions.removeAll().catch(() => {})
-    const reply = await target.reply(content).catch((error: Error) => {
-      logger.error('[System] Error replying error message to user:', error.message)
-      return null
-    })
+    const reply = await target
+      .reply({ components: [content], flags: ['IsComponentsV2', 'SuppressNotifications'] })
+      .catch((error: Error) => {
+        logger.error('[System] Error replying error message to user:', error.message)
+        return null
+      })
     setTimeout(() => {
       if (reply) {
         reply.delete().catch((error: Error) => {
@@ -53,13 +56,15 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
-      await target.editReply({ content }).catch((err) => {
+      await target.editReply({ components: [content], flags: ['IsComponentsV2'] }).catch((err) => {
         logger.warn('[System] Error editReply error message to user:', err)
       })
     } else {
-      await target.reply({ content, flags: ['Ephemeral'] }).catch((err) => {
-        logger.warn('[System] Error reply error message to user:', err)
-      })
+      await target
+        .reply({ components: [content], flags: ['IsComponentsV2', 'SuppressNotifications'] })
+        .catch((err) => {
+          logger.warn('[System] Error reply error message to user:', err)
+        })
     }
   }
 }
