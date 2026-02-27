@@ -18,7 +18,7 @@ class JoinCommand extends BaseCommand {
   // Validates if the bot can actually join the requested voice channel.
   private validateVoiceChannel(message: Message, vcId: string): void {
     const vc = message.guild!.channels.cache.get(vcId) as VoiceChannel
-    if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
+    if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
   }
 
   // Checks if a player already exists and if it's already in the target channel or busy elsewhere.
@@ -31,10 +31,10 @@ class JoinCommand extends BaseCommand {
     if (!existingPlayer) return
 
     if (existingPlayer.voiceChannelId === vcId) {
-      throw new BotError('Tớ đang ở trong kênh thoại này rồi mà.')
+      throw new BotError(`\${getBotName(bot)} đang ở trong kênh thoại này rồi mà.`)
     }
 
-    throw new BotError('Tớ đang bận phục vụ ở kênh thoại khác mất rồi.')
+    throw new BotError(`\${getBotName(bot)} đang bận phục vụ ở kênh thoại khác mất rồi.`)
   }
 
   // Retrieves an existing player or creates a new one for the guild.
@@ -81,7 +81,7 @@ class JoinCommand extends BaseCommand {
     this.checkExistingPlayer(bot, message, vcId, existingPlayer)
 
     await this.getOrCreatePlayer(bot, message, vcId, existingPlayer)
-    await replySuccessMessage(message, `Tớ đã sẵn sàng phát nhạc ở kênh này.`)
+    await replySuccessMessage(message, `\${getBotName(bot)} đã sẵn sàng phát nhạc ở kênh này.`)
   }
 }
 

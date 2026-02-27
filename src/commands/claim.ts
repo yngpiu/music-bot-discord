@@ -34,7 +34,7 @@ class ClaimCommand extends BaseCommand {
 
       await replySuccessMessage(
         message,
-        `Tớ chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha.`
+        `\${getBotName(bot)} chưa có người điều khiển, giờ bạn đang có quyền điều khiển cao nhất nha.`
       )
       return
     }

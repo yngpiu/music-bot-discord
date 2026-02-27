@@ -156,7 +156,7 @@ class QueueCommand extends BaseCommand {
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {
-      throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)
+      throw new BotError(`\${getBotName(bot)} đang không phát bản nhạc nào cả.`)
     }
 
     const totalPages = Math.ceil(player.queue.tracks.length / 5) || 1

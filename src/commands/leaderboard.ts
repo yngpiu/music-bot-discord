@@ -1,5 +1,5 @@
 // Command to display various music-related leaderboards (top tracks, listeners, bots).
-import type { Guild, Message } from 'discord.js'
+import type { ButtonInteraction, Guild, Message, StringSelectMenuInteraction } from 'discord.js'
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -15,7 +15,7 @@ import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
 import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 
 // Types of leaderboard views available.

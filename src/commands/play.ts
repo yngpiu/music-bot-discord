@@ -1,5 +1,5 @@
 // Main command to search for and play tracks or playlists from various sources.
-import type { Message, VoiceChannel } from 'discord.js'
+import type { EmbedBuilder, Message, VoiceChannel } from 'discord.js'
 import type { Player, SearchResult, UnresolvedSearchResult } from 'lavalink-client'
 
 import { TIME } from '~/constants/time'
@@ -22,7 +22,7 @@ class PlayCommand extends BaseCommand {
   // Validates if the bot can join the requested voice channel.
   private validateVoiceChannel(message: Message, vcId: string): void {
     const vc = message.guild!.channels.cache.get(vcId) as VoiceChannel
-    if (!vc?.joinable) throw new BotError('Tớ không thể vào kênh thoại của bạn.')
+    if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
   }
 
   // Retrieves an existing player or creates a new one for the guild.
@@ -47,7 +47,7 @@ class PlayCommand extends BaseCommand {
     if (!player.connected) await player.connect()
 
     // Ensure the player is in the same channel as the user.
-    if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
+    if (player.voiceChannelId !== vcId) throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
 
     // Set initial owner if not defined.
     if (!player.get('owner')) player.set('owner', message.author.id)
@@ -68,12 +68,12 @@ class PlayCommand extends BaseCommand {
     if (result.loadType === 'error') {
       throw new BotError(
         result.exception?.message ??
-          'Tớ không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh `search`.'
+          `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
     }
     if (!result.tracks.length) {
       throw new BotError(
-        'Tớ không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh `search`.'
+        `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
     }
 

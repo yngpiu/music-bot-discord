@@ -148,13 +148,13 @@ class MessageCreateEvent extends BotEvent {
 
     // Enforce voice channel requirements.
     if (command.requiresVoice || command.requiresVoiceMatch || command.requiresOwner) {
-      if (!player) throw new BotError('Tớ đang không hoạt động trong kênh nào cả.')
+      if (!player) throw new BotError(`\${getBotName(bot)} đang không hoạt động trong kênh nào cả.`)
     }
 
     if (command.requiresVoiceMatch) {
       if (!userVcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
       if (player!.voiceChannelId !== userVcId)
-        throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
+        throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
     }
 
     // Enforce session ownership for sensitive commands.

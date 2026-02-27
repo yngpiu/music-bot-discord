@@ -30,7 +30,7 @@ class SkiptoCommand extends BaseCommand {
     )
 
     if (!player.playing && !player.queue.current) {
-      throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)
+      throw new BotError(`\${getBotName(bot)} đang không phát bản nhạc nào cả.`)
     }
 
     if (!args[0]) {

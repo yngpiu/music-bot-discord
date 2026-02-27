@@ -27,7 +27,7 @@ class LeaveCommand extends BaseCommand {
 
     // Shutdown the player and disconnect from voice.
     await player.destroy()
-    await replySuccessMessage(message, `Tớ đã rời khỏi kênh thoại.`)
+    await replySuccessMessage(message, `\${getBotName(bot)} đã rời khỏi kênh thoại.`)
   }
 }
 
