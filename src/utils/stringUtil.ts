@@ -40,7 +40,7 @@ export function formatTrack(item: {
 }
 
 export function getBotName(bot: BotClient): string {
-  return bot.user?.displayName || bot.user?.username || 'Tớ'
+  return `**${bot.user?.displayName || bot.user?.username || 'Tớ'}**`
 }
 
 export function getBotAvatar(bot: BotClient): string {

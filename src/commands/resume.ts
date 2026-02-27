@@ -16,11 +16,6 @@ class ResumeCommand extends BaseCommand {
   description = 'Tiếp tục phát nhạc đang tạm dừng.'
   requiresVoiceMatch = true
 
-  // Sends a confirmation message after successfully resuming playback.
-  private async sendConfirmation(bot: BotClient, message: Message): Promise<void> {
-    await replySuccessMessage(message, `**${getBotName(bot)}** sẽ tiếp tục phát nhạc.`)
-  }
-
   // Executes the resume command.
   async execute(
     bot: BotClient,
@@ -35,7 +30,7 @@ class ResumeCommand extends BaseCommand {
     if (!player.paused) throw new BotError('Nhạc vẫn đang phát mà.')
 
     await player.resume()
-    await this.sendConfirmation(bot, message)
+    await replySuccessMessage(message, `${getBotName(bot)} sẽ tiếp tục phát nhạc.`)
   }
 }
 

@@ -3,6 +3,8 @@ import type { Message, User } from 'discord.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js'
 import type { Player } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'

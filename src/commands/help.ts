@@ -8,6 +8,7 @@ import {
 } from 'discord.js'
 import { config } from '~/config/env.js'
 
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
@@ -232,8 +233,10 @@ class HelpCommand extends BaseCommand {
 
     const { select, row } = this.buildSelectMenu()
     const embed = this.buildMainEmbed(bot)
-    const reply = await message.reply({ embeds: [embed], components: [row] })
-    this.startCollector(bot, message, reply, select, row)
+    const reply = await replySuccessEmbed(message, embed, [row], 60000)
+    if (reply) {
+      this.startCollector(bot, message, reply, select, row)
+    }
   }
 }
 

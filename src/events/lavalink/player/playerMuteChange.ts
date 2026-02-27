@@ -39,8 +39,8 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
     const channel = bot.channels.cache.get(player.textChannelId!)
 
     const message = serverMuted
-      ? `${EMOJI.ANIMATED_CAT_CRYING} **${getBotName(bot)}** đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
-      : `${EMOJI.ANIMATED_CAT_LOVE_YOU} **${getBotName(bot)}** đã nói lại được rồi, có thể tiếp tục phát nhạc.`
+      ? `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
+      : `${EMOJI.ANIMATED_CAT_LOVE_YOU} ${getBotName(bot)} đã nói lại được rồi, có thể tiếp tục phát nhạc.`
 
     await sendContainerMessage(channel, message)
   }

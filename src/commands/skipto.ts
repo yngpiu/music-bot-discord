@@ -1,5 +1,6 @@
 // Command to skip to a specific track index in the queue.
 import type { Message } from 'discord.js'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -33,16 +34,16 @@ class SkiptoCommand extends BaseCommand {
     }
 
     if (!args[0]) {
-      throw new BotError('Vui lòng cung cấp vị trí bài hát muốn chuyển tới.')
+      throw new BotError(
+        `Cú pháp: \`${config.prefix}skipto <1-${player.queue.tracks.length}>\`\nVD: \`${config.prefix}skipto 5\``
+      )
     }
 
     const position = parseInt(args[0], 10)
 
     // Validate the target position against the current queue length.
     if (isNaN(position) || position < 1 || position > player.queue.tracks.length) {
-      throw new BotError(
-        `Vị trí bài hát không hợp lệ, vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`
-      )
+      throw new BotError(`Vui lòng nhập từ 1 đến ${player.queue.tracks.length}.`)
     }
 
     // Skip to the specified track. Original tracks before it will be removed.
@@ -50,7 +51,7 @@ class SkiptoCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
+      `${getBotName(bot)} đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
     )
   }
 }

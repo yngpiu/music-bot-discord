@@ -9,6 +9,7 @@ import {
   StringSelectMenuOptionBuilder
 } from 'discord.js'
 
+import { EMOJI } from '~/constants/emoji'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
@@ -364,90 +365,92 @@ class LeaderboardCommand extends BaseCommand {
       buildViewSelect(currentView, disabled)
     ]
 
-    const reply = await message.reply({
-      embeds: [getEmbed()],
-      components: getComponents()
-    })
+    const reply = await replySuccessEmbed(message, getEmbed(), getComponents(), 120_000)
+
+    if (!reply) return
 
     const collector = reply.createMessageComponentCollector({
       time: 120_000,
       filter: (i) => i.user.id === userId
     })
 
-    collector.on('collect', async (interaction) => {
-      collector.resetTimer()
-      await interaction.deferUpdate()
+    collector.on(
+      'collect',
+      async (interaction: ButtonInteraction | StringSelectMenuInteraction) => {
+        collector.resetTimer()
+        await interaction.deferUpdate()
 
-      // Handle pagination buttons.
-      if (interaction.isButton()) {
-        const totalPages = getTotalPages()
-        switch (interaction.customId) {
-          case 'lb_first':
+        // Handle pagination buttons.
+        if (interaction.isButton()) {
+          const totalPages = getTotalPages()
+          switch (interaction.customId) {
+            case 'lb_first':
+              currentPage = 0
+              break
+            case 'lb_prev':
+              currentPage = Math.max(0, currentPage - 1)
+              break
+            case 'lb_next':
+              currentPage = Math.min(totalPages - 1, currentPage + 1)
+              break
+            case 'lb_last':
+              currentPage = totalPages - 1
+              break
+          }
+        }
+
+        // Handle view switching.
+        if (interaction.isStringSelectMenu() && interaction.customId === 'lb_view') {
+          const newView = interaction.values[0] as LeaderboardView
+          if (newView !== currentView) {
+            currentView = newView
             currentPage = 0
-            break
-          case 'lb_prev':
-            currentPage = Math.max(0, currentPage - 1)
-            break
-          case 'lb_next':
-            currentPage = Math.min(totalPages - 1, currentPage + 1)
-            break
-          case 'lb_last':
-            currentPage = totalPages - 1
-            break
-        }
-      }
 
-      // Handle view switching.
-      if (interaction.isStringSelectMenu() && interaction.customId === 'lb_view') {
-        const newView = interaction.values[0] as LeaderboardView
-        if (newView !== currentView) {
-          currentView = newView
-          currentPage = 0
+            // Lazy-load data only when the view is selected.
+            if (currentView === 'tracks' && trackEntries.length === 0) {
+              trackEntries = await getTopTracks(MAX_ITEMS, guild.id)
+            }
 
-          // Lazy-load data only when the view is selected.
-          if (currentView === 'tracks' && trackEntries.length === 0) {
-            trackEntries = await getTopTracks(MAX_ITEMS, guild.id)
-          }
+            if (currentView === 'listeners' && listenerEntries.length === 0) {
+              const rawListeners = await getTopListeners(MAX_ITEMS, guild.id)
+              listenerEntries = await Promise.all(
+                rawListeners.map(async (entry) => {
+                  let userName = `User (${entry.userId})`
+                  try {
+                    const member = await guild.members.fetch(entry.userId)
+                    userName = member.displayName || member.user.username
+                  } catch {
+                    /* ignore */
+                  }
+                  return { ...entry, userName }
+                })
+              )
+            }
 
-          if (currentView === 'listeners' && listenerEntries.length === 0) {
-            const rawListeners = await getTopListeners(MAX_ITEMS, guild.id)
-            listenerEntries = await Promise.all(
-              rawListeners.map(async (entry) => {
-                let userName = `User (${entry.userId})`
-                try {
-                  const member = await guild.members.fetch(entry.userId)
-                  userName = member.displayName || member.user.username
-                } catch {
-                  /* ignore */
-                }
-                return { ...entry, userName }
-              })
-            )
-          }
-
-          if (currentView === 'bots' && botEntries.length === 0) {
-            const rawBots = await getTopBots(MAX_ITEMS, guild.id)
-            botEntries = await Promise.all(
-              rawBots.map(async (entry) => {
-                let botName = `Bot (${entry.botId})`
-                try {
-                  const user = await bot.users.fetch(entry.botId)
-                  botName = user.displayName || user.username
-                } catch {
-                  /* ignore */
-                }
-                return { ...entry, botName }
-              })
-            )
+            if (currentView === 'bots' && botEntries.length === 0) {
+              const rawBots = await getTopBots(MAX_ITEMS, guild.id)
+              botEntries = await Promise.all(
+                rawBots.map(async (entry) => {
+                  let botName = `Bot (${entry.botId})`
+                  try {
+                    const user = await bot.users.fetch(entry.botId)
+                    botName = user.displayName || user.username
+                  } catch {
+                    /* ignore */
+                  }
+                  return { ...entry, botName }
+                })
+              )
+            }
           }
         }
-      }
 
-      await interaction.editReply({
-        embeds: [getEmbed()],
-        components: getComponents()
-      })
-    })
+        await interaction.editReply({
+          embeds: [getEmbed()],
+          components: getComponents()
+        })
+      }
+    )
 
     collector.on('end', async () => {
       // Disable components upon timeout.

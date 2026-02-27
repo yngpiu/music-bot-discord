@@ -1,5 +1,6 @@
 // Command to adjust the bot's audio volume level.
 import type { Message } from 'discord.js'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -29,7 +30,7 @@ class VolumeCommand extends BaseCommand {
     // If no argument is provided, show current volume.
     if (!args[0]) {
       throw new BotError(
-        `Âm lượng hiện tại đang là **${player.volume}%**. Cú pháp: \`!volume <0-100>\``
+        `Cú pháp: \`${config.prefix}volume <0-100>\`\nVD: \`${config.prefix}volume 50\``
       )
     }
 
@@ -44,7 +45,7 @@ class VolumeCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã **điều chỉnh** âm lượng thành **${vol}%**  .`
+      `${getBotName(bot)} đã **điều chỉnh** âm lượng thành **${vol}%**.`
     )
   }
 }

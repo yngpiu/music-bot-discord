@@ -19,10 +19,7 @@ class PlayerDestroyEvent extends LavalinkEvent {
 
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    await sendContainerMessage(
-      channel,
-      `${EMOJI.ANIMATED_CAT_BYE} **${getBotName(bot)}** đã rời đi.`
-    )
+    await sendContainerMessage(channel, `${EMOJI.ANIMATED_CAT_BYE} ${getBotName(bot)} đã rời đi.`)
   }
 }
 

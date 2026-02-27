@@ -73,7 +73,7 @@ class NotifyCommand extends BaseCommand {
           (failCount > 0 ? ` (Lỗi ${failCount} kênh)` : '')
       )
 
-    await message.reply({ embeds: [replyEmbed] })
+    await replySuccessEmbed(message, replyEmbed)
   }
 }
 

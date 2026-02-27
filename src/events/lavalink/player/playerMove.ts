@@ -27,7 +27,7 @@ class PlayerMoveEvent extends LavalinkEvent {
 
     await sendContainerMessage(
       channel,
-      `${EMOJI.ANIMATED_CAT_NO_IDEA} **${getBotName(bot)}** đã bị ai đó bê sang kênh <#${newVoiceChannelId}>.`
+      `${EMOJI.ANIMATED_CAT_NO_IDEA} ${getBotName(bot)} đã bị ai đó bê sang kênh <#${newVoiceChannelId}>.`
     )
   }
 }

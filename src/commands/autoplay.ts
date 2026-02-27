@@ -1,4 +1,5 @@
 // Command to toggle the autoplay feature, which automatically adds recommended tracks when the queue is empty.
+import { Message } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -35,7 +36,7 @@ class AutoplayCommand extends BaseCommand {
       ? '**bật** chế độ `Tự động phát`'
       : '**tắt** chế độ `Tự động phát`'
 
-    await replySuccessMessage(message, `**${getBotName(bot)}** đã ${actionText}.`)
+    await replySuccessMessage(message, `${getBotName(bot)} đã ${actionText}.`)
   }
 }
 

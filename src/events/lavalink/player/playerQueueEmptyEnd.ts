@@ -28,7 +28,7 @@ class PlayerQueueEmptyEndEvent extends LavalinkEvent {
     await deleteMessageNow([msg])
     await sendContainerMessage(
       channel,
-      `${EMOJI.ANIMATED_CAT_BYE} Không thấy yêu cầu nào nữa, **${getBotName(bot)}** đã rời đi.`
+      `${EMOJI.ANIMATED_CAT_BYE} Không thấy yêu cầu nào nữa, ${getBotName(bot)} đã rời đi.`
     )
   }
 }

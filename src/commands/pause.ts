@@ -37,7 +37,7 @@ class PauseCommand extends BaseCommand {
 
     await player.pause()
 
-    await replySuccessMessage(message, `**${getBotName(bot)}** đã tạm dừng phát nhạc.`)
+    await replySuccessMessage(message, `${getBotName(bot)} đã tạm dừng phát nhạc.`)
   }
 }
 

@@ -1,4 +1,5 @@
 // Command to play the previous track in the queue history.
+import { Message } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -46,7 +47,7 @@ class BackCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đang phát lại bài **${previousTrack.info.title}**.`
+      `${getBotName(bot)} đang phát lại bài **${previousTrack.info.title}**.`
     )
   }
 }

@@ -28,7 +28,7 @@ class PlayerQueueEmptyStartEvent extends LavalinkEvent {
     const message = await sendContainerMessage(
       channel,
       `
-      ${EMOJI.ANIMATED_CAT_BLINK} Hết nhạc rồi, **${getBotName(bot)}** sẽ rời đi trong <t:${Math.round((Date.now() + delayMs) / 1000)}:R> nếu không thấy yêu cầu nào.
+      ${EMOJI.ANIMATED_CAT_BLINK} Hết nhạc rồi, ${getBotName(bot)} sẽ rời đi trong <t:${Math.round((Date.now() + delayMs) / 1000)}:R> nếu không thấy yêu cầu nào.
     `,
       TIME.VERY_LONG
     )

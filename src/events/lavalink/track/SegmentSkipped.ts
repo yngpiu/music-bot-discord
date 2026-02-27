@@ -41,7 +41,7 @@ class SegmentSkippedEvent extends LavalinkEvent {
 
     const category = segmentMap[payload.segment.category] || payload.segment.category
 
-    const message = `${EMOJI.ANIMATED_CAT_BLINK} **${getBotName(bot)}** vừa tự động bỏ qua **đoạn ${category}**.`
+    const message = `${EMOJI.ANIMATED_CAT_BLINK} ${getBotName(bot)} vừa tự động bỏ qua **đoạn ${category}**.`
 
     await sendContainerMessage(channel, message, TIME.VERY_SHORT)
   }

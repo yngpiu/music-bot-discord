@@ -36,7 +36,7 @@ class TrackStuckHandler extends LavalinkEvent {
 
     await sendContainerMessage(
       channel,
-      `${EMOJI.ERROR} **${getBotName(bot)}** đã bỏ qua ${trackDisplay} do lỗi phát nhạc.`
+      `${EMOJI.ERROR} ${getBotName(bot)} đã bỏ qua ${trackDisplay} do lỗi phát nhạc.`
     )
   }
 }

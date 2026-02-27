@@ -1,5 +1,6 @@
 // Command to jump/seek to a specific time in the currently playing track.
 import type { Message } from 'discord.js'
+import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -39,7 +40,9 @@ class SeekCommand extends BaseCommand {
     }
 
     if (!args[0]) {
-      throw new BotError('Vui lòng nhập thời gian muốn tua. (VD: `seek 1:30` hoặc `seek 90`)')
+      throw new BotError(
+        `Cú pháp: \`${config.prefix}seek <thời gian>\`\nVD: \`${config.prefix}seek 1:30\` | \`${config.prefix}seek 90\``
+      )
     }
 
     const currentTrack = player.queue.current
@@ -65,7 +68,7 @@ class SeekCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
+      `${getBotName(bot)} đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
     )
   }
 }

@@ -1,5 +1,5 @@
 // Command to take ownership of the music player in a guild.
-import { Message } from 'discord.js'
+import { Message, VoiceChannel } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'

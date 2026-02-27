@@ -26,20 +26,13 @@ class SkipCommand extends BaseCommand {
     await reactLoadingMessage(message)
     logger.info(`[Command: skip] User ${message.author.tag} requested to skip track`)
 
-    // Verify if there is currently a track to skip.
     if (!player.playing && !player.queue.current) {
       throw new BotError(`Tớ đang không phát bản nhạc nào cả.`)
     }
 
-    const currentTrack = player.queue.current
-
-    // Trigger the skip in the player.
     await player.skip(0, false)
 
-    await replySuccessMessage(
-      message,
-      `**${getBotName(bot)}** đã **bỏ qua** bài hát **${currentTrack?.info.title || 'hiện tại'}**.`
-    )
+    await replySuccessMessage(message, `${getBotName(bot)} đã **bỏ qua** bài hát hiện tại.`)
   }
 }
 

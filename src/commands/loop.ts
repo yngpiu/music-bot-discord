@@ -46,11 +46,11 @@ class LoopCommand extends BaseCommand {
 
     let messageText: string
     if (nextMode === 'track') {
-      messageText = `**${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+      messageText = `${getBotName(bot)} đã **chuyển** chế độ lặp thành \`${modeText}\`.`
     } else if (nextMode === 'queue') {
-      messageText = `**${getBotName(bot)}** đã **chuyển** chế độ lặp thành \`${modeText}\`.`
+      messageText = `${getBotName(bot)} đã **chuyển** chế độ lặp thành \`${modeText}\`.`
     } else {
-      messageText = `**${getBotName(bot)}** đã **tắt** chế độ lặp.`
+      messageText = `${getBotName(bot)} đã **tắt** chế độ lặp.`
     }
 
     await replySuccessMessage(message, messageText)

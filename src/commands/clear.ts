@@ -45,7 +45,7 @@ class ClearCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
+      `${getBotName(bot)} đã dọn sạch **${trackCount}** bài hát khỏi hàng đợi.`
     )
   }
 }

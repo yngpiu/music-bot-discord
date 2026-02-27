@@ -41,7 +41,7 @@ class ReplayCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã **tua lại** bài hát **${currentTrack.info.title}** từ đầu.`
+      `${getBotName(bot)} đã **tua lại** bài hát **${currentTrack.info.title}** từ đầu.`
     )
   }
 }

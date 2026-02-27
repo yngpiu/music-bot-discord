@@ -26,7 +26,6 @@ class ShuffleCommand extends BaseCommand {
     await reactLoadingMessage(message)
     logger.info(`[Command: shuffle] User ${message.author.tag} requested to shuffle queue`)
 
-    // Ensure there are at least two tracks in the queue to shuffle.
     if (player.queue.tracks.length < 2) {
       throw new BotError('Danh sách chờ cần có ít nhất 2 bài hát.')
     }
@@ -35,7 +34,7 @@ class ShuffleCommand extends BaseCommand {
 
     await replySuccessMessage(
       message,
-      `**${getBotName(bot)}** đã **trộn lẫn lộn** **${player.queue.tracks.length}** bài hát trong hàng chờ.`
+      `${getBotName(bot)} đã **trộn** **${player.queue.tracks.length} bài hát** trong hàng chờ.`
     )
   }
 }

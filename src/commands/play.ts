@@ -10,7 +10,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command for searching and playing music.
@@ -142,8 +142,7 @@ class PlayCommand extends BaseCommand {
     }
 
     const addedEmbed = this.buildEmbed(bot, message, player, result, query)
-    const replyMessage = await message.reply(addedEmbed)
-    deleteMessage([replyMessage, message], TIME.MEDIUM)
+    await replySuccessEmbed(message, addedEmbed.embeds[0] as EmbedBuilder, undefined, TIME.MEDIUM)
 
     // Automatically start playback if not already playing.
     if (!player.playing) {

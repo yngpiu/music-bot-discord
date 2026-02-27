@@ -258,17 +258,21 @@ class FavoriteCommand extends BaseCommand {
       return rows
     }
 
-    const reply = await message.reply({
-      embeds: [buildEmbed(currentPage)],
-      components: getComponents(currentPage)
-    })
+    const reply = await replySuccessEmbed(
+      message,
+      buildEmbed(currentPage),
+      getComponents(currentPage),
+      60000
+    )
+
+    if (!reply) return
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
       filter: (i) => i.user.id === message.author.id
     })
 
-    collector.on('collect', async (interaction) => {
+    collector.on('collect', async (interaction: ButtonInteraction) => {
       if (interaction.isButton()) {
         collector.resetTimer()
         await interaction.deferUpdate().catch(() => {})
@@ -356,18 +360,21 @@ class FavoriteCommand extends BaseCommand {
       }
     })
 
-    collector.on('end', async (collected, reason) => {
-      if (reason === 'time') {
-        const player = bot.lavalink.getPlayer(message.guildId!)
-        await reply.delete().catch(() => {})
-        await message.delete().catch(() => {})
-        if (player && !player.playing && player.queue.tracks.length === 0) {
-          await player.destroy()
+    collector.on(
+      'end',
+      async (collected: Collection<string, ButtonInteraction>, reason: string) => {
+        if (reason === 'time') {
+          const player = bot.lavalink.getPlayer(message.guildId!)
+          await reply.delete().catch(() => {})
+          await message.delete().catch(() => {})
+          if (player && !player.playing && player.queue.tracks.length === 0) {
+            await player.destroy()
+          }
+        } else if (reason !== 'selected') {
+          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
         }
-      } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
       }
-    })
+    )
   }
 
   private async handlePlay(bot: BotClient, message: Message): Promise<void> {

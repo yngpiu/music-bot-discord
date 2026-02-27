@@ -19,7 +19,7 @@ class PlayerReconnectEvent extends LavalinkEvent {
 
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    const message = `${EMOJI.ANIMATED_CAT_CONGRATULATION} **${getBotName(bot)}** đã kết nối lại thành công.`
+    const message = `${EMOJI.ANIMATED_CAT_CONGRATULATION} ${getBotName(bot)} đã kết nối lại thành công.`
 
     await sendContainerMessage(channel, message)
   }

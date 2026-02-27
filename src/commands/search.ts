@@ -12,6 +12,7 @@ import {
 import { Player, UnresolvedTrack } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient'
 import { BotError } from '~/core/errors.js'
@@ -256,7 +257,7 @@ class SearchCommand extends BaseCommand {
           getBotAvatar(bot)
         )
 
-        await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, 60000)
+        await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
 
         if (!player.playing) await player.play()
       }
@@ -470,7 +471,11 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
+          await sendFollowUpMessage(
+            interaction,
+            addedEmbed.embeds?.[0] as EmbedBuilder,
+            TIME.MEDIUM
+          )
 
           if (!player.playing) await player.play().catch(() => {})
         } catch (error) {
@@ -682,7 +687,11 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await sendFollowUpMessage(interaction, addedEmbed.embeds?.[0] as EmbedBuilder, 60000)
+          await sendFollowUpMessage(
+            interaction,
+            addedEmbed.embeds?.[0] as EmbedBuilder,
+            TIME.MEDIUM
+          )
 
           if (!player.playing) await player.play().catch(() => {})
         } catch (error) {

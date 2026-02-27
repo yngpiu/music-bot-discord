@@ -20,7 +20,7 @@ class PlayerDisconnectEvent extends LavalinkEvent {
 
     await sendContainerMessage(
       channel,
-      `${EMOJI.ANIMATED_CAT_CRYING} **${getBotName(bot)}** đã bị ngắt kết nối.`
+      `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ngắt kết nối.`
     )
   }
 }

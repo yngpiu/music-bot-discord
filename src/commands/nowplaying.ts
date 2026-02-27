@@ -1,6 +1,7 @@
 // Command to display information about the track currently being played.
 import { EmbedBuilder, type Message } from 'discord.js'
 
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
