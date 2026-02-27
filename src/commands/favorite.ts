@@ -307,7 +307,6 @@ class FavoriteCommand extends BaseCommand {
         if (!track) return
 
         await interaction.deferUpdate().catch(() => {})
-        await interaction.message.delete().catch(() => {})
 
         const member = interaction.guild?.members.cache.get(interaction.user.id)
         const vcId = member?.voice.channelId
