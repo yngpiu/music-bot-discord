@@ -25,7 +25,11 @@ import {
 } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import {
+  reactLoadingMessage,
+  replySuccessEmbed,
+  sendFollowUpEphemeral
+} from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
 
 // Command for searching music from multiple providers with an interactive UI.
@@ -216,10 +220,10 @@ class SearchCommand extends BaseCommand {
             components: getComponents(false, currentSource)
           })
         } catch (error) {
-          await interaction.followUp({
-            content: `Lỗi khi tìm kiếm: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            ephemeral: true
-          })
+          await sendFollowUpEphemeral(
+            interaction,
+            `Lỗi khi tìm kiếm: ${error instanceof Error ? error.message : 'Unknown error'}`
+          )
         }
         return
       }
@@ -424,10 +428,10 @@ class SearchCommand extends BaseCommand {
           const spotifyAlbum = await fetchAlbum(album.id)
 
           if (!spotifyAlbum.tracks.items.length) {
-            await interaction.followUp({
-              content: `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`,
-              flags: ['Ephemeral']
-            })
+            await sendFollowUpEphemeral(
+              interaction,
+              `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
+            )
             return
           }
 
@@ -471,10 +475,7 @@ class SearchCommand extends BaseCommand {
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading album details:', error)
-          await interaction.followUp({
-            content: `❌ Đã có lỗi xảy ra khi tải album.`,
-            flags: ['Ephemeral']
-          })
+          await sendFollowUpEphemeral(interaction, `❌ Đã có lỗi xảy ra khi tải album.`)
         }
       }
     })
@@ -641,10 +642,10 @@ class SearchCommand extends BaseCommand {
           const spotifyPlaylist = await fetchPlaylist(playlist.id)
 
           if (!spotifyPlaylist.tracks.items.length) {
-            await interaction.followUp({
-              content: `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`,
-              flags: ['Ephemeral']
-            })
+            await sendFollowUpEphemeral(
+              interaction,
+              `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
+            )
             return
           }
 
@@ -686,10 +687,7 @@ class SearchCommand extends BaseCommand {
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading playlist details:', error)
-          await interaction.followUp({
-            content: `❌ Đã có lỗi xảy ra khi tải danh sách phát.`,
-            flags: ['Ephemeral']
-          })
+          await sendFollowUpEphemeral(interaction, `❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
         }
       }
     })

@@ -5,7 +5,8 @@ import {
   ContainerBuilder,
   EmbedBuilder,
   type Message,
-  type MessageActionRowComponentBuilder
+  type MessageActionRowComponentBuilder,
+  type RepliableInteraction
 } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji'
@@ -105,4 +106,11 @@ export async function replySuccessEmbed(
 
 export async function reactLoadingMessage(message: Message) {
   await message.react(EMOJI.LOADING)
+}
+
+export async function sendFollowUpEphemeral(interaction: RepliableInteraction, content: string) {
+  return interaction.followUp({
+    content,
+    ephemeral: true
+  })
 }
