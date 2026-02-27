@@ -2,7 +2,9 @@
 import {
   ActionRowBuilder,
   ButtonBuilder,
+  ButtonInteraction,
   ButtonStyle,
+  Collection,
   EmbedBuilder,
   type Message,
   type MessageActionRowComponentBuilder,
@@ -20,7 +22,13 @@ import { BotError } from '~/core/errors.js'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import {
+  reactLoadingMessage,
+  replySuccessEmbed,
+  replySuccessMessage,
+  sendFollowUpEphemeral,
+  sendFollowUpMessage
+} from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
@@ -184,7 +192,8 @@ class FavoriteCommand extends BaseCommand {
       const pagedTracks = favorites.slice(start, start + itemsPerPage)
 
       const description = pagedTracks
-        .map((t, i) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((t: any, i: number) => {
           const trackDisplay = formatTrack({
             title: t.title,
             trackLink: t.uri ?? '',
@@ -214,7 +223,8 @@ class FavoriteCommand extends BaseCommand {
 
       if (pagedTracks.length > 0) {
         selectMenu.addOptions(
-          pagedTracks.map((track, index) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          pagedTracks.map((track: any, index: number) => {
             const label = track.title.substring(0, 100)
             const descriptionOption = track.author ? track.author.substring(0, 100) : ''
             const option = new StringSelectMenuOptionBuilder()
@@ -302,10 +312,7 @@ class FavoriteCommand extends BaseCommand {
         const member = interaction.guild?.members.cache.get(interaction.user.id)
         const vcId = member?.voice.channelId
         if (!vcId) {
-          await interaction.followUp({
-            content: 'Bạn đang không ở kênh thoại nào cả!',
-            flags: ['Ephemeral']
-          })
+          await sendFollowUpEphemeral(interaction, 'Bạn đang không ở kênh thoại nào cả!')
           return
         }
 
@@ -325,10 +332,7 @@ class FavoriteCommand extends BaseCommand {
 
         if (!player.connected) await player.connect()
         if (player.voiceChannelId !== vcId) {
-          await interaction.followUp({
-            content: 'Bạn không ở cùng kênh thoại với tớ.',
-            flags: ['Ephemeral']
-          })
+          await sendFollowUpEphemeral(interaction, 'Bạn không ở cùng kênh thoại với tớ.')
           return
         }
 
@@ -353,10 +357,9 @@ class FavoriteCommand extends BaseCommand {
           .setDescription(
             `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi!`
           )
-        await interaction.followUp({ embeds: [embed] })
+        await sendFollowUpMessage(interaction, embed, 60_000)
 
         if (!player.playing) await player.play()
-        collector.stop('selected')
       }
     })
 
@@ -365,8 +368,6 @@ class FavoriteCommand extends BaseCommand {
       async (collected: Collection<string, ButtonInteraction>, reason: string) => {
         if (reason === 'time') {
           const player = bot.lavalink.getPlayer(message.guildId!)
-          await reply.delete().catch(() => {})
-          await message.delete().catch(() => {})
           if (player && !player.playing && player.queue.tracks.length === 0) {
             await player.destroy()
           }
@@ -410,7 +411,9 @@ class FavoriteCommand extends BaseCommand {
     if (player.voiceChannelId !== vcId) throw new BotError('Bạn không ở cùng kênh thoại với tớ.')
 
     const tracks = favorites.map(
-      (track) =>
+      (
+        track: any // eslint-disable-line @typescript-eslint/no-explicit-any
+      ) =>
         player.LavalinkManager.utils.buildUnresolvedTrack(
           {
             title: track.title,
