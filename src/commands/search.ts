@@ -231,7 +231,6 @@ class SearchCommand extends BaseCommand {
         if (!track) return
 
         await interaction.deferUpdate().catch(() => {})
-        await interaction.message.delete().catch(() => {})
 
         await player.queue.add(track)
 
@@ -251,7 +250,7 @@ class SearchCommand extends BaseCommand {
           getBotAvatar(bot)
         )
 
-        await message.reply(addedEmbed)
+        await replySuccessEmbed(message, addedEmbed.embeds[0])
 
         if (!player.playing) await player.play()
 
@@ -417,18 +416,18 @@ class SearchCommand extends BaseCommand {
         if (!album) return
 
         await interaction.deferUpdate().catch(() => {})
-        await interaction.message.delete().catch(() => {})
 
         const loadingQuery = `https://open.spotify.com/album/${album.id}`
-        const loadingMessage = await message.reply(`⏳ Đang tải album **${album.name}**...`)
+        await reactLoadingMessage(message)
 
         try {
           const spotifyAlbum = await fetchAlbum(album.id)
 
           if (!spotifyAlbum.tracks.items.length) {
-            await loadingMessage.edit(
-              `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
-            )
+            await interaction.followUp({
+              content: `❌ Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`,
+              flags: ['Ephemeral']
+            })
             return
           }
 
@@ -466,13 +465,16 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await loadingMessage.edit({ content: '', ...addedEmbed })
+          await replySuccessEmbed(message, addedEmbed.embeds?.[0] as EmbedBuilder)
 
           if (!player.playing) await player.play().catch(() => {})
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading album details:', error)
-          await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải album.`)
+          await interaction.followUp({
+            content: `❌ Đã có lỗi xảy ra khi tải album.`,
+            flags: ['Ephemeral']
+          })
         }
       }
     })
@@ -631,20 +633,18 @@ class SearchCommand extends BaseCommand {
         if (!playlist) return
 
         await interaction.deferUpdate().catch(() => {})
-        await interaction.message.delete().catch(() => {})
 
         const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
-        const loadingMessage = await message.reply(
-          `⏳ Đang tải danh sách phát **${playlist.name}**...`
-        )
+        await reactLoadingMessage(message)
 
         try {
           const spotifyPlaylist = await fetchPlaylist(playlist.id)
 
           if (!spotifyPlaylist.tracks.items.length) {
-            await loadingMessage.edit(
-              `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
-            )
+            await interaction.followUp({
+              content: `❌ Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`,
+              flags: ['Ephemeral']
+            })
             return
           }
 
@@ -680,13 +680,16 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await loadingMessage.edit({ content: '', ...addedEmbed })
+          await replySuccessEmbed(message, addedEmbed.embeds?.[0] as EmbedBuilder)
 
           if (!player.playing) await player.play().catch(() => {})
           collector.stop('selected')
         } catch (error) {
           logger.error('[Command: search] Error loading playlist details:', error)
-          await loadingMessage.edit(`❌ Đã có lỗi xảy ra khi tải danh sách phát.`)
+          await interaction.followUp({
+            content: `❌ Đã có lỗi xảy ra khi tải danh sách phát.`,
+            flags: ['Ephemeral']
+          })
         }
       }
     })
