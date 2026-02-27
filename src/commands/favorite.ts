@@ -17,9 +17,11 @@ import type { UnresolvedTrack } from 'lavalink-client'
 import { config } from '~/config/env'
 
 import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
+import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
@@ -30,7 +32,7 @@ import {
   sendFollowUpEphemeral,
   sendFollowUpMessage
 } from '~/utils/messageUtil.js'
-import { formatDuration, formatTrack } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
 function parsePositions(args: string[], maxLength: number): number[] {
@@ -319,7 +321,8 @@ class FavoriteCommand extends BaseCommand {
           }
 
           const vc = interaction.guild!.channels.cache.get(vcId) as VoiceChannel
-          if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+          if (!vc?.joinable)
+            throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
           const player =
             bot.lavalink.getPlayer(interaction.guildId!) ??
@@ -334,7 +337,10 @@ class FavoriteCommand extends BaseCommand {
 
           if (!player.connected) await player.connect()
           if (player.voiceChannelId !== vcId) {
-            await sendFollowUpEphemeral(interaction, `Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+            await sendFollowUpEphemeral(
+              interaction,
+              `Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`
+            )
             return
           }
 
@@ -354,12 +360,21 @@ class FavoriteCommand extends BaseCommand {
 
           await player.queue.add(unresolvedTrack)
 
-          const embed = new EmbedBuilder()
-            .setColor(0x00c2e6)
-            .setDescription(
-              `${EMOJI.ANIMATED_CAT_DANCE} Đã thêm **${track.title}** từ danh sách yêu thích vào hàng đợi.`
-            )
-          await sendFollowUpMessage(interaction, embed, 60_000)
+          const addedEmbed = buildAddedItemEmbed(
+            'track',
+            {
+              title: unresolvedTrack.info.title,
+              tracks: [unresolvedTrack],
+              thumbnailUrl: unresolvedTrack.info.artworkUrl ?? null,
+              author: unresolvedTrack.info.author,
+              trackLink: unresolvedTrack.info.uri ?? 'https://github.com/yngpiu',
+              authorLink: null
+            },
+            player,
+            interaction.user,
+            getBotAvatar(bot)
+          )
+          await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
 
           if (!player.playing) await player.play()
         }
@@ -411,7 +426,8 @@ class FavoriteCommand extends BaseCommand {
       })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+    if (player.voiceChannelId !== vcId)
+      throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
 
     const tracks = favorites.map(
       (
