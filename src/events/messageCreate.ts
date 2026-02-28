@@ -15,7 +15,7 @@ import { BotError } from '~/core/errors.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
-import { lines } from '~/utils/stringUtil'
+import { getBotName, lines } from '~/utils/stringUtil.js'
 
 // Event handler for when a message is created. Responsible for delegating logic to the appropriate command and bot instance.
 class MessageCreateEvent extends BotEvent {
