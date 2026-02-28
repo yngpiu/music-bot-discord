@@ -427,12 +427,14 @@ const commands = [
       {
         name: 'add / remove / list',
         required: false,
-        desc: 'Sử dụng `add <tên> <lệnh> [args]` để tạo lệnh tắt, `rm <tên>` để xóa, hoặc `list` (mặc định) để xem danh sách.'
+        desc: 'Sử dụng `add <tên> <lệnh> [args]` để tạo lệnh tắt, `rm <vị trí>` để xóa (hỗ trợ khoảng như 1-5), hoặc `list` (mặc định) để xem danh sách.'
       }
     ],
     examples: [
       ['command add', 'noinaycoanh p nơi này có anh'],
-      ['command rm', 'noinaycoanh'],
+      ['command rm', '1'],
+      ['command rm', '1 2 3'],
+      ['command rm', '1-5'],
       ['command list', '']
     ]
   }

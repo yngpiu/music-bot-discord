@@ -142,7 +142,7 @@ export const commandsByCategory = {
     },
     {
       name: 'command',
-      args: '[add/rm/list]',
+      args: '[add/rm <vị trí>/list]',
       desc: 'Quản lý lệnh tắt cá nhân.'
     }
   ]
