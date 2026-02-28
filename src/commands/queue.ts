@@ -11,7 +11,7 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
-import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to display and navigate through the music queue.
 class QueueCommand extends BaseCommand {
@@ -156,7 +156,7 @@ class QueueCommand extends BaseCommand {
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {
-      throw new BotError(`\${getBotName(bot)} đang không phát bản nhạc nào cả.`)
+      throw new BotError(`${getBotName(bot)} đang không phát bản nhạc nào cả.`)
     }
 
     const totalPages = Math.ceil(player.queue.tracks.length / 5) || 1

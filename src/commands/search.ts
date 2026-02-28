@@ -32,7 +32,7 @@ import {
   sendFollowUpEphemeral,
   sendFollowUpMessage
 } from '~/utils/messageUtil.js'
-import { formatDuration, formatTrack, getBotAvatar, lines } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar, getBotName, lines } from '~/utils/stringUtil.js'
 
 // Command for searching music from multiple providers with an interactive UI.
 class SearchCommand extends BaseCommand {
@@ -734,7 +734,7 @@ class SearchCommand extends BaseCommand {
     if (!vcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
 
     const vc = message.guild.channels.cache.get(vcId) as VoiceChannel
-    if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+    if (!vc?.joinable) throw new BotError(`${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
     const prefix = args[0]?.toLowerCase()
     let mode: 'album' | 'playlist' | 'track' = 'track'
@@ -772,7 +772,8 @@ class SearchCommand extends BaseCommand {
       })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+    if (player.voiceChannelId !== vcId)
+      throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
     if (!player.get('owner')) {
       player.set('owner', message.author.id)

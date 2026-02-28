@@ -11,7 +11,7 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
 import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
-import { getBotAvatar } from '~/utils/stringUtil.js'
+import { getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command for searching and playing music.
 class PlayCommand extends BaseCommand {
@@ -20,9 +20,9 @@ class PlayCommand extends BaseCommand {
   description = 'Phát một bài hát hoặc danh sách phát.'
 
   // Validates if the bot can join the requested voice channel.
-  private validateVoiceChannel(message: Message, vcId: string): void {
+  private validateVoiceChannel(bot: BotClient, message: Message, vcId: string): void {
     const vc = message.guild!.channels.cache.get(vcId) as VoiceChannel
-    if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+    if (!vc?.joinable) throw new BotError(`${getBotName(bot)} không thể vào kênh thoại của bạn.`)
   }
 
   // Retrieves an existing player or creates a new one for the guild.
@@ -47,7 +47,8 @@ class PlayCommand extends BaseCommand {
     if (!player.connected) await player.connect()
 
     // Ensure the player is in the same channel as the user.
-    if (player.voiceChannelId !== vcId) throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+    if (player.voiceChannelId !== vcId)
+      throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
     // Set initial owner if not defined.
     if (!player.get('owner')) player.set('owner', message.author.id)
@@ -57,6 +58,7 @@ class PlayCommand extends BaseCommand {
 
   // Searches for tracks based on the query, using Spotify resolver if necessary.
   private async searchQuery(
+    bot: BotClient,
     player: Player,
     message: Message,
     query: string
@@ -68,12 +70,12 @@ class PlayCommand extends BaseCommand {
     if (result.loadType === 'error') {
       throw new BotError(
         result.exception?.message ??
-          `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
+          `${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
     }
     if (!result.tracks.length) {
       throw new BotError(
-        `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
+        `${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
     }
 
@@ -129,10 +131,10 @@ class PlayCommand extends BaseCommand {
     if (!query) throw new BotError('Vui lòng nhập tên/đường dẫn bài hát.')
 
     if (!vcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
-    this.validateVoiceChannel(message, vcId)
+    this.validateVoiceChannel(bot, message, vcId)
 
     const player = await this.getOrCreatePlayer(bot, message, vcId, existingPlayer)
-    const result = await this.searchQuery(player, message, query)
+    const result = await this.searchQuery(bot, player, message, query)
 
     // Add search results (tracks or playlist) to the queue.
     if (result.loadType === 'playlist') {

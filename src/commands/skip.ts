@@ -27,7 +27,7 @@ class SkipCommand extends BaseCommand {
     logger.info(`[Command: skip] User ${message.author.tag} requested to skip track`)
 
     if (!player.playing && !player.queue.current) {
-      throw new BotError(`\${getBotName(bot)} đang không phát bản nhạc nào cả.`)
+      throw new BotError(`${getBotName(bot)} đang không phát bản nhạc nào cả.`)
     }
 
     await player.skip(0, false)

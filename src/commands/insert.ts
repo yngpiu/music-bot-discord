@@ -11,7 +11,7 @@ import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
 import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
-import { getBotAvatar } from '~/utils/stringUtil.js'
+import { getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to add tracks to a specific index in the queue.
 class InsertCommand extends BaseCommand {
@@ -33,7 +33,7 @@ class InsertCommand extends BaseCommand {
       throw new BotError('Bạn đang không ở kênh thoại nào cả.')
     }
     const vc = member.voice.channel as VoiceChannel
-    if (!vc.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+    if (!vc.joinable) throw new BotError(`${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
     if (args.length < 1) {
       const prefix = await resolvePrefix(message.guild!.id, message.author.id)
@@ -71,7 +71,7 @@ class InsertCommand extends BaseCommand {
 
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId)
-      throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+      throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
     // Set initial owner if not defined.
     if (!player.get('owner')) {
@@ -112,12 +112,12 @@ class InsertCommand extends BaseCommand {
     if (result.loadType === 'error') {
       throw new BotError(
         result.exception?.message ??
-          `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
+          `${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
     }
     if (!result.tracks.length)
       throw new BotError(
-        `\${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
+        `${getBotName(bot)} không tìm thấy bài hát nào, bạn hãy kiểm tra lại tên bài hát/đường dẫn hoặc sử dụng lệnh \`search\`.`
       )
 
     // Add to queue at specific index.

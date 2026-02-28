@@ -32,7 +32,7 @@ import {
   sendFollowUpEphemeral,
   sendFollowUpMessage
 } from '~/utils/messageUtil.js'
-import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
 function parsePositions(args: string[], maxLength: number): number[] {
@@ -323,7 +323,7 @@ class FavoriteCommand extends BaseCommand {
 
           const vc = interaction.guild!.channels.cache.get(vcId) as VoiceChannel
           if (!vc?.joinable)
-            throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+            throw new BotError(`${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
           const player =
             bot.lavalink.getPlayer(interaction.guildId!) ??
@@ -340,7 +340,7 @@ class FavoriteCommand extends BaseCommand {
           if (player.voiceChannelId !== vcId) {
             await sendFollowUpEphemeral(
               interaction,
-              `Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`
+              `Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`
             )
             return
           }
@@ -403,7 +403,7 @@ class FavoriteCommand extends BaseCommand {
 
     if (!vcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')
     const vc = message.guild.channels.cache.get(vcId) as VoiceChannel
-    if (!vc?.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
+    if (!vc?.joinable) throw new BotError(`${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
     const favorites = await prisma.favoriteTrack.findMany({
       where: { userId: message.author.id },
@@ -428,7 +428,7 @@ class FavoriteCommand extends BaseCommand {
 
     if (!player.connected) await player.connect()
     if (player.voiceChannelId !== vcId)
-      throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+      throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
     const tracks = favorites.map(
       (
