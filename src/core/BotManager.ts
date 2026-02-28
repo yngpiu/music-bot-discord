@@ -6,15 +6,17 @@ import { config } from '~/config/env.js'
 import { initTrackService } from '~/services/trackService.js'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { Loader } from '~/core/Loader.js'
 import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
+import { sendContainerMessage } from '~/utils/messageUtil'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
-import { formatDuration, formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
+import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Manages the lifecycle of multiple bot clients and shared connections (Redis, Lavalink).
 export class BotManager {
@@ -161,16 +163,12 @@ export class BotManager {
                   }
                 } else {
                   logger.warn(`[Autoplay] Fallback search returned no results.`)
-                  try {
-                    const channel = bot.channels.cache.get(player.textChannelId!)
-                    if (channel?.isTextBased() && 'send' in channel) {
-                      await channel.send({
-                        content: `${EMOJI.ERROR} **Mất kết nối YouTube Music!** Không thể tìm thấy bài hát liên quan để gợi ý (hết nhạc tự động chèn). Bot sẽ dừng phát nhạc tại đây.`
-                      })
-                    }
-                  } catch (e) {
-                    logger.error('[Autoplay] Error sending empty fallback notification:', e)
-                  }
+                  player.set('autoplay', false)
+                  await sendContainerMessage(
+                    bot.channels.cache.get(player.textChannelId!),
+                    `${EMOJI.ERROR} ${getBotName(bot)} đã tự động tắt **Tự động phát** vì không tìm thấy bài hát đề xuất.`,
+                    TIME.SHORT
+                  )
                 }
                 return
               }
@@ -329,7 +327,8 @@ export class BotManager {
       .setColor(0x00c2e6)
       .setAuthor({
         name: 'Thêm tự động',
-        iconURL: getBotAvatar(bot)})
+        iconURL: getBotAvatar(bot)
+      })
       .setDescription(description)
 
     await channel.send({ embeds: [embed] }).catch((err) => {

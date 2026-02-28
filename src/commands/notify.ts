@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed, replySuccessMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 
 // Command for broadcasting announcements to active music bot instances.
@@ -64,16 +64,11 @@ class NotifyCommand extends BaseCommand {
         }
       }
     }
-
-    // Feedback to the command user.
-    const replyEmbed = new EmbedBuilder()
-      .setColor(0x00ff00)
-      .setDescription(
-        `Đã gửi thông báo đến **${successCount}** kênh.` +
-          (failCount > 0 ? ` (Lỗi ${failCount} kênh)` : '')
-      )
-
-    await replySuccessEmbed(message, replyEmbed)
+    replySuccessMessage(
+      message,
+      `Đã gửi thông báo đến **${successCount}** kênh.` +
+        (failCount > 0 ? ` (Lỗi ${failCount} kênh)` : '')
+    )
   }
 }
 
