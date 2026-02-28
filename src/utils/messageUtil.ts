@@ -18,7 +18,7 @@ export const deleteMessageNow = async (messages: (Message | null | undefined)[])
 
   for (const msg of messages) {
     if (msg && msg.deletable) {
-      await msg.delete().catch()
+      await msg.delete().catch(() => {})
     }
   }
 }
@@ -34,7 +34,7 @@ export const deleteMessage = (
     () => {
       messages.forEach((msg) => {
         if (msg && msg.deletable) {
-          msg.delete().catch()
+          msg.delete().catch(() => {})
         }
       })
     },

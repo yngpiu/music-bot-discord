@@ -43,13 +43,9 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
       })
     setTimeout(() => {
       if (reply) {
-        reply.delete().catch((error: Error) => {
-          logger.error('[System] Error deleting error message:', error.message)
-        })
+        reply.delete().catch(() => {})
       }
-      target.delete().catch((error: Error) => {
-        logger.error('[System] Error deleting error message:', error.message)
-      })
+      target.delete().catch(() => {})
     }, TIME.VERY_SHORT)
     return
   }
