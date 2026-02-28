@@ -73,7 +73,12 @@ class PrefixCommand extends BaseCommand {
     const guildPrefix = await getGuildPrefix(guildId)
     const userPrefix = await getUserPrefix(userId)
 
-    const repliedMessage = `Prefix hiện tại của bạn là \`${userPrefix ?? guildPrefix ?? config.prefix}\`.`
+    const prefixes = [userPrefix, guildPrefix, config.prefix]
+      .filter(Boolean)
+      .map((p) => `\`${p}\``)
+      .join(', ')
+
+    const repliedMessage = `Prefix hiện tại: ${prefixes}.`
 
     await replySuccessMessage(message, repliedMessage)
   }

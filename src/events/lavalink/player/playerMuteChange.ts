@@ -25,11 +25,11 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
     // Automatically pause playback if server-muted by an admin.
     if (serverMuted) {
       player.set('paused_of_servermute', true)
-      if (!player.paused) await player.pause()
+      if (!player.paused) await player.pause().catch(() => {})
     } else {
       // Automatically resume when unmuted if we were the ones who paused it.
       if (player.get('paused_of_servermute')) {
-        if (player.paused) await player.resume()
+        if (player.paused) await player.resume().catch(() => {})
         player.set('paused_of_servermute', false)
       }
     }

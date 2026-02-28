@@ -31,6 +31,23 @@ export async function resolvePrefix(guildId: string, userId: string): Promise<st
   return config.prefix
 }
 
+// Returns all unique applicable prefixes for a user in a guild (user, guild, default).
+// Used by parseCommand to allow any valid prefix to work.
+export async function getAllPrefixes(guildId: string, userId: string): Promise<string[]> {
+  const prefixes = new Set<string>()
+
+  const userPrefix = await getUserPrefix(userId)
+  if (userPrefix) prefixes.add(userPrefix)
+
+  const guildPrefix = await getGuildPrefix(guildId)
+  if (guildPrefix) prefixes.add(guildPrefix)
+
+  prefixes.add(config.prefix)
+
+  // Sort by length descending so longer prefixes are matched first (e.g., "!!" before "!").
+  return [...prefixes].sort((a, b) => b.length - a.length)
+}
+
 // Gets the custom prefix for a guild, or null if not set.
 export async function getGuildPrefix(guildId: string): Promise<string | null> {
   // Try Redis cache first.

@@ -8,13 +8,7 @@ import {
   type Message,
   type MessageActionRowComponentBuilder
 } from 'discord.js'
-import {
-  MAX_ALIASES,
-  addAlias,
-  hasReachedLimit,
-  listAliases,
-  removeAliasByNames
-} from '~/services/aliasService.js'
+import { addAlias, listAliases, removeAliasByNames } from '~/services/aliasService.js'
 
 import { EMOJI } from '~/constants/emoji'
 import { BaseCommand } from '~/core/BaseCommand.js'
@@ -120,10 +114,6 @@ class CommandAliasCommand extends BaseCommand {
       throw new BotError(`Lệnh \`${targetCommand}\` không tồn tại.`)
     }
 
-    if (await hasReachedLimit(message.author.id)) {
-      throw new BotError(`Bạn đã đạt giới hạn **${MAX_ALIASES}** lệnh tắt.`)
-    }
-
     await addAlias(message.author.id, aliasName, targetCommand, targetArgs)
     logger.info(
       `[Command: command] User ${message.author.tag} added alias "${aliasName}" -> "${targetCommand} ${targetArgs}"`
@@ -198,7 +188,7 @@ class CommandAliasCommand extends BaseCommand {
         })
         .setDescription(description)
         .setFooter({
-          text: `Trang ${page + 1}/${totalPages} • ${aliases.length}/${MAX_ALIASES} lệnh tắt`
+          text: `Trang ${page + 1}/${totalPages} • ${aliases.length} lệnh tắt`
         })
     }
 

@@ -5,12 +5,9 @@ import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 
-// Maximum number of aliases a user can create.
-const MAX_ALIASES = 25
-
 // Redis key prefix for alias cache.
 const CACHE_PREFIX = 'alias:'
-const CACHE_TTL = 600 // 10 minutes
+const CACHE_TTL = 1800 // 30 minutes
 
 let redis: Redis | null = null
 
@@ -111,20 +108,6 @@ export async function listAliases(
     select: { aliasName: true, command: true, args: true }
   })
 }
-
-// Returns the number of aliases a user has.
-export async function countAliases(userId: string): Promise<number> {
-  return prisma.customAlias.count({ where: { userId } })
-}
-
-// Checks if a user has reached the alias limit.
-export async function hasReachedLimit(userId: string): Promise<boolean> {
-  const count = await countAliases(userId)
-  return count >= MAX_ALIASES
-}
-
-// Maximum aliases constant exported.
-export { MAX_ALIASES }
 
 // Parses a stored alias string ("command arg1 arg2") into AliasResult.
 function parseStoredAlias(stored: string): AliasResult {

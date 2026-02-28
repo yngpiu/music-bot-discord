@@ -3,7 +3,7 @@ import { ContainerBuilder, Events, GuildMember, Message } from 'discord.js'
 import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
 import { resolveAlias } from '~/services/aliasService.js'
-import { resolvePrefix } from '~/services/prefixService.js'
+import { getAllPrefixes } from '~/services/prefixService.js'
 
 import { EMOJI } from '~/constants/emoji'
 import type { BaseCommand } from '~/core/BaseCommand'
@@ -28,10 +28,18 @@ class MessageCreateEvent extends BotEvent {
   ): Promise<{ command: BaseCommand; args: string[]; commandName: string; prefix: string } | null> {
     if (message.author.bot || !message.guild) return null
 
-    const prefix = await resolvePrefix(message.guild.id, message.author.id)
-    if (!message.content.startsWith(prefix)) return null
+    // Try all applicable prefixes (user, guild, default).
+    const prefixes = await getAllPrefixes(message.guild.id, message.author.id)
+    let matchedPrefix: string | null = null
+    for (const p of prefixes) {
+      if (message.content.startsWith(p)) {
+        matchedPrefix = p
+        break
+      }
+    }
+    if (!matchedPrefix) return null
 
-    const args = message.content.slice(prefix.length).trim().split(/\s+/)
+    const args = message.content.slice(matchedPrefix.length).trim().split(/\s+/)
     const commandName = args.shift()?.toLowerCase()
     if (!commandName) return null
 
@@ -46,11 +54,11 @@ class MessageCreateEvent extends BotEvent {
         command: realCommand,
         args: [...alias.args, ...args],
         commandName: alias.command,
-        prefix
+        prefix: matchedPrefix
       }
     }
 
-    return { command, args, commandName, prefix }
+    return { command, args, commandName, prefix: matchedPrefix }
   }
 
   // Routes the command request to the appropriate bot instance in a multi-bot environment.
