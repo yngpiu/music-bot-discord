@@ -13,7 +13,7 @@ import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 class NotifyCommand extends BaseCommand {
   name = 'notify'
   aliases = ['thongbao']
-  description = 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho Owner).'
+  description = 'Gửi thông báo đến tất cả các kênh đang phát nhạc (Chỉ dành cho **Chủ xị**).'
   requiresVoice = false
 
   // Executes the notification recruitment broadcast.

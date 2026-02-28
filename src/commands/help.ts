@@ -26,7 +26,7 @@ export const commandsByCategory = {
     },
     {
       name: 'search',
-      args: '[(album|alb|ab)/(playlist|pls|pl)] <tên>',
+      args: '[(album|alb|ab)/(playlist|pls|pll)] <tên>',
       desc: 'Tìm và chọn bài hát, album hoặc playlist.'
     },
     { name: 'pause', args: '', desc: 'Tạm dừng nhạc.' },
@@ -63,7 +63,12 @@ export const commandsByCategory = {
       args: '',
       desc: 'Hiển thị bài hát đang phát.'
     },
-    { name: 'status', args: '', desc: 'Xem trạng thái của player.' }
+    { name: 'status', args: '', desc: 'Xem trạng thái của player.' },
+    {
+      name: 'favorite',
+      args: '[add/remove/play]',
+      desc: 'Quản lý danh sách nhạc yêu thích.'
+    }
   ],
   Queue: [
     { name: 'queue', args: '[trang]', desc: 'Xem danh sách chờ.' },
@@ -119,6 +124,16 @@ export const commandsByCategory = {
       name: 'leaderboard',
       args: '',
       desc: 'Xem bảng xếp hạng bài hát và bot.'
+    },
+    {
+      name: 'permission',
+      args: '[claim/transfer <người dùng>]',
+      desc: 'Quản lý quyền hạn (vd: xem/lấy/chuyển chức danh **Chủ xị**).'
+    },
+    {
+      name: 'notify',
+      args: '<nội dung>',
+      desc: 'Gửi thông báo tới các kênh đang phát (Owner).'
     }
   ]
 }

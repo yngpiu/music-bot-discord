@@ -68,7 +68,7 @@ export async function sendContainerMessage(
 }
 
 export async function replySuccessMessage(message: Message, content: string) {
-  const container = createContainerMessage(`${EMOJI.SUCCESS}${content}`)
+  const container = createContainerMessage(`${EMOJI.SUCCESS} ${content}`)
 
   const repliedMessage = await message.reply({
     components: [container],

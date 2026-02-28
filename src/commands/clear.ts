@@ -33,9 +33,7 @@ class ClearCommand extends BaseCommand {
     // Additional check to ensure the user has permission to clear the queue.
     const owner = player.get('owner')
     if (owner && message.author.id !== owner) {
-      throw new BotError(
-        'Chỉ **người đang có quyền điều khiển cao nhất** mới có quyền dùng lệnh này.'
-      )
+      throw new BotError('Chỉ **Chủ xị** mới có quyền dùng lệnh này.')
     }
 
     const trackCount = player.queue.tracks.length

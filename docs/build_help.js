@@ -9,7 +9,7 @@ const commands = [
     category: 'music',
     options: [
       {
-        name: 'tên / đường dẫn tới bài hát',
+        name: 'tên / đường dẫn',
         required: true,
         desc: 'Tên bài hát cần tìm hoặc đường dẫn nhạc hợp lệ.'
       }
@@ -21,7 +21,7 @@ const commands = [
   },
   {
     name: 'search',
-    aliases: ['find'],
+    aliases: [],
     desc: 'Tìm kiếm nâng cao cho phép bạn chọn bài hát từ một danh sách kết quả trực quan. Bạn có thể chỉ định tìm kiếm theo bài hát, album hoặc danh sách phát, và chọn kết quả ứng ý từ bảng tùy chọn. Hỗ trợ nhiều nguồn nhạc khác nhau.',
     category: 'music',
     options: [
@@ -181,7 +181,7 @@ const commands = [
       {
         name: 'add / remove / play / (hiển thị danh sách)',
         required: false,
-        desc: 'Sử dụng `add` để lưu nhạc đang phát, `remove` kèm theo vị trí để xoá, hoặc để trống để hiển thị danh sách có sẵn để bạn tuỳ chọn.'
+        desc: 'Sử dụng `add` để lưu nhạc đang phát, `remove` (hoặc `rm`, `del`) kèm theo vị trí để xoá, hoặc để trống để hiển thị danh sách có sẵn để bạn tuỳ chọn.'
       }
     ],
     examples: [
@@ -339,12 +339,32 @@ const commands = [
     ]
   },
   {
-    name: 'claim',
-    aliases: ['c'],
-    desc: 'Tự động chiếm đoạt và lấy lại quyền điều khiển bot. Lệnh này hữu ích vô cùng nếu cựu chủ phòng đã rời máy mà bạn muốn tuỳ chỉnh nhạc nội bộ.',
+    name: 'permission',
+    aliases: ['perms', 'pms'],
+    desc: 'Quản lý quyền hạn Chủ xị điều khiển bot (claim, transfer).',
     category: 'info',
-    options: [],
-    examples: [['claim', '']]
+    options: [
+      {
+        name: '(không tham số)',
+        required: false,
+        desc: 'Hiển thị **Chủ xị** hiện tại của player.'
+      },
+      {
+        name: 'claim',
+        required: false,
+        desc: 'Sử dụng `claim` để nhận chức danh **Chủ xị** nếu người trước đó đã rời kênh thoại.'
+      },
+      {
+        name: 'transfer',
+        required: false,
+        desc: 'Sử dụng `transfer` kèm theo tag người dùng hoặc ID để nhường lại chức danh **Chủ xị** cho họ.'
+      }
+    ],
+    examples: [
+      ['permission', ''],
+      ['permission claim', ''],
+      ['permission transfer', '@User']
+    ]
   },
   {
     name: 'help',
@@ -368,8 +388,9 @@ const commands = [
   {
     name: 'notify',
     aliases: ['thongbao'],
-    desc: 'Phát thanh một đoạn văn bản thông báo từ Ban Quản Trị đến tất cả các kênh người dùng đang nghe nhạc. Tính năng hạn chế chỉ khả dụng cho chủ sở hữu đích thực của máy chủ.',
+    desc: 'Gửi thông báo đến tất cả các kênh đang phát nhạc. Tính năng hạn chế chỉ khả dụng cho các **Chủ xị** đích thực của bot (Owner).',
     category: 'info',
+    requiresOwner: true,
     options: [
       {
         name: 'Mô tả thông báo',
@@ -838,5 +859,5 @@ const template = `<!DOCTYPE html>
 </body>
 </html>`
 
-fs.writeFileSync('/home/yngpiu/Documents/music-bot/help.html', template)
+fs.writeFileSync('/home/yngpiu/Documents/music-bot/docs/help.html', template)
 console.log('Successfully generated help.html with beautiful structured arguments!')
