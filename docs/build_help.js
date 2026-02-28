@@ -399,6 +399,24 @@ const commands = [
       }
     ],
     examples: [['notify', 'Bot sẽ bảo trì trong 5 phút nữa, các bạn nhớ lưu nhạc lại nhé!']]
+  },
+  {
+    name: 'prefix',
+    aliases: ['px'],
+    desc: 'Xem hoặc thay đổi prefix (tiền tố lệnh) cá nhân hoặc của máy chủ. Bạn có thể tự đặt prefix riêng cho bản thân mình.',
+    category: 'info',
+    options: [
+      {
+        name: 'set / reset / server',
+        required: false,
+        desc: 'Sử dụng `set <prefix>` để đổi prefix cá nhân, `reset` để xóa. Dùng `server <prefix>` để đổi cho toàn máy chủ (chỉ dành cho Chủ máy chủ).'
+      }
+    ],
+    examples: [
+      ['prefix', ''],
+      ['prefix set', '!'],
+      ['prefix server', '?']
+    ]
   }
 ]
 
