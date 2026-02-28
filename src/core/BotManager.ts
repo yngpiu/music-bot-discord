@@ -3,6 +3,7 @@ import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
+import { setPrefixRedisClient } from '~/services/prefixService.js'
 import { initTrackService } from '~/services/trackService.js'
 
 import { EMOJI } from '~/constants/emoji.js'
@@ -42,6 +43,7 @@ export class BotManager {
     try {
       await this.redis.connect()
       setRedisClient(this.redis)
+      setPrefixRedisClient(this.redis)
       setSpotifyRedisClient(this.redis)
       initTrackService(this.redis)
       await initSpotifyToken()

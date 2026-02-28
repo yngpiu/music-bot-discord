@@ -2,6 +2,7 @@
 import { ContainerBuilder, Events, GuildMember, Message } from 'discord.js'
 import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
+import { resolvePrefix } from '~/services/prefixService.js'
 
 import { EMOJI } from '~/constants/emoji'
 import type { BaseCommand } from '~/core/BaseCommand'
@@ -20,21 +21,23 @@ class MessageCreateEvent extends BotEvent {
   name = Events.MessageCreate
 
   // Attempts to parse a command and its arguments from a message.
-  private parseCommand(
+  private async parseCommand(
     bot: BotClient,
     message: Message
-  ): { command: BaseCommand; args: string[]; commandName: string } | null {
+  ): Promise<{ command: BaseCommand; args: string[]; commandName: string; prefix: string } | null> {
     if (message.author.bot || !message.guild) return null
-    if (!message.content.startsWith(config.prefix)) return null
 
-    const args = message.content.slice(config.prefix.length).trim().split(/\s+/)
+    const prefix = await resolvePrefix(message.guild.id, message.author.id)
+    if (!message.content.startsWith(prefix)) return null
+
+    const args = message.content.slice(prefix.length).trim().split(/\s+/)
     const commandName = args.shift()?.toLowerCase()
     if (!commandName) return null
 
     const command = bot.commands.get(commandName)
     if (!command) return null
 
-    return { command, args, commandName }
+    return { command, args, commandName, prefix }
   }
 
   // Routes the command request to the appropriate bot instance in a multi-bot environment.
@@ -168,16 +171,17 @@ class MessageCreateEvent extends BotEvent {
 
     return {
       player: player as Player,
-      vcId: userVcId as string
+      vcId: userVcId as string,
+      prefix: config.prefix
     }
   }
 
   // Main execution entry for the messageCreate event.
   async execute(bot: BotClient, manager: BotManager, message: Message): Promise<void> {
-    const parsed = this.parseCommand(bot, message)
+    const parsed = await this.parseCommand(bot, message)
     if (!parsed) return
 
-    const { command, args, commandName } = parsed
+    const { command, args, commandName, prefix } = parsed
 
     const chosenBot = await this.routeBot(bot, manager, message, command, commandName)
     if (!chosenBot) return
@@ -191,6 +195,7 @@ class MessageCreateEvent extends BotEvent {
     if (!isOwner && (await this.checkRateLimit(message))) return
 
     const ctx = this.buildCommandContext(bot, message, command)
+    ctx.prefix = prefix
     await command.execute(bot, message, args, ctx)
   }
 }

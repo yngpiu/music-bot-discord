@@ -1,6 +1,5 @@
 // Command to skip to a specific track index in the queue.
 import type { Message } from 'discord.js'
-import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -22,7 +21,7 @@ class SkiptoCommand extends BaseCommand {
     bot: BotClient,
     message: Message,
     args: string[],
-    { player }: CommandContext
+    { player, prefix }: CommandContext
   ): Promise<void> {
     await reactLoadingMessage(message)
     logger.info(
@@ -35,7 +34,7 @@ class SkiptoCommand extends BaseCommand {
 
     if (!args[0]) {
       throw new BotError(
-        `Cú pháp: \`${config.prefix}skipto <1-${player.queue.tracks.length}>\`\nVD: \`${config.prefix}skipto 5\``
+        `Cú pháp: \`${prefix}skipto <1-${player.queue.tracks.length}>\`\nVD: \`${prefix}skipto 5\``
       )
     }
 

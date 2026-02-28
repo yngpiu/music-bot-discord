@@ -1,6 +1,6 @@
 // Command to insert a track or playlist at a specific position in the queue.
 import type { EmbedBuilder, GuildMember, Message, VoiceChannel } from 'discord.js'
-import { config } from '~/config/env'
+import { resolvePrefix } from '~/services/prefixService.js'
 
 import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
@@ -36,8 +36,9 @@ class InsertCommand extends BaseCommand {
     if (!vc.joinable) throw new BotError(`\${getBotName(bot)} không thể vào kênh thoại của bạn.`)
 
     if (args.length < 1) {
+      const prefix = await resolvePrefix(message.guild!.id, message.author.id)
       throw new BotError(
-        `Cú pháp: \`${config.prefix}insert [vị trí] <tên bài hát/đường dẫn>\`\nVD: \`${config.prefix}insert 1 Nơi này có anh\` | \`${config.prefix}insert Nơi này có anh\``
+        `Cú pháp: \`${prefix}insert [vị trí] <tên bài hát/đường dẫn>\`\nVD: \`${prefix}insert 1 Nơi này có anh\` | \`${prefix}insert Nơi này có anh\``
       )
     }
 
@@ -69,7 +70,8 @@ class InsertCommand extends BaseCommand {
       })
 
     if (!player.connected) await player.connect()
-    if (player.voiceChannelId !== vcId) throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
+    if (player.voiceChannelId !== vcId)
+      throw new BotError(`Bạn không ở cùng kênh thoại với \${getBotName(bot)}.`)
 
     // Set initial owner if not defined.
     if (!player.get('owner')) {

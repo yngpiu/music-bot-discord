@@ -8,6 +8,8 @@ declare global {
     player: Player
     // Voice channel ID of the user who triggered the command.
     vcId: string
+    // The resolved prefix used to trigger this command.
+    prefix: string
   }
 }
 

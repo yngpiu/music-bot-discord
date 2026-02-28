@@ -1,6 +1,5 @@
 // Command to adjust the bot's audio volume level.
 import type { Message } from 'discord.js'
-import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -22,16 +21,14 @@ class VolumeCommand extends BaseCommand {
     bot: BotClient,
     message: Message,
     args: string[],
-    { player }: CommandContext
+    { player, prefix }: CommandContext
   ): Promise<void> {
     await reactLoadingMessage(message)
     logger.info(`[Command: volume] User ${message.author.tag} requested to change volume`)
 
     // If no argument is provided, show current volume.
     if (!args[0]) {
-      throw new BotError(
-        `Cú pháp: \`${config.prefix}volume <0-100>\`\nVD: \`${config.prefix}volume 50\``
-      )
+      throw new BotError(`Cú pháp: \`${prefix}volume <0-100>\`\nVD: \`${prefix}volume 50\``)
     }
 
     const vol = parseInt(args[0], 10)

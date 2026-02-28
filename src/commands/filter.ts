@@ -1,7 +1,6 @@
 // Command to manage audio filters and effects like Bassboost, Nightcore, etc.
 import type { Message } from 'discord.js'
 import type { FilterManager } from 'lavalink-client'
-import { config } from '~/config/env'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -86,10 +85,10 @@ class FilterCommand extends BaseCommand {
   requiresVoice = true
 
   // Validates that the provided filter name is supported.
-  private validateInput(input: string | undefined): string {
+  private validateInput(input: string | undefined, prefix: string): string {
     if (!input || !AVAILABLE_FILTERS.includes(input)) {
       throw new BotError(
-        `Cú pháp: \`${config.prefix}filter <hiệu ứng>\`\nVD: \`${config.prefix}filter bassboost\`\nHiệu ứng hợp lệ: \`${AVAILABLE_FILTERS.join(', ')}\``
+        `Cú pháp: \`${prefix}filter <hiệu ứng>\`\nVD: \`${prefix}filter bassboost\`\nHiệu ứng hợp lệ: \`${AVAILABLE_FILTERS.join(', ')}\``
       )
     }
     return input
@@ -127,14 +126,14 @@ class FilterCommand extends BaseCommand {
     bot: BotClient,
     message: Message,
     args: string[],
-    { player }: CommandContext
+    { player, prefix }: CommandContext
   ): Promise<void> {
     await reactLoadingMessage(message)
     logger.info(
       `[Command: filter] User ${message.author.tag} requested to toggle effect: ${args[0] ?? 'empty'}`
     )
 
-    const input = this.validateInput(args[0]?.toLowerCase())
+    const input = this.validateInput(args[0]?.toLowerCase(), prefix)
     const actionText = await this.applyEffect(player.filterManager, input)
     await this.sendConfirmation(bot, message, actionText)
   }

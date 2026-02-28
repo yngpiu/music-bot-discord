@@ -6,7 +6,7 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder
 } from 'discord.js'
-import { config } from '~/config/env.js'
+import { resolvePrefix } from '~/services/prefixService.js'
 
 import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
@@ -134,6 +134,11 @@ export const commandsByCategory = {
       name: 'notify',
       args: '<nội dung>',
       desc: 'Gửi thông báo tới các kênh đang phát (Owner).'
+    },
+    {
+      name: 'prefix',
+      args: '[set/reset/server]',
+      desc: 'Xem hoặc thay đổi prefix cá nhân/server.'
     }
   ]
 }
@@ -146,14 +151,14 @@ class HelpCommand extends BaseCommand {
   requiresVoice = false
 
   // Builds the main landing embed for the help command.
-  private buildMainEmbed(bot: BotClient): EmbedBuilder {
+  private buildMainEmbed(bot: BotClient, prefix: string): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(0x00c2e6)
       .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: getBotAvatar(bot) })
       .setDescription(
         '- Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\n- Bạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại **[TRANG HƯỚNG DẪN CHI TIẾT](https://yngpiu.github.io/music-bot-discord/docs/help.html)**.'
       )
-      .setFooter({ text: `Prefix mặc định: \`${config.prefix}\`` })
+      .setFooter({ text: `Prefix hiện tại: ${prefix}` })
   }
 
   // Builds an embed featuring commands from a specific category.
@@ -246,8 +251,9 @@ class HelpCommand extends BaseCommand {
     await reactLoadingMessage(message)
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 
+    const prefix = await resolvePrefix(message.guild!.id, message.author.id)
     const { select, row } = this.buildSelectMenu()
-    const embed = this.buildMainEmbed(bot)
+    const embed = this.buildMainEmbed(bot, prefix)
     const reply = await replySuccessEmbed(message, embed, [row], 60000)
     if (reply) {
       this.startCollector(bot, message, reply, select, row)

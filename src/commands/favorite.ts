@@ -14,7 +14,7 @@ import {
   type VoiceChannel
 } from 'discord.js'
 import type { UnresolvedTrack } from 'lavalink-client'
-import { config } from '~/config/env'
+import { resolvePrefix } from '~/services/prefixService.js'
 
 import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time'
@@ -138,8 +138,9 @@ class FavoriteCommand extends BaseCommand {
 
   private async handleRemove(message: Message, args: string[]): Promise<void> {
     if (args.length === 0) {
+      const prefix = await resolvePrefix(message.guild!.id, message.author.id)
       throw new BotError(
-        `Cú pháp: \`${config.prefix}fav rm <vị trí>\`\nVD: \`${config.prefix}fav rm 1\` | \`${config.prefix}fav rm 1-3\` | \`${config.prefix}fav rm 1 3\``
+        `Cú pháp: \`${prefix}fav rm <vị trí>\`\nVD: \`${prefix}fav rm 1\` | \`${prefix}fav rm 1-3\` | \`${prefix}fav rm 1 3\``
       )
     }
 
