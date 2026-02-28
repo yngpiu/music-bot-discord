@@ -417,6 +417,24 @@ const commands = [
       ['prefix set', '!'],
       ['prefix server', '?']
     ]
+  },
+  {
+    name: 'command',
+    aliases: ['cmd', 'alias'],
+    desc: 'Quản lý lệnh tắt cá nhân. Bạn có thể tạo các phím tắt để gọi lệnh bot nhanh hơn mà không cần nhập lại toàn bộ nội dung mỗi lần.',
+    category: 'info',
+    options: [
+      {
+        name: 'add / remove / list',
+        required: false,
+        desc: 'Sử dụng `add <tên> <lệnh> [args]` để tạo lệnh tắt, `rm <tên>` để xóa, hoặc `list` (mặc định) để xem danh sách.'
+      }
+    ],
+    examples: [
+      ['command add', 'noinaycoanh p nơi này có anh'],
+      ['command rm', 'noinaycoanh'],
+      ['command list', '']
+    ]
   }
 ]
 

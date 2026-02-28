@@ -3,6 +3,7 @@ import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
+import { setAliasRedisClient } from '~/services/aliasService.js'
 import { setPrefixRedisClient } from '~/services/prefixService.js'
 import { initTrackService } from '~/services/trackService.js'
 
@@ -44,6 +45,7 @@ export class BotManager {
       await this.redis.connect()
       setRedisClient(this.redis)
       setPrefixRedisClient(this.redis)
+      setAliasRedisClient(this.redis)
       setSpotifyRedisClient(this.redis)
       initTrackService(this.redis)
       await initSpotifyToken()

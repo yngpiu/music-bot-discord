@@ -2,6 +2,7 @@
 import { ContainerBuilder, Events, GuildMember, Message } from 'discord.js'
 import type { Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
+import { resolveAlias } from '~/services/aliasService.js'
 import { resolvePrefix } from '~/services/prefixService.js'
 
 import { EMOJI } from '~/constants/emoji'
@@ -35,7 +36,19 @@ class MessageCreateEvent extends BotEvent {
     if (!commandName) return null
 
     const command = bot.commands.get(commandName)
-    if (!command) return null
+    if (!command) {
+      // Fallback: resolve custom alias.
+      const alias = await resolveAlias(message.author.id, commandName)
+      if (!alias) return null
+      const realCommand = bot.commands.get(alias.command)
+      if (!realCommand) return null
+      return {
+        command: realCommand,
+        args: [...alias.args, ...args],
+        commandName: alias.command,
+        prefix
+      }
+    }
 
     return { command, args, commandName, prefix }
   }

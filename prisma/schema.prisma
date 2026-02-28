@@ -82,3 +82,15 @@ model FavoriteTrack {
   @@unique([userId, identifier, sourceName])
   @@index([userId])
 }
+
+model CustomAlias {
+  id        String   @id @default(cuid())
+  userId    String
+  aliasName String
+  command   String
+  args      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, aliasName])
+  @@index([userId])
+}

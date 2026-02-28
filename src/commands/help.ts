@@ -139,6 +139,11 @@ export const commandsByCategory = {
       name: 'prefix',
       args: '[set/reset/server]',
       desc: 'Xem hoặc thay đổi prefix cá nhân/server.'
+    },
+    {
+      name: 'command',
+      args: '[add/rm/list]',
+      desc: 'Quản lý lệnh tắt cá nhân.'
     }
   ]
 }
