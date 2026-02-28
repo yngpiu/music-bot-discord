@@ -90,6 +90,17 @@ export async function removeAlias(userId: string, aliasName: string): Promise<bo
   }
 }
 
+// Removes multiple aliases by their names for a user.
+export async function removeAliasByNames(userId: string, aliasNames: string[]): Promise<void> {
+  await prisma.customAlias.deleteMany({
+    where: {
+      userId,
+      aliasName: { in: aliasNames }
+    }
+  })
+  await invalidateCache(userId)
+}
+
 // Lists all aliases for a user.
 export async function listAliases(
   userId: string
