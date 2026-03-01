@@ -6,6 +6,7 @@ import {
   EmbedBuilder,
   type Message,
   type MessageActionRowComponentBuilder,
+  MessageCreateOptions,
   type RepliableInteraction
 } from 'discord.js'
 
@@ -183,4 +184,41 @@ export async function sendFollowUpMessage(
   }
 
   return followedUpMessage
+}
+
+export async function safeSendMessageToChannel(
+  channel: Channel | null | undefined,
+  messageOptions: MessageCreateOptions,
+  timeoutDeleteMessage?: number
+): Promise<Message | null> {
+  if (!channel?.isTextBased() || !channel.isSendable()) {
+    return null
+  }
+
+  try {
+    const sendedMessage = await channel.send(messageOptions)
+    if (timeoutDeleteMessage && timeoutDeleteMessage > 0) {
+      deleteMessage([sendedMessage], timeoutDeleteMessage)
+    }
+    return sendedMessage
+  } catch {
+    return null
+  }
+}
+
+export async function safeReplyMessage(
+  message: Message,
+  messageOptions: MessageCreateOptions,
+  timeoutDeleteMessage?: number
+): Promise<Message | null> {
+  if (!message.channel.isTextBased() || !message.channel.isSendable()) {
+    return null
+  }
+  const repliedMessage = await message.channel.send(messageOptions)
+  if (timeoutDeleteMessage && timeoutDeleteMessage > 0) {
+    deleteMessage([repliedMessage, message], timeoutDeleteMessage)
+  } else {
+    deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+  }
+  return repliedMessage
 }
