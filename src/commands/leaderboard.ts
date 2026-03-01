@@ -445,10 +445,12 @@ class LeaderboardCommand extends BaseCommand {
           }
         }
 
-        await interaction.editReply({
-          embeds: [getEmbed()],
-          components: getComponents()
-        })
+        await interaction
+          .editReply({
+            embeds: [getEmbed()],
+            components: getComponents()
+          })
+          .catch(() => null)
       }
     )
 

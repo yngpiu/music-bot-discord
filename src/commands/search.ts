@@ -218,10 +218,12 @@ class SearchCommand extends BaseCommand {
 
           embed.setDescription(buildDescription(tracks, newSource))
 
-          await interaction.editReply({
-            embeds: [embed],
-            components: getComponents(false, currentSource)
-          })
+          await interaction
+            .editReply({
+              embeds: [embed],
+              components: getComponents(false, currentSource)
+            })
+            .catch(() => null)
         } catch (error) {
           await sendFollowUpEphemeral(
             interaction,
