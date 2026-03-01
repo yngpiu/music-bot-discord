@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerDisconnect' event.
@@ -18,7 +18,7 @@ class PlayerDisconnectEvent extends LavalinkEvent {
     logger.warn(`[Player: ${player.guildId}] Disconnected from voice channel ${voiceChannelId}`)
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    await sendContainerMessage(
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ngắt kết nối.`
     )

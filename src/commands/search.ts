@@ -29,8 +29,8 @@ import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
   replySuccessEmbed,
-  sendFollowUpEphemeral,
-  sendFollowUpMessage
+  safeFollowUpInteraction,
+  sendFollowUpEphemeral
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName, lines } from '~/utils/stringUtil.js'
 
@@ -262,7 +262,11 @@ class SearchCommand extends BaseCommand {
             getBotAvatar(bot)
           )
 
-          await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
+          await safeFollowUpInteraction(
+            interaction,
+            { embeds: [addedEmbed.embeds[0] as EmbedBuilder] },
+            TIME.MEDIUM
+          )
 
           if (!player.playing) await player.play()
         }
@@ -488,9 +492,9 @@ class SearchCommand extends BaseCommand {
               getBotAvatar(bot)
             )
 
-            await sendFollowUpMessage(
+            await safeFollowUpInteraction(
               interaction,
-              addedEmbed.embeds?.[0] as EmbedBuilder,
+              { embeds: [addedEmbed.embeds?.[0] as EmbedBuilder] },
               TIME.MEDIUM
             )
 
@@ -719,9 +723,9 @@ class SearchCommand extends BaseCommand {
               getBotAvatar(bot)
             )
 
-            await sendFollowUpMessage(
+            await safeFollowUpInteraction(
               interaction,
-              addedEmbed.embeds?.[0] as EmbedBuilder,
+              { embeds: [addedEmbed.embeds?.[0] as EmbedBuilder] },
               TIME.MEDIUM
             )
 

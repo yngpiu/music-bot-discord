@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerQueueEmptyStart' event.
@@ -25,7 +25,7 @@ class PlayerQueueEmptyStartEvent extends LavalinkEvent {
     // Reset any existing message ID.
     player.set('queueEmptyMessageId', null)
 
-    const message = await sendContainerMessage(
+    const message = await safeSendMessageWithContainer(
       channel,
       `
       ${EMOJI.ANIMATED_CAT_BLINK} Hết nhạc rồi, ${getBotName(bot)} sẽ rời đi trong <t:${Math.round((Date.now() + delayMs) / 1000)}:R> nếu không thấy yêu cầu nào.

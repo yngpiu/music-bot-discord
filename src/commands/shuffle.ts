@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to shuffle the queue.
@@ -32,7 +32,7 @@ class ShuffleCommand extends BaseCommand {
 
     await player.queue.shuffle()
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đã **trộn** **${player.queue.tracks.length} bài hát** trong hàng chờ.`
     )

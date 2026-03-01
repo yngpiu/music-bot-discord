@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to make the bot leave the voice channel and clear its state.
@@ -28,7 +28,7 @@ class LeaveCommand extends BaseCommand {
 
     // Shutdown the player and disconnect from voice.
     await player.destroy()
-    await replySuccessMessage(message, `${getBotName(bot)} đã rời khỏi kênh thoại.`)
+    await safeReplySuccessMessage(message, `${getBotName(bot)} đã rời khỏi kênh thoại.`)
   }
 }
 

@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerReconnect' event.
@@ -21,7 +21,7 @@ class PlayerReconnectEvent extends LavalinkEvent {
 
     const message = `${EMOJI.ANIMATED_CAT_CONGRATULATION} ${getBotName(bot)} đã kết nối lại thành công.`
 
-    await sendContainerMessage(channel, message)
+    await safeSendMessageWithContainer(channel, message)
   }
 }
 

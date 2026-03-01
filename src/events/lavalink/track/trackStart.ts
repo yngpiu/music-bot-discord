@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
 // Event handler for the 'trackStart' event.
@@ -32,7 +32,7 @@ class TrackStartEvent extends LavalinkEvent {
       author: track.info.author
     })
 
-    await sendContainerMessage(
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`,
       TIME.MEDIUM

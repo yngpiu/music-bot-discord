@@ -15,7 +15,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors'
 
 import { logger } from '~/utils/logger.js'
-import { replySuccessMessage } from '~/utils/messageUtil.js'
+import { safeReplySuccessMessage } from '~/utils/messageUtil.js'
 
 // Maximum allowed prefix length.
 const MAX_PREFIX_LENGTH = 5
@@ -80,7 +80,7 @@ class PrefixCommand extends BaseCommand {
 
     const repliedMessage = `Prefix hiện tại: ${prefixes}.`
 
-    await replySuccessMessage(message, repliedMessage)
+    await safeReplySuccessMessage(message, repliedMessage)
   }
 
   // Sets the user's personal prefix.
@@ -101,14 +101,14 @@ class PrefixCommand extends BaseCommand {
       `[Command: prefix] User ${message.author.tag} set personal prefix to "${newPrefix}"`
     )
     await setUserPrefix(message.author.id, newPrefix)
-    await replySuccessMessage(message, `Đã đặt prefix cá nhân của bạn thành \`${newPrefix}\``)
+    await safeReplySuccessMessage(message, `Đã đặt prefix cá nhân của bạn thành \`${newPrefix}\``)
   }
 
   // Resets the user's personal prefix.
   private async handleUserReset(message: Message): Promise<void> {
     await resetUserPrefix(message.author.id)
     logger.info(`[Command: prefix] User ${message.author.tag} reset personal prefix`)
-    await replySuccessMessage(message, 'Đã xóa prefix cá nhân và sử dụng prefix của máy chủ.')
+    await safeReplySuccessMessage(message, 'Đã xóa prefix cá nhân và sử dụng prefix của máy chủ.')
   }
 
   // Handles guild-level prefix commands.
@@ -127,7 +127,7 @@ class PrefixCommand extends BaseCommand {
       logger.info(
         `[Command: prefix] User ${message.author.tag} reset guild prefix for ${message.guild!.id}`
       )
-      await replySuccessMessage(
+      await safeReplySuccessMessage(
         message,
         `Đã xóa prefix server, máy chủ sẽ dùng prefix mặc định \`${config.prefix}\`.`
       )
@@ -148,7 +148,7 @@ class PrefixCommand extends BaseCommand {
     logger.info(
       `[Command: prefix] User ${message.author.tag} set guild prefix to "${action}" for ${message.guild!.id}`
     )
-    await replySuccessMessage(message, `Đã đặt prefix server thành \`${action}\`.`)
+    await safeReplySuccessMessage(message, `Đã đặt prefix server thành \`${action}\`.`)
   }
 }
 

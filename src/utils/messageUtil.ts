@@ -1,13 +1,21 @@
 // Utilities for asynchronous message management and cleanup.
 import {
   ActionRowBuilder,
+  ButtonInteraction,
   Channel,
+  ChatInputCommandInteraction,
   ContainerBuilder,
+  DiscordAPIError,
   EmbedBuilder,
+  InteractionEditReplyOptions,
+  InteractionReplyOptions,
+  InteractionResponse,
   type Message,
   type MessageActionRowComponentBuilder,
-  MessageCreateOptions,
-  type RepliableInteraction
+  type MessageCreateOptions,
+  type MessageEditOptions,
+  ModalSubmitInteraction,
+  StringSelectMenuInteraction
 } from 'discord.js'
 
 import { EMOJI } from '~/constants/emoji'
@@ -152,10 +160,6 @@ export async function replySuccessEmbed(
   return repliedMessage
 }
 
-export async function reactLoadingMessage(message: Message) {
-  await safeReact(message, EMOJI.LOADING)
-}
-
 export async function sendFollowUpEphemeral(interaction: RepliableInteraction, content: string) {
   return interaction.followUp({
     content,
@@ -163,62 +167,258 @@ export async function sendFollowUpEphemeral(interaction: RepliableInteraction, c
   })
 }
 
-export async function sendFollowUpMessage(
-  interaction: RepliableInteraction,
-  embed: EmbedBuilder,
-  timeout?: number
-) {
-  const followedUpMessage = await interaction
-    .followUp({
-      embeds: [embed],
-      flags: ['SuppressNotifications']
-    })
-    .catch(() => null)
+export type RepliableInteraction =
+  | ChatInputCommandInteraction
+  | ButtonInteraction
+  | StringSelectMenuInteraction
+  | ModalSubmitInteraction
 
-  if (!followedUpMessage) return
+// ─── Internal Helpers ─────────────────────────────────────────────────────────
 
-  if (timeout && timeout > 0) {
-    deleteMessage([followedUpMessage], timeout)
-  } else {
-    deleteMessage([followedUpMessage], TIME.VERY_SHORT)
+const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms))
+
+async function safeRemoveAllReactions(message: Message): Promise<void> {
+  if (!message.reactions.cache.size) return
+  try {
+    await message.reactions.removeAll()
+  } catch {
+    // Thiếu MANAGE_MESSAGES permission hoặc message đã bị xóa
   }
-
-  return followedUpMessage
 }
+
+function scheduleDelete(messages: Message[], timeout?: number): void {
+  if (!timeout || timeout <= 0) return
+  safeDeleteMessageAfter(messages, timeout)
+}
+
+// ─── Message ──────────────────────────────────────────────────────────────────
 
 export async function safeSendMessageToChannel(
   channel: Channel | null | undefined,
   messageOptions: MessageCreateOptions,
   timeoutDeleteMessage?: number
 ): Promise<Message | null> {
-  if (!channel?.isTextBased() || !channel.isSendable()) {
-    return null
-  }
+  if (!channel?.isTextBased() || !channel.isSendable()) return null
 
   try {
-    const sendedMessage = await channel.send(messageOptions)
-    if (timeoutDeleteMessage && timeoutDeleteMessage > 0) {
-      deleteMessage([sendedMessage], timeoutDeleteMessage)
-    }
-    return sendedMessage
+    const sentMessage = await channel.send(messageOptions)
+    scheduleDelete([sentMessage], timeoutDeleteMessage)
+    return sentMessage
   } catch {
     return null
   }
 }
 
 export async function safeReplyMessage(
-  message: Message,
+  message: Message | null | undefined,
   messageOptions: MessageCreateOptions,
   timeoutDeleteMessage?: number
 ): Promise<Message | null> {
-  if (!message.channel.isTextBased() || !message.channel.isSendable()) {
+  if (!message?.channel.isTextBased() || !message.channel.isSendable()) return null
+
+  try {
+    const repliedMessage = await message.reply(messageOptions)
+    await safeRemoveAllReactions(message)
+    scheduleDelete([repliedMessage, message], timeoutDeleteMessage)
+    return repliedMessage
+  } catch {
     return null
   }
-  const repliedMessage = await message.channel.send(messageOptions)
-  if (timeoutDeleteMessage && timeoutDeleteMessage > 0) {
-    deleteMessage([repliedMessage, message], timeoutDeleteMessage)
-  } else {
-    deleteMessage([repliedMessage, message], TIME.VERY_SHORT)
+}
+
+export async function safeEditMessage(
+  message: Message | null | undefined,
+  messageOptions: MessageEditOptions,
+  timeoutDeleteMessage?: number
+): Promise<Message | null> {
+  if (!message?.editable) return null
+
+  try {
+    const editedMessage = await message.edit(messageOptions)
+    await safeRemoveAllReactions(message)
+    scheduleDelete([editedMessage], timeoutDeleteMessage)
+    return editedMessage
+  } catch {
+    return null
   }
+}
+
+// Quickly adds a loading reaction to a message.
+export async function reactLoadingMessage(message: Message | null | undefined): Promise<void> {
+  if (!message) return
+  try {
+    const existing = message.reactions.cache.get(EMOJI.LOADING.match(/:(\d+)>/)?.[1] ?? '')
+    if (!existing || !existing.me) {
+      await message.react(EMOJI.LOADING)
+    }
+  } catch (err) {
+    if (err instanceof DiscordAPIError && err.code === 10008) return
+    logger.warn(`Failed to react loading to message:`, err)
+  }
+}
+
+export async function safeDeleteMessageNow(
+  messages: (Message | null | undefined) | (Message | null | undefined)[]
+): Promise<boolean> {
+  const msgArray = Array.isArray(messages) ? messages : [messages]
+  const valid = msgArray.filter((m): m is Message => m != null && m.deletable)
+  if (valid.length === 0) return false
+
+  await Promise.allSettled(valid.map((m) => safeRemoveAllReactions(m)))
+
+  const results = await Promise.allSettled(valid.map((m) => m.delete()))
+  return results.some((r) => r.status === 'fulfilled')
+}
+
+export async function safeDeleteMessageAfter(
+  messages: (Message | null | undefined) | (Message | null | undefined)[],
+  timeoutDeleteMessage: number
+): Promise<boolean> {
+  const msgArray = Array.isArray(messages) ? messages : [messages]
+  const valid = msgArray.filter((m): m is Message => m != null && m.deletable)
+  if (valid.length === 0) return false
+
+  await delay(timeoutDeleteMessage)
+  return safeDeleteMessageNow(valid)
+}
+
+// ─── Interaction ──────────────────────────────────────────────────────────────
+
+export async function safeReplyInteraction(
+  interaction: RepliableInteraction | null | undefined,
+  options: InteractionReplyOptions,
+  timeoutDeleteMessage?: number
+): Promise<InteractionResponse | null> {
+  if (!interaction || interaction.replied || interaction.deferred) return null
+
+  try {
+    const response = await interaction.reply(options)
+
+    const fetched = await interaction.fetchReply().catch(() => null)
+    if (fetched) {
+      scheduleDelete([fetched], timeoutDeleteMessage)
+    }
+
+    return response
+  } catch {
+    return null
+  }
+}
+
+export async function safeEditReplyInteraction(
+  interaction: RepliableInteraction | null | undefined,
+  options: InteractionEditReplyOptions,
+  timeoutDeleteMessage?: number
+): Promise<Message | null> {
+  if (!interaction || (!interaction.replied && !interaction.deferred)) return null
+
+  try {
+    const edited = await interaction.editReply(options)
+    await safeRemoveAllReactions(edited)
+    return edited
+  } catch {
+    return null
+  }
+}
+
+export async function safeFollowUpInteraction(
+  interaction: RepliableInteraction | null | undefined,
+  options: InteractionReplyOptions,
+  timeoutDeleteMessage?: number
+): Promise<Message | null> {
+  if (!interaction || (!interaction.replied && !interaction.deferred)) return null
+
+  try {
+    const followed = await interaction.followUp(options)
+    scheduleDelete([followed], timeoutDeleteMessage)
+    return followed
+  } catch {
+    return null
+  }
+}
+
+export async function safeDeferReplyInteraction(
+  interaction: RepliableInteraction | null | undefined,
+  options?: { ephemeral?: boolean }
+): Promise<InteractionResponse | null> {
+  if (!interaction || interaction.replied || interaction.deferred) return null
+
+  try {
+    return await interaction.deferReply({ ephemeral: options?.ephemeral ?? false })
+  } catch {
+    return null
+  }
+}
+
+export async function safeReplyMessageWithContainer(
+  message: Message,
+  container: ContainerBuilder,
+  timeoutDeleteMessage?: number
+) {
+  const repliedMessage = await safeReplyMessage(
+    message,
+    {
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    },
+    timeoutDeleteMessage
+  )
+
   return repliedMessage
+}
+
+export async function safeReplySuccessMessage(
+  message: Message,
+  content: string,
+  timeoutDeleteMessage: number = TIME.VERY_SHORT
+) {
+  const repliedMessage = await safeReplyMessageWithContainer(
+    message,
+    new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(`${EMOJI.SUCCESS} ${content}`)
+    ),
+    timeoutDeleteMessage
+  )
+
+  return repliedMessage
+}
+
+export async function safeReplyErrorMessage(
+  message: Message,
+  content: string,
+  timeoutDeleteMessage: number = TIME.VERY_SHORT
+) {
+  const repliedMessage = await safeReplyMessageWithContainer(
+    message,
+    new ContainerBuilder().addTextDisplayComponents((t) =>
+      t.setContent(`${EMOJI.ERROR} ${content}`)
+    ),
+    timeoutDeleteMessage
+  )
+
+  return repliedMessage
+}
+
+export async function safeSendMessageWithContainer(
+  channel: Channel | null | undefined,
+  containerOrText: ContainerBuilder | string,
+  timeoutDeleteMessage?: number
+) {
+  if (!channel) return null
+
+  const container =
+    typeof containerOrText === 'string'
+      ? new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(containerOrText))
+      : containerOrText
+
+  const sended = await safeSendMessageToChannel(
+    channel,
+    {
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    },
+    timeoutDeleteMessage
+  )
+
+  return sended
 }

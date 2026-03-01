@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to replay the current track.
@@ -39,7 +39,7 @@ class ReplayCommand extends BaseCommand {
 
     await player.seek(0)
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đã **tua lại** bài hát **${currentTrack.info.title}** từ đầu.`
     )

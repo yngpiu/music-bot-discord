@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to rearrange tracks in the music queue.
@@ -69,7 +69,7 @@ class MoveCommand extends BaseCommand {
     player.queue.splice(fromIndex, 1)
     player.queue.splice(toIndex, 0, trackToMove)
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đã di chuyển bài hát **${trackToMove.info.title}** từ vị trí **${fromPos}** sang vị trí **${toPos}**.`
     )

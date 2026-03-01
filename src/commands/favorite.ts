@@ -28,9 +28,9 @@ import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
   replySuccessEmbed,
-  replySuccessMessage,
-  sendFollowUpEphemeral,
-  sendFollowUpMessage
+  safeFollowUpInteraction,
+  safeReplySuccessMessage,
+  sendFollowUpEphemeral
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
@@ -126,7 +126,7 @@ class FavoriteCommand extends BaseCommand {
         }
       })
 
-      await replySuccessMessage(
+      await safeReplySuccessMessage(
         message,
         `Đã thêm **${currentTrack.title}** vào danh sách yêu thích.`
       )
@@ -170,7 +170,7 @@ class FavoriteCommand extends BaseCommand {
         ? `đã xóa **${tracksToRemove[0].title}** khỏi danh sách yêu thích.`
         : `đã xóa **${tracksToRemove.length}** bài hát khỏi danh sách yêu thích.`
 
-      await replySuccessMessage(message, `**${message.author.displayName}**, ${description}`)
+      await safeReplySuccessMessage(message, `**${message.author.displayName}**, ${description}`)
     } catch (error) {
       logger.error('[Command: favorite] Error removing favorite tracks:', error)
       throw new BotError('Đã xảy ra lỗi khi xóa bài hát yêu thích.')
@@ -375,7 +375,11 @@ class FavoriteCommand extends BaseCommand {
             interaction.user,
             getBotAvatar(bot)
           )
-          await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
+          await safeFollowUpInteraction(
+            interaction,
+            { embeds: [addedEmbed.embeds[0] as EmbedBuilder] },
+            TIME.MEDIUM
+          )
 
           if (!player.playing) await player.play()
         }
@@ -451,7 +455,7 @@ class FavoriteCommand extends BaseCommand {
 
     await player.queue.add(tracks)
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `Đã thêm **${tracks.length}** bài hát yêu thích vào danh sách chờ.`
     )

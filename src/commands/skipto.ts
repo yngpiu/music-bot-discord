@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command for jumping to a specific position in the queue.
@@ -48,7 +48,7 @@ class SkiptoCommand extends BaseCommand {
     // Skip to the specified track. Original tracks before it will be removed.
     await player.skip(position)
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đã **nhảy đến** bài thứ **${position}** trong hàng đợi.`
     )

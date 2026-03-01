@@ -16,7 +16,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, replySuccessEmbed, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Maximum allowed alias name length.
@@ -118,7 +118,7 @@ class CommandAliasCommand extends BaseCommand {
     logger.info(
       `[Command: command] User ${message.author.tag} added alias "${aliasName}" -> "${targetCommand} ${targetArgs}"`
     )
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `Đã tạo lệnh tắt \`${aliasName}\` → \`${targetCommand} ${targetArgs}\`.`
     )
@@ -154,7 +154,7 @@ class CommandAliasCommand extends BaseCommand {
       ? `đã xóa lệnh tắt \`${removedNames[0]}\`.`
       : `đã xóa **${removedNames.length}** lệnh tắt.`
 
-    await replySuccessMessage(message, `**${message.author.displayName}**, ${description}`)
+    await safeReplySuccessMessage(message, `**${message.author.displayName}**, ${description}`)
   }
 
   // Shows paginated list with navigation buttons.

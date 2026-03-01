@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
@@ -29,10 +29,10 @@ class PermissionCommand extends BaseCommand {
       const currentOwnerId = ctx.player?.get<string>('owner')
       await reactLoadingMessage(message)
       if (!currentOwnerId) {
-        await replySuccessMessage(message, `**Chủ xị** hiện chưa được thiết lập.`)
+        await safeReplySuccessMessage(message, `**Chủ xị** hiện chưa được thiết lập.`)
         return
       }
-      await replySuccessMessage(message, `**Chủ xị** hiện tại là <@${currentOwnerId}>.`)
+      await safeReplySuccessMessage(message, `**Chủ xị** hiện tại là <@${currentOwnerId}>.`)
       return
     }
 
@@ -68,7 +68,7 @@ class PermissionCommand extends BaseCommand {
     if (!currentOwnerId) {
       player.set('owner', message.author.id)
 
-      await replySuccessMessage(
+      await safeReplySuccessMessage(
         message,
         `${getBotName(bot)} chưa có **Chủ xị**, giờ bạn đang là **Chủ xị** nha.`
       )
@@ -94,7 +94,7 @@ class PermissionCommand extends BaseCommand {
     // Transfer ownership.
     player.set('owner', message.author.id)
 
-    await replySuccessMessage(message, `Bạn đã trở thành **Chủ xị** thành công.`)
+    await safeReplySuccessMessage(message, `Bạn đã trở thành **Chủ xị** thành công.`)
   }
 
   // Handles the 'transfer' subcommand to give ownership to another user.
@@ -141,7 +141,7 @@ class PermissionCommand extends BaseCommand {
       `[Command: permission transfer] Owner transferred from ${message.author.tag} to ${targetUser.tag}`
     )
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `Đã chuyển chức danh **Chủ xị** sang cho **<@${targetUser.id}>**.`
     )

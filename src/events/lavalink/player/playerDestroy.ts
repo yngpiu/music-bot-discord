@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerDestroy' event.
@@ -19,7 +19,7 @@ class PlayerDestroyEvent extends LavalinkEvent {
 
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    await sendContainerMessage(channel, `${EMOJI.ANIMATED_CAT_BYE} ${getBotName(bot)} đã rời đi.`)
+    await safeSendMessageWithContainer(channel, `${EMOJI.ANIMATED_CAT_BYE} ${getBotName(bot)} đã rời đi.`)
   }
 }
 

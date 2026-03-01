@@ -13,7 +13,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage, reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import { safeDeleteMessageAfter, reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Commands grouped by category for display in the help menu.
@@ -245,7 +245,7 @@ class HelpCommand extends BaseCommand {
           components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)]
         })
         .catch(() => {})
-      deleteMessage([reply, message], TIME.SHORT)
+      safeDeleteMessageAfter([reply, message], TIME.SHORT)
     })
   }
 

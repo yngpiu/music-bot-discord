@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to enable or disable the autoplay mode.
@@ -36,7 +36,7 @@ class AutoplayCommand extends BaseCommand {
       ? '**bật** chế độ `Tự động phát`'
       : '**tắt** chế độ `Tự động phát`'
 
-    await replySuccessMessage(message, `${getBotName(bot)} đã ${actionText}.`)
+    await safeReplySuccessMessage(message, `${getBotName(bot)} đã ${actionText}.`)
   }
 }
 

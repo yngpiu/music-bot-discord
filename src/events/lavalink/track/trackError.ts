@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { formatTrack, getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'trackError' event.
@@ -34,7 +34,7 @@ class TrackErrorEvent extends LavalinkEvent {
       author: track.info.author
     })
 
-    await sendContainerMessage(
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ERROR} ${getBotName(bot)} đã bỏ qua ${trackDisplay} do lỗi phát nhạc.`
     )

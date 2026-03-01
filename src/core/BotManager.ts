@@ -15,7 +15,7 @@ import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
@@ -168,7 +168,7 @@ export class BotManager {
                 } else {
                   logger.warn(`[Autoplay] Fallback search returned no results.`)
                   player.set('autoplay', false)
-                  await sendContainerMessage(
+                  await safeSendMessageWithContainer(
                     bot.channels.cache.get(player.textChannelId!),
                     `${EMOJI.ERROR} ${getBotName(bot)} đã tự động tắt **Tự động phát** vì không tìm thấy bài hát đề xuất.`,
                     TIME.SHORT

@@ -7,7 +7,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to summon the bot to a voice channel.
@@ -82,7 +82,7 @@ class JoinCommand extends BaseCommand {
     this.checkExistingPlayer(bot, message, vcId, existingPlayer)
 
     await this.getOrCreatePlayer(bot, message, vcId, existingPlayer)
-    await replySuccessMessage(message, `${getBotName(bot)} đã sẵn sàng phát nhạc ở kênh này.`)
+    await safeReplySuccessMessage(message, `${getBotName(bot)} đã sẵn sàng phát nhạc ở kênh này.`)
   }
 }
 

@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to skip the currently playing track.
@@ -32,7 +32,7 @@ class SkipCommand extends BaseCommand {
 
     await player.skip(0, false)
 
-    await replySuccessMessage(message, `${getBotName(bot)} đã **bỏ qua** bài hát hiện tại.`)
+    await safeReplySuccessMessage(message, `${getBotName(bot)} đã **bỏ qua** bài hát hiện tại.`)
   }
 }
 

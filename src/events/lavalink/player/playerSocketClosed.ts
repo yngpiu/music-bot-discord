@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerSocketClosed' event.
@@ -23,7 +23,7 @@ class PlayerSocketClosedEvent extends LavalinkEvent {
     )
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    await sendContainerMessage(
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ERROR} ${getBotName(bot)} đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`
     )

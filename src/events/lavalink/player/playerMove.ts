@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerMove' event.
@@ -25,7 +25,7 @@ class PlayerMoveEvent extends LavalinkEvent {
     )
     const channel = bot.channels.cache.get(player.textChannelId!)
 
-    await sendContainerMessage(
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ANIMATED_CAT_NO_IDEA} ${getBotName(bot)} đã bị ai đó bê sang kênh <#${newVoiceChannelId}>.`
     )

@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to navigate back to the previous track.
@@ -45,7 +45,7 @@ class BackCommand extends BaseCommand {
     // Play the previous track.
     await player.play({ clientTrack: previousTrack })
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đang phát lại bài **${previousTrack.info.title}**.`
     )

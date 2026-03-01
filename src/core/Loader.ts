@@ -12,7 +12,12 @@ import { BotManager } from '~/core/BotManager.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { createContainerMessage, safeEditReply, safeReply } from '~/utils/messageUtil.js'
+import {
+  createContainerMessage,
+  safeEditReplyInteraction,
+  safeReplyInteraction,
+  safeReplyMessage
+} from '~/utils/messageUtil.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -35,13 +40,17 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target instanceof Message) {
     await target.reactions.removeAll().catch(() => {})
-    const reply = await safeReply(target, {
-      components: [content],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
-    })
+    const reply = await safeReplyMessage(
+      target,
+      {
+        components: [content],
+        flags: ['IsComponentsV2', 'SuppressNotifications']
+      },
+      TIME.VERY_SHORT
+    )
     setTimeout(() => {
       if (reply) {
-        reply.delete().catch(() => {})
+        // Handled by scheduleDelete in safeReplyMessage
       }
       target.delete().catch(() => {})
     }, TIME.VERY_SHORT)
@@ -50,14 +59,16 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
-      await safeEditReply(target as import('discord.js').RepliableInteraction, {
-        components: [content],
-        flags: ['IsComponentsV2']
-      })
+      await safeEditReplyInteraction(
+        target as import('~/utils/messageUtil.js').RepliableInteraction,
+        {
+          components: [content]
+        }
+      )
     } else {
-      await safeReply(target as import('discord.js').RepliableInteraction, {
+      await safeReplyInteraction(target as import('~/utils/messageUtil.js').RepliableInteraction, {
         components: [content],
-        flags: ['IsComponentsV2', 'SuppressNotifications']
+        flags: ['SuppressNotifications']
       })
     }
   }

@@ -7,7 +7,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessageNow, sendContainerMessage } from '~/utils/messageUtil'
+import { safeDeleteMessageNow, safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerQueueEmptyEnd' event.
@@ -25,8 +25,8 @@ class PlayerQueueEmptyEndEvent extends LavalinkEvent {
 
     const msg = await (channel as TextChannel).messages.fetch(msgId as string)
 
-    await deleteMessageNow([msg])
-    await sendContainerMessage(
+    await safeDeleteMessageNow([msg])
+    await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ANIMATED_CAT_BYE} Không thấy yêu cầu nào nữa, ${getBotName(bot)} đã rời đi.`
     )

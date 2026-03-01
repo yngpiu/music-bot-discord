@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessageNow } from '~/utils/messageUtil'
+import { safeDeleteMessageNow } from '~/utils/messageUtil'
 
 // Event handler for the 'playerQueueEmptyCancel' event.
 class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
@@ -25,7 +25,7 @@ class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
 
     const msg = await (channel as TextChannel).messages.fetch(msgId as string)
 
-    await deleteMessageNow([msg])
+    await safeDeleteMessageNow([msg])
 
     player.set('queueEmptyMessageId', null)
   }

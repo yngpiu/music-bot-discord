@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to cycle through repeat modes.
@@ -53,7 +53,7 @@ class LoopCommand extends BaseCommand {
       messageText = `${getBotName(bot)} đã **tắt** chế độ lặp.`
     }
 
-    await replySuccessMessage(message, messageText)
+    await safeReplySuccessMessage(message, messageText)
   }
 }
 

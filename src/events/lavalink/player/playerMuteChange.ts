@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerMuteChange' event.
@@ -42,7 +42,7 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
       ? `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
       : `${EMOJI.ANIMATED_CAT_LOVE_YOU} ${getBotName(bot)} đã nói lại được rồi, có thể tiếp tục phát nhạc.`
 
-    await sendContainerMessage(channel, message)
+    await safeSendMessageWithContainer(channel, message)
   }
 }
 

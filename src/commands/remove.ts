@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
@@ -90,7 +90,7 @@ class RemoveCommand extends BaseCommand {
       ? `đã xóa **${removedTitles[0]}** khỏi hàng đợi.`
       : `đã xóa **${removedTitles.length}** bài hát khỏi hàng đợi:\n\`${removedTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}\``
 
-    await replySuccessMessage(message, `${getBotName(bot)} ${description}`)
+    await safeReplySuccessMessage(message, `${getBotName(bot)} ${description}`)
   }
 }
 

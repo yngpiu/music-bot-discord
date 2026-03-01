@@ -10,7 +10,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage, reactLoadingMessage, safeReply } from '~/utils/messageUtil.js'
+import { safeDeleteMessageAfter, reactLoadingMessage, safeReply } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to display and navigate through the music queue.
@@ -172,7 +172,7 @@ class QueueCommand extends BaseCommand {
     if (totalPages > 1) {
       this.startPageCollector(bot, message, replyMessage, player, totalPages)
     } else {
-      deleteMessage([replyMessage, message], TIME.VERY_LONG)
+      safeDeleteMessageAfter([replyMessage, message], TIME.VERY_LONG)
     }
   }
 }

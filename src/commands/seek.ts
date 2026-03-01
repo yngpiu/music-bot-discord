@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { reactLoadingMessage, replySuccessMessage } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { formatDuration, getBotName } from '~/utils/stringUtil.js'
 
 // Parses a time string (e.g., "1:30" or "90") into milliseconds.
@@ -65,7 +65,7 @@ class SeekCommand extends BaseCommand {
 
     await player.seek(seekMs)
 
-    await replySuccessMessage(
+    await safeReplySuccessMessage(
       message,
       `${getBotName(bot)} đã tua bài hát đến mốc **${formatDuration(seekMs)}**.`
     )

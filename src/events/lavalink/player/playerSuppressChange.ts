@@ -6,7 +6,7 @@ import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendContainerMessage } from '~/utils/messageUtil'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Event handler for the 'playerSuppressChange' event.
@@ -37,7 +37,7 @@ class PlayerSuppressChangeEvent extends LavalinkEvent {
       ? `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị đuổi khỏi sân khấu, không thể tiếp tục phát nhạc.`
       : `${EMOJI.ANIMATED_CAT_LOVE} ${getBotName(bot)} đã được bế lên sân khấu để phát nhạc.`
 
-    await sendContainerMessage(channel, message)
+    await safeSendMessageWithContainer(channel, message)
   }
 }
 
