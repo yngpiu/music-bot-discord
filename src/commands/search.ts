@@ -166,117 +166,130 @@ class SearchCommand extends BaseCommand {
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
-      filter: (i) => i.user.id === message.author.id
+      filter: (i: import('discord.js').MessageComponentInteraction) =>
+        i.user.id === message.author.id
     })
 
-    collector.on('collect', async (interaction) => {
-      if (interaction.isButton()) {
-        collector.resetTimer()
-        const newSource = interaction.customId
-        currentSource = newSource
-        await interaction.deferUpdate()
+    collector.on(
+      'collect',
+      async (interaction: import('discord.js').MessageComponentInteraction) => {
+        if (interaction.isButton()) {
+          collector.resetTimer()
+          const newSource = interaction.customId
+          currentSource = newSource
+          await interaction.deferUpdate()
 
-        let newResult
+          let newResult
 
-        try {
-          if (newSource === 'spsearch') {
-            const spotifyTracks = await searchSpotify(query, 10)
+          try {
+            if (newSource === 'spsearch') {
+              const spotifyTracks = await searchSpotify(query, 10)
 
-            if (!spotifyTracks.length) {
-              newResult = { loadType: 'empty', tracks: [] }
+              if (!spotifyTracks.length) {
+                newResult = { loadType: 'empty', tracks: [] }
+              } else {
+                const mappedTracks = spotifyTracks.map(
+                  (t) =>
+                    player.LavalinkManager.utils.buildUnresolvedTrack(
+                      {
+                        title: t.name,
+                        author: t.artists.map((a) => a.name).join(', '),
+                        uri: `https://open.spotify.com/track/${t.id}`,
+                        identifier: t.id,
+                        artworkUrl: t.album.images[0]?.url ?? null,
+                        duration: t.duration_ms,
+                        isrc: t.isrc ?? null
+                      },
+                      message.author
+                    ) as UnresolvedTrack
+                )
+
+                newResult = { loadType: 'search', tracks: mappedTracks }
+              }
             } else {
-              const mappedTracks = spotifyTracks.map(
-                (t) =>
-                  player.LavalinkManager.utils.buildUnresolvedTrack(
-                    {
-                      title: t.name,
-                      author: t.artists.map((a) => a.name).join(', '),
-                      uri: `https://open.spotify.com/track/${t.id}`,
-                      identifier: t.id,
-                      artworkUrl: t.album.images[0]?.url ?? null,
-                      duration: t.duration_ms,
-                      isrc: t.isrc ?? null
-                    },
-                    message.author
-                  ) as UnresolvedTrack
+              newResult = await player.search(
+                { query, source: newSource as import('lavalink-client').SearchPlatform },
+                message.author
               )
-
-              newResult = { loadType: 'search', tracks: mappedTracks }
             }
-          } else {
-            newResult = await player.search(
-              { query, source: newSource as import('lavalink-client').SearchPlatform },
-              message.author
+
+            if (newResult.loadType === 'error' || newResult.loadType === 'empty') {
+              tracks = []
+            } else {
+              tracks = newResult.tracks.slice(0, 10)
+            }
+
+            embed.setDescription(buildDescription(tracks, newSource))
+
+            await interaction
+              .editReply({
+                embeds: [embed],
+                components: getComponents(false, currentSource)
+              })
+              .catch(() => null)
+          } catch (error) {
+            await sendFollowUpEphemeral(
+              interaction,
+              `Lỗi khi tìm kiếm: ${error instanceof Error ? error.message : 'Unknown error'}`
             )
           }
+          return
+        }
 
-          if (newResult.loadType === 'error' || newResult.loadType === 'empty') {
-            tracks = []
-          } else {
-            tracks = newResult.tracks.slice(0, 10)
-          }
+        if (interaction.isStringSelectMenu()) {
+          const index = parseInt(interaction.values[0])
+          const track = tracks[index]
 
-          embed.setDescription(buildDescription(tracks, newSource))
+          if (!track) return
 
-          await interaction
-            .editReply({
-              embeds: [embed],
-              components: getComponents(false, currentSource)
-            })
-            .catch(() => null)
-        } catch (error) {
-          await sendFollowUpEphemeral(
-            interaction,
-            `Lỗi khi tìm kiếm: ${error instanceof Error ? error.message : 'Unknown error'}`
+          await interaction.deferUpdate().catch(() => {})
+
+          await player.queue.add(track)
+
+          const addedEmbed = buildAddedItemEmbed(
+            'track',
+            {
+              title: track.info.title,
+              tracks: [track],
+              thumbnailUrl: track.info.artworkUrl ?? null,
+              author: track.info.author,
+              trackLink: track.info.uri ?? 'https://github.com/yngpiu',
+
+              authorLink: (track as import('lavalink-client').Track).pluginInfo?.artistUrl ?? null
+            },
+            player,
+            message.author,
+            getBotAvatar(bot)
           )
+
+          await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
+
+          if (!player.playing) await player.play()
         }
-        return
       }
+    )
 
-      if (interaction.isStringSelectMenu()) {
-        const index = parseInt(interaction.values[0])
-        const track = tracks[index]
+    collector.on(
+      'end',
+      async (
+        collected: import('discord.js').Collection<
+          string,
+          import('discord.js').MessageComponentInteraction
+        >,
+        reason: string
+      ) => {
+        if (reason === 'time') {
+          await reply.delete().catch(() => {})
+          await message.delete().catch(() => {})
 
-        if (!track) return
-
-        await interaction.deferUpdate().catch(() => {})
-
-        await player.queue.add(track)
-
-        const addedEmbed = buildAddedItemEmbed(
-          'track',
-          {
-            title: track.info.title,
-            tracks: [track],
-            thumbnailUrl: track.info.artworkUrl ?? null,
-            author: track.info.author,
-            trackLink: track.info.uri ?? 'https://github.com/yngpiu',
-
-            authorLink: (track as import('lavalink-client').Track).pluginInfo?.artistUrl ?? null
-          },
-          player,
-          message.author,
-          getBotAvatar(bot)
-        )
-
-        await sendFollowUpMessage(interaction, addedEmbed.embeds[0] as EmbedBuilder, TIME.MEDIUM)
-
-        if (!player.playing) await player.play()
-      }
-    })
-
-    collector.on('end', async (collected, reason) => {
-      if (reason === 'time') {
-        await reply.delete().catch(() => {})
-        await message.delete().catch(() => {})
-
-        if (!player.playing && player.queue.tracks.length === 0) {
-          await player.destroy()
+          if (!player.playing && player.queue.tracks.length === 0) {
+            await player.destroy()
+          }
+        } else if (reason !== 'selected') {
+          await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
         }
-      } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
       }
-    })
+    )
   }
 
   // Handles album-specific searching using the Spotify API.
@@ -394,111 +407,127 @@ class SearchCommand extends BaseCommand {
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
-      filter: (i) => i.user.id === message.author.id
+      filter: (i: import('discord.js').MessageComponentInteraction) =>
+        i.user.id === message.author.id
     })
 
-    collector.on('collect', async (interaction) => {
-      if (interaction.isButton()) {
-        collector.resetTimer()
-        await interaction.deferUpdate().catch(() => {})
+    collector.on(
+      'collect',
+      async (interaction: import('discord.js').MessageComponentInteraction) => {
+        if (interaction.isButton()) {
+          collector.resetTimer()
+          await interaction.deferUpdate().catch(() => {})
 
-        if (interaction.customId === 'prev_page' && currentPage > 0) {
-          currentPage--
-          await fetchPage(currentPage)
-        } else if (interaction.customId === 'next_page' && albums.length === itemsPerPage) {
-          currentPage++
-          await fetchPage(currentPage)
-        }
-
-        await interaction.message.edit({
-          embeds: [buildEmbed(currentPage)],
-          components: getComponents(currentPage, false)
-        })
-        return
-      }
-
-      if (interaction.isStringSelectMenu()) {
-        const index = parseInt(interaction.values[0])
-        const album = albums[index]
-
-        if (!album) return
-
-        await interaction.deferUpdate().catch(() => {})
-
-        const loadingQuery = `https://open.spotify.com/album/${album.id}`
-        await reactLoadingMessage(message)
-
-        try {
-          const spotifyAlbum = await fetchAlbum(album.id)
-
-          if (!spotifyAlbum.tracks.items.length) {
-            await sendFollowUpEphemeral(
-              interaction,
-              `${EMOJI.ERROR} Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
-            )
-            return
+          if (interaction.customId === 'prev_page' && currentPage > 0) {
+            currentPage--
+            await fetchPage(currentPage)
+          } else if (interaction.customId === 'next_page' && albums.length === itemsPerPage) {
+            currentPage++
+            await fetchPage(currentPage)
           }
 
-          const tracks = spotifyAlbum.tracks.items.map(
-            (t) =>
-              player.LavalinkManager.utils.buildUnresolvedTrack(
-                {
-                  title: t.name,
-                  author: t.artists.map((a) => a.name).join(', '),
-                  uri: `https://open.spotify.com/track/${t.id}`,
-                  identifier: t.id,
-                  artworkUrl: t.album?.images[0]?.url ?? album.images[0]?.url ?? null,
-                  duration: t.duration_ms,
-                  isrc: t.isrc ?? null
-                },
-                message.author
-              ) as UnresolvedTrack
-          )
+          await interaction.message.edit({
+            embeds: [buildEmbed(currentPage)],
+            components: getComponents(currentPage, false)
+          })
+          return
+        }
 
-          await player.queue.add(tracks)
+        if (interaction.isStringSelectMenu()) {
+          const index = parseInt(interaction.values[0])
+          const album = albums[index]
 
-          const addedEmbed = buildAddedItemEmbed(
-            'playlist',
-            {
-              title: spotifyAlbum.name || album.name,
-              tracks: tracks,
-              thumbnailUrl: spotifyAlbum.images[0]?.url ?? album.images[0]?.url ?? null,
+          if (!album) return
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              author: album.artists.map((a: any) => a.name).join(', ') || undefined,
-              trackLink: loadingQuery
-            },
-            player,
-            message.author,
-            getBotAvatar(bot)
-          )
+          await interaction.deferUpdate().catch(() => {})
 
-          await sendFollowUpMessage(
-            interaction,
-            addedEmbed.embeds?.[0] as EmbedBuilder,
-            TIME.MEDIUM
-          )
+          const loadingQuery = `https://open.spotify.com/album/${album.id}`
+          await reactLoadingMessage(message)
 
-          if (!player.playing) await player.play().catch(() => {})
-        } catch (error) {
-          logger.error('[Command: search] Error loading album details:', error)
-          await sendFollowUpEphemeral(interaction, `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải album.`)
+          try {
+            const spotifyAlbum = await fetchAlbum(album.id)
+
+            if (!spotifyAlbum.tracks.items.length) {
+              await sendFollowUpEphemeral(
+                interaction,
+                `${EMOJI.ERROR} Không thể tải album **${album.name}**. Có thể album này trống hoặc là album độc quyền quốc gia.`
+              )
+              return
+            }
+
+            const tracks = spotifyAlbum.tracks.items.map(
+              (t) =>
+                player.LavalinkManager.utils.buildUnresolvedTrack(
+                  {
+                    title: t.name,
+                    author: t.artists.map((a) => a.name).join(', '),
+                    uri: `https://open.spotify.com/track/${t.id}`,
+                    identifier: t.id,
+                    artworkUrl: t.album?.images[0]?.url ?? album.images[0]?.url ?? null,
+                    duration: t.duration_ms,
+                    isrc: t.isrc ?? null
+                  },
+                  message.author
+                ) as UnresolvedTrack
+            )
+
+            await player.queue.add(tracks)
+
+            const addedEmbed = buildAddedItemEmbed(
+              'playlist',
+              {
+                title: spotifyAlbum.name || album.name,
+                tracks: tracks,
+                thumbnailUrl: spotifyAlbum.images[0]?.url ?? album.images[0]?.url ?? null,
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                author: album.artists.map((a: any) => a.name).join(', ') || undefined,
+                trackLink: loadingQuery
+              },
+              player,
+              message.author,
+              getBotAvatar(bot)
+            )
+
+            await sendFollowUpMessage(
+              interaction,
+              addedEmbed.embeds?.[0] as EmbedBuilder,
+              TIME.MEDIUM
+            )
+
+            if (!player.playing) await player.play().catch(() => {})
+          } catch (error) {
+            logger.error('[Command: search] Error loading album details:', error)
+            await sendFollowUpEphemeral(
+              interaction,
+              `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải album.`
+            )
+          }
         }
       }
-    })
+    )
 
-    collector.on('end', async (collected, reason) => {
-      if (reason === 'time') {
-        await reply.delete().catch(() => {})
-        await message.delete().catch(() => {})
+    collector.on(
+      'end',
+      async (
+        collected: import('discord.js').Collection<
+          string,
+          import('discord.js').MessageComponentInteraction
+        >,
+        reason: string
+      ) => {
+        if (reason === 'time') {
+          await reply.delete().catch(() => {})
+          await message.delete().catch(() => {})
 
-        if (!player.playing && player.queue.tracks.length === 0) {
-          await player.destroy()
+          if (!player.playing && player.queue.tracks.length === 0) {
+            await player.destroy()
+          }
+        } else if (reason !== 'selected') {
+          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
         }
-      } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
       }
-    })
+    )
   }
 
   // Handles playlist-specific searching using the Spotify API.
@@ -612,112 +641,125 @@ class SearchCommand extends BaseCommand {
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
-      filter: (i) => i.user.id === message.author.id
+      filter: (i: import('discord.js').MessageComponentInteraction) =>
+        i.user.id === message.author.id
     })
 
-    collector.on('collect', async (interaction) => {
-      if (interaction.isButton()) {
-        collector.resetTimer()
-        await interaction.deferUpdate().catch(() => {})
+    collector.on(
+      'collect',
+      async (interaction: import('discord.js').MessageComponentInteraction) => {
+        if (interaction.isButton()) {
+          collector.resetTimer()
+          await interaction.deferUpdate().catch(() => {})
 
-        if (interaction.customId === 'prev_page' && currentPage > 0) {
-          currentPage--
-          await fetchPage(currentPage)
-        } else if (interaction.customId === 'next_page' && playlists.length === itemsPerPage) {
-          currentPage++
-          await fetchPage(currentPage)
-        }
-
-        await interaction.message.edit({
-          embeds: [buildEmbed(currentPage)],
-          components: getComponents(currentPage, false)
-        })
-        return
-      }
-
-      if (interaction.isStringSelectMenu()) {
-        const index = parseInt(interaction.values[0])
-        const playlist = playlists[index]
-
-        if (!playlist) return
-
-        await interaction.deferUpdate().catch(() => {})
-
-        const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
-        await reactLoadingMessage(message)
-
-        try {
-          const spotifyPlaylist = await fetchPlaylist(playlist.id)
-
-          if (!spotifyPlaylist.tracks.items.length) {
-            await sendFollowUpEphemeral(
-              interaction,
-              `${EMOJI.ERROR} Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
-            )
-            return
+          if (interaction.customId === 'prev_page' && currentPage > 0) {
+            currentPage--
+            await fetchPage(currentPage)
+          } else if (interaction.customId === 'next_page' && playlists.length === itemsPerPage) {
+            currentPage++
+            await fetchPage(currentPage)
           }
 
-          const tracks = spotifyPlaylist.tracks.items.map(
-            (t) =>
-              player.LavalinkManager.utils.buildUnresolvedTrack(
-                {
-                  title: t.name,
-                  author: t.artists.map((a) => a.name).join(', '),
-                  uri: `https://open.spotify.com/track/${t.id}`,
-                  identifier: t.id,
-                  artworkUrl: t.album?.images[0]?.url ?? null,
-                  duration: t.duration_ms,
-                  isrc: t.isrc ?? null
-                },
-                message.author
-              ) as UnresolvedTrack
-          )
+          await interaction.message.edit({
+            embeds: [buildEmbed(currentPage)],
+            components: getComponents(currentPage, false)
+          })
+          return
+        }
 
-          await player.queue.add(tracks)
+        if (interaction.isStringSelectMenu()) {
+          const index = parseInt(interaction.values[0])
+          const playlist = playlists[index]
 
-          const addedEmbed = buildAddedItemEmbed(
-            'playlist',
-            {
-              title: spotifyPlaylist.name || playlist.name,
-              tracks: tracks,
-              thumbnailUrl: spotifyPlaylist.images[0]?.url ?? playlist.images[0]?.url ?? null,
-              author: undefined,
-              trackLink: loadingQuery
-            },
-            player,
-            message.author,
-            getBotAvatar(bot)
-          )
+          if (!playlist) return
 
-          await sendFollowUpMessage(
-            interaction,
-            addedEmbed.embeds?.[0] as EmbedBuilder,
-            TIME.MEDIUM
-          )
+          await interaction.deferUpdate().catch(() => {})
 
-          if (!player.playing) await player.play().catch(() => {})
-        } catch (error) {
-          logger.error('[Command: search] Error loading playlist details:', error)
-          await sendFollowUpEphemeral(
-            interaction,
-            `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải danh sách phát.`
-          )
+          const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
+          await reactLoadingMessage(message)
+
+          try {
+            const spotifyPlaylist = await fetchPlaylist(playlist.id)
+
+            if (!spotifyPlaylist.tracks.items.length) {
+              await sendFollowUpEphemeral(
+                interaction,
+                `${EMOJI.ERROR} Không thể tải danh sách phát **${playlist.name}**. Có thể danh sách phát trống hoặc riêng tư.`
+              )
+              return
+            }
+
+            const tracks = spotifyPlaylist.tracks.items.map(
+              (t) =>
+                player.LavalinkManager.utils.buildUnresolvedTrack(
+                  {
+                    title: t.name,
+                    author: t.artists.map((a) => a.name).join(', '),
+                    uri: `https://open.spotify.com/track/${t.id}`,
+                    identifier: t.id,
+                    artworkUrl: t.album?.images[0]?.url ?? null,
+                    duration: t.duration_ms,
+                    isrc: t.isrc ?? null
+                  },
+                  message.author
+                ) as UnresolvedTrack
+            )
+
+            await player.queue.add(tracks)
+
+            const addedEmbed = buildAddedItemEmbed(
+              'playlist',
+              {
+                title: spotifyPlaylist.name || playlist.name,
+                tracks: tracks,
+                thumbnailUrl: spotifyPlaylist.images[0]?.url ?? playlist.images[0]?.url ?? null,
+                author: undefined,
+                trackLink: loadingQuery
+              },
+              player,
+              message.author,
+              getBotAvatar(bot)
+            )
+
+            await sendFollowUpMessage(
+              interaction,
+              addedEmbed.embeds?.[0] as EmbedBuilder,
+              TIME.MEDIUM
+            )
+
+            if (!player.playing) await player.play().catch(() => {})
+          } catch (error) {
+            logger.error('[Command: search] Error loading playlist details:', error)
+            await sendFollowUpEphemeral(
+              interaction,
+              `${EMOJI.ERROR} Đã có lỗi xảy ra khi tải danh sách phát.`
+            )
+          }
         }
       }
-    })
+    )
 
-    collector.on('end', async (collected, reason) => {
-      if (reason === 'time') {
-        await reply.delete().catch(() => {})
-        await message.delete().catch(() => {})
+    collector.on(
+      'end',
+      async (
+        collected: import('discord.js').Collection<
+          string,
+          import('discord.js').MessageComponentInteraction
+        >,
+        reason: string
+      ) => {
+        if (reason === 'time') {
+          await reply.delete().catch(() => {})
+          await message.delete().catch(() => {})
 
-        if (!player.playing && player.queue.tracks.length === 0) {
-          await player.destroy()
+          if (!player.playing && player.queue.tracks.length === 0) {
+            await player.destroy()
+          }
+        } else if (reason !== 'selected') {
+          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
         }
-      } else if (reason !== 'selected') {
-        await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
       }
-    })
+    )
   }
 
   // Executes the search command.

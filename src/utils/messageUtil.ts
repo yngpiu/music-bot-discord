@@ -19,7 +19,8 @@ export async function safeReply(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options: any
 ) {
-  return target.reply(options).catch((err: Error) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (target as any).reply(options).catch((err: Error) => {
     logger.warn('[MessageUtil] Error in safeReply:', err.message)
     return null
   })

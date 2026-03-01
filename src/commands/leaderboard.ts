@@ -371,7 +371,7 @@ class LeaderboardCommand extends BaseCommand {
 
     const collector = reply.createMessageComponentCollector({
       time: 120_000,
-      filter: (i) => i.user.id === userId
+      filter: (i: import('discord.js').MessageComponentInteraction) => i.user.id === userId
     })
 
     collector.on(

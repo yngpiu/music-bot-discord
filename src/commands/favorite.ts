@@ -283,7 +283,8 @@ class FavoriteCommand extends BaseCommand {
 
     const collector = reply.createMessageComponentCollector({
       time: 60000,
-      filter: (i) => i.user.id === message.author.id
+      filter: (i: import('discord.js').MessageComponentInteraction) =>
+        i.user.id === message.author.id
     })
 
     collector.on(
