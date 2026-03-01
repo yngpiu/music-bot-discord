@@ -229,7 +229,6 @@ function buildTrackEmbed(
       iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
-    .setColor(0xffd700)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
@@ -260,7 +259,6 @@ function buildBotEmbed(
       iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
-    .setColor(0x00c2e6)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 
@@ -291,7 +289,6 @@ function buildUserEmbed(
       iconURL: getGuildIcon(guild)
     })
     .setDescription(description)
-    .setColor(0x9b59b6)
     .setFooter({ text: `Trang ${page + 1}/${totalPages || 1}` })
 }
 

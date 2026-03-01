@@ -158,7 +158,6 @@ class HelpCommand extends BaseCommand {
   // Builds the main landing embed for the help command.
   private buildMainEmbed(bot: BotClient, prefix: string): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(0x00c2e6)
       .setAuthor({ name: 'Danh sách hướng dẫn', iconURL: getBotAvatar(bot) })
       .setDescription(
         '- Vui lòng chọn một danh mục lệnh ở bên dưới để xem chi tiết nhé.\n- Bạn có thể xem danh sách lệnh và các sử dụng chi tiết hơn tại **[TRANG HƯỚNG DẪN CHI TIẾT](https://yngpiu.github.io/music-bot-discord/docs/help.html)**.'
@@ -182,7 +181,6 @@ class HelpCommand extends BaseCommand {
       .join('\n\n')
 
     return new EmbedBuilder()
-      .setColor(0x00c2e6)
       .setAuthor({
         name: `Các lệnh thuộc danh mục ${category}`,
         iconURL: getBotAvatar(bot)

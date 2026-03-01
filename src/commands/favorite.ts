@@ -208,7 +208,6 @@ class FavoriteCommand extends BaseCommand {
         .join('\n')
 
       return new EmbedBuilder()
-        .setColor(0x00c2e6)
         .setTitle(
           `Danh sách yêu thích của ${message.author.displayName} - Trang ${page + 1}/${totalPages}`
         )

@@ -392,7 +392,6 @@ class SearchCommand extends BaseCommand {
         .setTitle(`Album tìm kiếm: "${query}" - Trang ${page + 1}`)
         .setThumbnail(albums[0]?.images[0]?.url || null)
         .setDescription(buildDescription(albums, page))
-        .setColor('#1DB954')
         .setFooter({ text: 'Hãy chọn album bạn muốn nghe trong vòng 60s.' })
     }
 
@@ -626,7 +625,6 @@ class SearchCommand extends BaseCommand {
         .setTitle(`Playlist tìm kiếm: "${query}" - Trang ${page + 1}`)
         .setThumbnail(playlists[0]?.images[0]?.url || null)
         .setDescription(buildDescription(playlists, page))
-        .setColor('#1DB954')
         .setFooter({ text: 'Hãy chọn danh sách phát bạn muốn nghe trong vòng 60s.' })
     }
 

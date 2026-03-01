@@ -328,7 +328,6 @@ export class BotManager {
       .join('\n')
 
     const embed = new EmbedBuilder()
-      .setColor(0x00c2e6)
       .setAuthor({
         name: 'Thêm tự động',
         iconURL: getBotAvatar(bot)

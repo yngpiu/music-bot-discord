@@ -45,7 +45,6 @@ export function buildAddedItemEmbed(
     Math.max(0, player.queue.utils.totalDuration() - totalDurationMs - (player.position ?? 0))
 
   const embed = new EmbedBuilder()
-    .setColor(0x00c2e6)
     .setAuthor({
       name: isPlaylist ? 'Thêm danh sách phát' : 'Thêm bài hát',
       iconURL: botAvatarUrl

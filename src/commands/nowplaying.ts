@@ -36,7 +36,6 @@ class NowplayingCommand extends BaseCommand {
 
     // Construct embed with track metadata.
     const embed = new EmbedBuilder()
-      .setColor(0x00c2e6)
       .setAuthor({
         name: 'Đang phát hiện tại',
         iconURL: getBotAvatar(bot)

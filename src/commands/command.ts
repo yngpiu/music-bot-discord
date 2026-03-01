@@ -181,7 +181,6 @@ class CommandAliasCommand extends BaseCommand {
         .join('\n')
 
       return new EmbedBuilder()
-        .setColor(0x00c2e6)
         .setAuthor({
           name: `Lệnh tắt của ${message.author.displayName}`,
           iconURL: getBotAvatar(bot)
