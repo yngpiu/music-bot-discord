@@ -55,10 +55,12 @@ export async function sendContainerMessage(
 
   if (!channel || !channel.isTextBased() || !('send' in channel)) return
 
-  const sendedMessage = await channel.send({
-    components: [container],
-    flags: ['IsComponentsV2', 'SuppressNotifications']
-  })
+  const sendedMessage = await channel
+    .send({
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    })
+    .catch(() => null)
 
   if (!sendedMessage) return
 
@@ -70,10 +72,12 @@ export async function sendContainerMessage(
 export async function replySuccessMessage(message: Message, content: string) {
   const container = createContainerMessage(`${EMOJI.SUCCESS} ${content}`)
 
-  const repliedMessage = await message.reply({
-    components: [container],
-    flags: ['IsComponentsV2', 'SuppressNotifications']
-  })
+  const repliedMessage = await message
+    .reply({
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    })
+    .catch(() => null)
 
   await message.reactions.removeAll().catch(() => {})
 
@@ -90,11 +94,13 @@ export async function replySuccessEmbed(
   components?: ActionRowBuilder<MessageActionRowComponentBuilder>[],
   timeout?: number
 ) {
-  const repliedMessage = await message.reply({
-    embeds: [embed],
-    components,
-    flags: ['SuppressNotifications']
-  })
+  const repliedMessage = await message
+    .reply({
+      embeds: [embed],
+      components,
+      flags: ['SuppressNotifications']
+    })
+    .catch(() => null)
 
   await message.reactions.removeAll().catch(() => {})
 
@@ -110,7 +116,7 @@ export async function replySuccessEmbed(
 }
 
 export async function reactLoadingMessage(message: Message) {
-  await message.react(EMOJI.LOADING)
+  await message.react(EMOJI.LOADING).catch(() => null)
 }
 
 export async function sendFollowUpEphemeral(interaction: RepliableInteraction, content: string) {
@@ -125,10 +131,12 @@ export async function sendFollowUpMessage(
   embed: EmbedBuilder,
   timeout?: number
 ) {
-  const followedUpMessage = await interaction.followUp({
-    embeds: [embed],
-    flags: ['SuppressNotifications']
-  })
+  const followedUpMessage = await interaction
+    .followUp({
+      embeds: [embed],
+      flags: ['SuppressNotifications']
+    })
+    .catch(() => null)
 
   if (!followedUpMessage) return
 
