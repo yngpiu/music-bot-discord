@@ -62,7 +62,7 @@ class SearchCommand extends BaseCommand {
       if (tracks.length > 0) {
         selectMenu.addOptions(
           tracks.map((track, index) => {
-            const label = track.info.title.substring(0, 100)
+            const label = (track.info.title || 'Không rõ tên').substring(0, 100)
             const description = track.info.author ? track.info.author.substring(0, 100) : ''
             const option = new StringSelectMenuOptionBuilder()
               .setLabel(label)
@@ -322,7 +322,7 @@ class SearchCommand extends BaseCommand {
 
       selectMenu.addOptions(
         albums.map((album, index) => {
-          const label = album.name.substring(0, 100)
+          const label = (album.name || 'Album không tên').substring(0, 100)
           const description = album.artists
             .map((a: { name: string }) => a.name)
             .join(', ')
@@ -544,7 +544,7 @@ class SearchCommand extends BaseCommand {
 
       selectMenu.addOptions(
         playlists.map((playlist, index) => {
-          const label = playlist.name.substring(0, 100)
+          const label = (playlist.name || 'Playlist không tên').substring(0, 100)
           const option = new StringSelectMenuOptionBuilder()
             .setLabel(label)
             .setValue(index.toString())
