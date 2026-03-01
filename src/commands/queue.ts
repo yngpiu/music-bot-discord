@@ -10,7 +10,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { deleteMessage, reactLoadingMessage } from '~/utils/messageUtil.js'
+import { deleteMessage, reactLoadingMessage, safeReply } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to display and navigate through the music queue.
@@ -161,15 +161,10 @@ class QueueCommand extends BaseCommand {
 
     const totalPages = Math.ceil(player.queue.tracks.length / 5) || 1
 
-    const replyMessage = await message
-      .reply({
-        embeds: [this.buildEmbed(bot, player, 1, totalPages)],
-        components: totalPages > 1 ? [this.buildNavRow(1, totalPages)] : []
-      })
-      .catch((e: Error) => {
-        logger.warn(`[Command: queue] Error sending notification:`, e)
-        return null
-      })
+    const replyMessage = await safeReply(message, {
+      embeds: [this.buildEmbed(bot, player, 1, totalPages)],
+      components: totalPages > 1 ? [this.buildNavRow(1, totalPages)] : []
+    })
 
     if (!replyMessage) return
 

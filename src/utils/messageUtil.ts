@@ -12,6 +12,47 @@ import {
 import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time.js'
 
+import { logger } from '~/utils/logger.js'
+
+export async function safeReply(
+  target: Message | RepliableInteraction,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options: any
+) {
+  return target.reply(options).catch((err: Error) => {
+    logger.warn('[MessageUtil] Error in safeReply:', err.message)
+    return null
+  })
+}
+
+export async function safeSend(
+  channel: import('discord.js').TextBasedChannel,
+  options: string | import('discord.js').MessageCreateOptions | import('discord.js').MessagePayload
+) {
+  if (!('send' in channel)) return null
+  return channel.send(options).catch((err: Error) => {
+    logger.warn('[MessageUtil] Error in safeSend:', err.message)
+    return null
+  })
+}
+
+export async function safeEditReply(
+  interaction: RepliableInteraction,
+  options:
+    | string
+    | import('discord.js').MessagePayload
+    | import('discord.js').InteractionEditReplyOptions
+) {
+  return interaction.editReply(options).catch((err) => {
+    logger.warn('[MessageUtil] Error in safeEditReply:', err.message)
+    return null
+  })
+}
+
+export async function safeReact(message: Message, emoji: string) {
+  return message.react(emoji).catch(() => null)
+}
+
 // Immediately deletes multiple messages and waits for the operation to complete.
 export const deleteMessageNow = async (messages: (Message | null | undefined)[]): Promise<void> => {
   if (!messages || messages.length === 0) return
@@ -55,12 +96,10 @@ export async function sendContainerMessage(
 
   if (!channel || !channel.isTextBased() || !('send' in channel)) return
 
-  const sendedMessage = await channel
-    .send({
-      components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
-    })
-    .catch(() => null)
+  const sendedMessage = await safeSend(channel, {
+    components: [container],
+    flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
 
   if (!sendedMessage) return
 
@@ -72,12 +111,10 @@ export async function sendContainerMessage(
 export async function replySuccessMessage(message: Message, content: string) {
   const container = createContainerMessage(`${EMOJI.SUCCESS} ${content}`)
 
-  const repliedMessage = await message
-    .reply({
-      components: [container],
-      flags: ['IsComponentsV2', 'SuppressNotifications']
-    })
-    .catch(() => null)
+  const repliedMessage = await safeReply(message, {
+    components: [container],
+    flags: ['IsComponentsV2', 'SuppressNotifications']
+  })
 
   await message.reactions.removeAll().catch(() => {})
 
@@ -94,13 +131,11 @@ export async function replySuccessEmbed(
   components?: ActionRowBuilder<MessageActionRowComponentBuilder>[],
   timeout?: number
 ) {
-  const repliedMessage = await message
-    .reply({
-      embeds: [embed],
-      components,
-      flags: ['SuppressNotifications']
-    })
-    .catch(() => null)
+  const repliedMessage = await safeReply(message, {
+    embeds: [embed],
+    components,
+    flags: ['SuppressNotifications']
+  })
 
   await message.reactions.removeAll().catch(() => {})
 
@@ -116,7 +151,7 @@ export async function replySuccessEmbed(
 }
 
 export async function reactLoadingMessage(message: Message) {
-  await message.react(EMOJI.LOADING).catch(() => null)
+  await safeReact(message, EMOJI.LOADING)
 }
 
 export async function sendFollowUpEphemeral(interaction: RepliableInteraction, content: string) {

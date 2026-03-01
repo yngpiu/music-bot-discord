@@ -12,6 +12,7 @@ import { BotEvent } from '~/core/BotEvent.js'
 import type { BotManager } from '~/core/BotManager'
 import { BotError } from '~/core/errors.js'
 
+import { safeReply } from '~/utils/messageUtil.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
@@ -109,7 +110,7 @@ class MessageCreateEvent extends BotEvent {
       : lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(text))
-    await message.reply({ components: [container], flags: ['IsComponentsV2'] }).catch(() => null)
+    await safeReply(message, { components: [container], flags: ['IsComponentsV2'] })
   }
 
   // Checks if a user is currently banned from using the bot.

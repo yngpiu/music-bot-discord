@@ -12,7 +12,7 @@ import { BotManager } from '~/core/BotManager.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { createContainerMessage } from '~/utils/messageUtil'
+import { createContainerMessage, safeEditReply, safeReply } from '~/utils/messageUtil.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -35,12 +35,10 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target instanceof Message) {
     await target.reactions.removeAll().catch(() => {})
-    const reply = await target
-      .reply({ components: [content], flags: ['IsComponentsV2', 'SuppressNotifications'] })
-      .catch((error: Error) => {
-        logger.error('[System] Error replying error message to user:', error.message)
-        return null
-      })
+    const reply = await safeReply(target, {
+      components: [content],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    })
     setTimeout(() => {
       if (reply) {
         reply.delete().catch(() => {})
@@ -52,15 +50,15 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target.isRepliable()) {
     if (target.deferred || target.replied) {
-      await target.editReply({ components: [content], flags: ['IsComponentsV2'] }).catch((err) => {
-        logger.warn('[System] Error editReply error message to user:', err)
+      await safeEditReply(target as import('discord.js').RepliableInteraction, {
+        components: [content],
+        flags: ['IsComponentsV2']
       })
     } else {
-      await target
-        .reply({ components: [content], flags: ['IsComponentsV2', 'SuppressNotifications'] })
-        .catch((err) => {
-          logger.warn('[System] Error reply error message to user:', err)
-        })
+      await safeReply(target as import('discord.js').RepliableInteraction, {
+        components: [content],
+        flags: ['IsComponentsV2', 'SuppressNotifications']
+      })
     }
   }
 }
