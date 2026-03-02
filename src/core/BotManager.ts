@@ -1,7 +1,7 @@
 // The central coordinator for multiple bot instances, Redis connection, and Lavalink integration.
-import { EmbedBuilder, type TextChannel } from 'discord.js'
+import { EmbedBuilder, type TextChannel, type VoiceState } from 'discord.js'
 import { Redis } from 'ioredis'
-import { LavalinkManager } from 'lavalink-client'
+import { LavalinkManager, type Player } from 'lavalink-client'
 import { config } from '~/config/env.js'
 import { setAliasRedisClient } from '~/services/aliasService.js'
 import { setPrefixRedisClient } from '~/services/prefixService.js'
@@ -15,7 +15,7 @@ import { RedisQueueStore } from '~/lib/QueueStore.js'
 import { initSpotifyToken, setSpotifyRedisClient } from '~/lib/spotify/client.js'
 
 import { logger } from '~/utils/logger.js'
-import { safeSendMessageWithContainer } from '~/utils/messageUtil'
+import { safeSendMessageToChannel, safeSendMessageWithContainer } from '~/utils/messageUtil.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { setRedisClient } from '~/utils/rateLimiter.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
@@ -334,8 +334,6 @@ export class BotManager {
       })
       .setDescription(description)
 
-    await channel.send({ embeds: [embed] }).catch((err) => {
-      logger.error('[Player] Error sending Autoplay notification message:', err)
-    })
+    await safeSendMessageToChannel(channel, { embeds: [embed] })
   }
 }

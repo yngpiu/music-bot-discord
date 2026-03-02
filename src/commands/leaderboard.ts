@@ -15,7 +15,12 @@ import type { BotClient } from '~/core/BotClient'
 import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed, safeEditReply } from '~/utils/messageUtil.js'
+import {
+  reactLoadingMessage,
+  replySuccessEmbed,
+  safeEditMessage,
+  safeEditReplyInteraction
+} from '~/utils/messageUtil.js'
 import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 
 // Types of leaderboard views available.
@@ -442,7 +447,7 @@ class LeaderboardCommand extends BaseCommand {
           }
         }
 
-        await safeEditReply(interaction, {
+        await safeEditReplyInteraction(interaction, {
           embeds: [getEmbed()],
           components: getComponents()
         })
@@ -451,9 +456,7 @@ class LeaderboardCommand extends BaseCommand {
 
     collector.on('end', async () => {
       // Disable components upon timeout.
-      await reply.edit({ components: getComponents(true) }).catch((err: Error) => {
-        logger.warn('[Command: leaderboard] Error disabling buttons on timeout:', err)
-      })
+      await safeEditMessage(reply, { components: getComponents(true) })
     })
   }
 }

@@ -16,7 +16,12 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import {
+  reactLoadingMessage,
+  replySuccessEmbed,
+  safeEditMessage,
+  safeReplySuccessMessage
+} from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Maximum allowed alias name length.
@@ -252,16 +257,14 @@ class CommandAliasCommand extends BaseCommand {
       else if (interaction.customId === 'cmd_next' && currentPage < totalPages - 1) currentPage++
       else if (interaction.customId === 'cmd_last') currentPage = totalPages - 1
 
-      await interaction.message
-        .edit({
-          embeds: [buildEmbed(currentPage)],
-          components: getButtons(currentPage)
-        })
-        .catch(() => {})
+      await safeEditMessage(interaction.message, {
+        embeds: [buildEmbed(currentPage)],
+        components: getButtons(currentPage)
+      })
     })
 
     collector.on('end', async () => {
-      await reply.edit({ components: getButtons(currentPage, true) }).catch(() => {})
+      await safeEditMessage(reply, { components: getButtons(currentPage, true) })
     })
   }
 }

@@ -28,6 +28,7 @@ import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
   replySuccessEmbed,
+  safeEditMessage,
   safeFollowUpInteraction,
   safeReplySuccessMessage,
   sendFollowUpEphemeral
@@ -299,7 +300,7 @@ class FavoriteCommand extends BaseCommand {
             currentPage++
           }
 
-          await interaction.message.edit({
+          await safeEditMessage(interaction.message, {
             embeds: [buildEmbed(currentPage)],
             components: getComponents(currentPage)
           })
@@ -395,7 +396,7 @@ class FavoriteCommand extends BaseCommand {
             await player.destroy()
           }
         } else if (reason !== 'selected') {
-          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
+          await safeEditMessage(reply, { components: getComponents(currentPage, true) })
         }
       }
     )

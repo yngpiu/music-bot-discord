@@ -12,7 +12,7 @@ import { BotEvent } from '~/core/BotEvent.js'
 import type { BotManager } from '~/core/BotManager'
 import { BotError } from '~/core/errors.js'
 
-import { safeReply } from '~/utils/messageUtil.js'
+import { safeEditMessage, safeReply, safeReplyMessage } from '~/utils/messageUtil.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
@@ -124,9 +124,10 @@ class MessageCreateEvent extends BotEvent {
         `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
       )
     )
-    const reply = await message
-      .reply({ components: [container], flags: ['IsComponentsV2'] })
-      .catch(() => null)
+    const reply = await safeReplyMessage(message, {
+      components: [container],
+      flags: ['IsComponentsV2']
+    })
 
     if (reply) {
       setTimeout(() => {
@@ -148,9 +149,10 @@ class MessageCreateEvent extends BotEvent {
         `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh. Vui lòng chờ **${remaining}s** trước khi thử lại.`
       )
     )
-    const reply = await message
-      .reply({ components: [container], flags: ['IsComponentsV2'] })
-      .catch(() => null)
+    const reply = await safeReplyMessage(message, {
+      components: [container],
+      flags: ['IsComponentsV2']
+    })
 
     if (reply) {
       setTimeout(() => {

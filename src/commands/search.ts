@@ -29,6 +29,8 @@ import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
   replySuccessEmbed,
+  safeEditMessage,
+  safeEditReplyInteraction,
   safeFollowUpInteraction,
   sendFollowUpEphemeral
 } from '~/utils/messageUtil.js'
@@ -221,12 +223,10 @@ class SearchCommand extends BaseCommand {
 
             embed.setDescription(buildDescription(tracks, newSource))
 
-            await interaction
-              .editReply({
-                embeds: [embed],
-                components: getComponents(false, currentSource)
-              })
-              .catch(() => null)
+            await safeEditReplyInteraction(interaction, {
+              embeds: [embed],
+              components: getComponents(false, currentSource)
+            })
           } catch (error) {
             await sendFollowUpEphemeral(
               interaction,
@@ -290,7 +290,7 @@ class SearchCommand extends BaseCommand {
             await player.destroy()
           }
         } else if (reason !== 'selected') {
-          await reply.edit({ components: getComponents(true, currentSource) }).catch(() => {})
+          await safeEditMessage(reply, { components: getComponents(true, currentSource) })
         }
       }
     )
@@ -429,7 +429,7 @@ class SearchCommand extends BaseCommand {
             await fetchPage(currentPage)
           }
 
-          await interaction.message.edit({
+          await safeEditMessage(interaction.message, {
             embeds: [buildEmbed(currentPage)],
             components: getComponents(currentPage, false)
           })
@@ -527,7 +527,7 @@ class SearchCommand extends BaseCommand {
             await player.destroy()
           }
         } else if (reason !== 'selected') {
-          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
+          await safeEditMessage(reply, { components: getComponents(currentPage, true) })
         }
       }
     )
@@ -662,7 +662,7 @@ class SearchCommand extends BaseCommand {
             await fetchPage(currentPage)
           }
 
-          await interaction.message.edit({
+          await safeEditMessage(interaction.message, {
             embeds: [buildEmbed(currentPage)],
             components: getComponents(currentPage, false)
           })
@@ -758,7 +758,7 @@ class SearchCommand extends BaseCommand {
             await player.destroy()
           }
         } else if (reason !== 'selected') {
-          await reply.edit({ components: getComponents(currentPage, true) }).catch(() => {})
+          await safeEditMessage(reply, { components: getComponents(currentPage, true) })
         }
       }
     )

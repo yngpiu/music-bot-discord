@@ -251,9 +251,8 @@ export async function reactLoadingMessage(message: Message | null | undefined): 
     if (!existing || !existing.me) {
       await message.react(EMOJI.LOADING)
     }
-  } catch (err) {
-    if (err instanceof DiscordAPIError && err.code === 10008) return
-    logger.warn(`Failed to react loading to message:`, err)
+  } catch {
+    // Ignore error
   }
 }
 
