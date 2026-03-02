@@ -41,7 +41,7 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
 
   if (target instanceof Message) {
     await target.reactions.removeAll().catch(() => {})
-    const reply = await safeReplyMessage(
+    await safeReplyMessage(
       target,
       {
         components: [content],
@@ -49,12 +49,6 @@ async function replyError(target: ReplyTarget, text: string): Promise<void> {
       },
       TIME.VERY_SHORT
     )
-    setTimeout(() => {
-      if (reply) {
-        // Handled by scheduleDelete in safeReplyMessage
-      }
-      target.delete().catch(() => {})
-    }, TIME.VERY_SHORT)
     return
   }
 

@@ -1,7 +1,7 @@
 // The central coordinator for multiple bot instances, Redis connection, and Lavalink integration.
-import { EmbedBuilder, type TextChannel, type VoiceState } from 'discord.js'
+import { EmbedBuilder, type TextChannel } from 'discord.js'
 import { Redis } from 'ioredis'
-import { LavalinkManager, type Player } from 'lavalink-client'
+import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
 import { setAliasRedisClient } from '~/services/aliasService.js'
 import { setPrefixRedisClient } from '~/services/prefixService.js'

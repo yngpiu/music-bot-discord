@@ -1,17 +1,13 @@
 // Utilities for asynchronous message management and cleanup.
 import {
-  ActionRowBuilder,
   ButtonInteraction,
   Channel,
   ChatInputCommandInteraction,
   ContainerBuilder,
-  DiscordAPIError,
-  EmbedBuilder,
   InteractionEditReplyOptions,
   InteractionReplyOptions,
   InteractionResponse,
   type Message,
-  type MessageActionRowComponentBuilder,
   type MessageCreateOptions,
   type MessageEditOptions,
   ModalSubmitInteraction,
@@ -20,8 +16,6 @@ import {
 
 import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time.js'
-
-import { logger } from '~/utils/logger.js'
 
 export async function sendFollowUpEphemeral(interaction: RepliableInteraction, content: string) {
   return interaction.followUp({
@@ -169,8 +163,7 @@ export async function safeReplyInteraction(
 
 export async function safeEditReplyInteraction(
   interaction: RepliableInteraction | null | undefined,
-  options: InteractionEditReplyOptions,
-  timeoutDeleteMessage?: number
+  options: InteractionEditReplyOptions
 ): Promise<Message | null> {
   if (!interaction || (!interaction.replied && !interaction.deferred)) return null
 

@@ -12,7 +12,7 @@ import { BotEvent } from '~/core/BotEvent.js'
 import type { BotManager } from '~/core/BotManager'
 import { BotError } from '~/core/errors.js'
 
-import { safeEditMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { safeReplyMessage } from '~/utils/messageUtil.js'
 import { getDeterministicIndexFromId } from '~/utils/numberUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { checkRateLimit, getBanRemainingMs } from '~/utils/rateLimiter.js'
