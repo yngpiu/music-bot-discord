@@ -1,11 +1,12 @@
 // Command to display the current status of the music player, including volume, filters, and repeat mode.
 import { EmbedBuilder, type Message } from 'discord.js'
 
+import { TIME } from '~/constants/time.js'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show comprehensive player information.
@@ -73,7 +74,14 @@ class StatusCommand extends BaseCommand {
       embed.setDescription('Không có bài hát nào đang phát.')
     }
 
-    await replySuccessEmbed(message, embed)
+    await safeReplyMessage(
+      message,
+      {
+        embeds: [embed],
+        flags: ['SuppressNotifications']
+      },
+      TIME.VERY_SHORT
+    )
   }
 }
 

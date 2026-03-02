@@ -1,6 +1,6 @@
 // Provides static methods for hot-loading commands, events, and interactions.
 import { Prisma } from '@prisma/client'
-import { BaseInteraction, Message } from 'discord.js'
+import { BaseInteraction, ContainerBuilder, Message } from 'discord.js'
 import { readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -13,7 +13,6 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  createContainerMessage,
   safeEditReplyInteraction,
   safeReplyInteraction,
   safeReplyMessage
@@ -36,7 +35,9 @@ function isPrismaError(err: unknown): boolean {
 
 // Sends an error message to a user and handles cleanup.
 async function replyError(target: ReplyTarget, text: string): Promise<void> {
-  const content = createContainerMessage(`${EMOJI.ERROR} ${text}`)
+  const content = new ContainerBuilder().addTextDisplayComponents((t) =>
+    t.setContent(`${EMOJI.ERROR} ${text}`)
+  )
 
   if (target instanceof Message) {
     await target.reactions.removeAll().catch(() => {})

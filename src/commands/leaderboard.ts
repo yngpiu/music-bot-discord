@@ -17,9 +17,9 @@ import prisma from '~/lib/prisma.js'
 import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
-  replySuccessEmbed,
   safeEditMessage,
-  safeEditReplyInteraction
+  safeEditReplyInteraction,
+  safeReplyMessage
 } from '~/utils/messageUtil.js'
 import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 
@@ -367,7 +367,15 @@ class LeaderboardCommand extends BaseCommand {
       buildViewSelect(currentView, disabled)
     ]
 
-    const reply = await replySuccessEmbed(message, getEmbed(), getComponents(), 120_000)
+    const reply = await safeReplyMessage(
+      message,
+      {
+        embeds: [getEmbed()],
+        components: getComponents(),
+        flags: ['SuppressNotifications']
+      },
+      120000
+    )
 
     if (!reply) return
 

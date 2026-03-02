@@ -18,8 +18,8 @@ import { BotError } from '~/core/errors'
 import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
-  replySuccessEmbed,
   safeEditMessage,
+  safeReplyMessage,
   safeReplySuccessMessage
 } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
@@ -233,10 +233,13 @@ class CommandAliasCommand extends BaseCommand {
       ]
     }
 
-    const reply = await replySuccessEmbed(
+    const reply = await safeReplyMessage(
       message,
-      buildEmbed(currentPage),
-      getButtons(currentPage),
+      {
+        embeds: [buildEmbed(currentPage)],
+        components: getButtons(currentPage),
+        flags: ['SuppressNotifications']
+      },
       60000
     )
 

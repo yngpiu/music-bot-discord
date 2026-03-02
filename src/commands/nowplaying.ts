@@ -7,7 +7,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show currently playing track details.
@@ -50,7 +50,14 @@ class NowplayingCommand extends BaseCommand {
         }),
         inline: false
       })
-    await replySuccessEmbed(message, embed, undefined, TIME.MEDIUM)
+    await safeReplyMessage(
+      message,
+      {
+        embeds: [embed],
+        flags: ['SuppressNotifications']
+      },
+      TIME.MEDIUM
+    )
   }
 }
 

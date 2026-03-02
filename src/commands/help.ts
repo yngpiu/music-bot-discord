@@ -13,7 +13,12 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { safeDeleteMessageAfter, reactLoadingMessage, replySuccessEmbed } from '~/utils/messageUtil.js'
+import {
+  reactLoadingMessage,
+  safeDeleteMessageAfter,
+  safeEditMessage,
+  safeReplyMessage
+} from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
 // Commands grouped by category for display in the help menu.
@@ -240,11 +245,9 @@ class HelpCommand extends BaseCommand {
 
     collector.on('end', async () => {
       select.setDisabled(true)
-      await reply
-        .edit({
-          components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)]
-        })
-        .catch(() => {})
+      await safeEditMessage(reply, {
+        components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)]
+      })
       safeDeleteMessageAfter([reply, message], TIME.SHORT)
     })
   }
@@ -257,7 +260,15 @@ class HelpCommand extends BaseCommand {
     const prefix = await resolvePrefix(message.guild!.id, message.author.id)
     const { select, row } = this.buildSelectMenu()
     const embed = this.buildMainEmbed(bot, prefix)
-    const reply = await replySuccessEmbed(message, embed, [row], 60000)
+    const reply = await safeReplyMessage(
+      message,
+      {
+        embeds: [embed],
+        components: [row],
+        flags: ['SuppressNotifications']
+      },
+      60000
+    )
     if (reply) {
       this.startCollector(bot, message, reply, select, row)
     }

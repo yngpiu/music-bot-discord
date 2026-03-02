@@ -27,9 +27,9 @@ import prisma from '~/lib/prisma.js'
 import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
-  replySuccessEmbed,
   safeEditMessage,
   safeFollowUpInteraction,
+  safeReplyMessage,
   safeReplySuccessMessage,
   sendFollowUpEphemeral
 } from '~/utils/messageUtil.js'
@@ -272,10 +272,13 @@ class FavoriteCommand extends BaseCommand {
       return rows
     }
 
-    const reply = await replySuccessEmbed(
+    const reply = await safeReplyMessage(
       message,
-      buildEmbed(currentPage),
-      getComponents(currentPage),
+      {
+        embeds: [buildEmbed(currentPage)],
+        components: getComponents(currentPage),
+        flags: ['SuppressNotifications']
+      },
       60000
     )
 

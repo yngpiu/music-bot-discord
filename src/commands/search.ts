@@ -28,10 +28,10 @@ import {
 import { logger } from '~/utils/logger.js'
 import {
   reactLoadingMessage,
-  replySuccessEmbed,
   safeEditMessage,
   safeEditReplyInteraction,
   safeFollowUpInteraction,
+  safeReplyMessage,
   sendFollowUpEphemeral
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName, lines } from '~/utils/stringUtil.js'
@@ -157,10 +157,16 @@ class SearchCommand extends BaseCommand {
       .setDescription(buildDescription(tracks, currentSource))
       .setFooter({ text: 'Hãy chọn bài hát hoặc đổi nguồn tìm kiếm (60s).' })
 
-    const reply = await replySuccessEmbed(
+    const reply = await safeReplyMessage(
       message,
-      embed,
-      getComponents(false, currentSource) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      {
+        embeds: [embed],
+        components: getComponents(
+          false,
+          currentSource
+        ) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+        flags: ['SuppressNotifications']
+      },
       60000
     )
 
@@ -399,10 +405,16 @@ class SearchCommand extends BaseCommand {
         .setFooter({ text: 'Hãy chọn album bạn muốn nghe trong vòng 60s.' })
     }
 
-    const reply = await replySuccessEmbed(
+    const reply = await safeReplyMessage(
       message,
-      buildEmbed(currentPage),
-      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      {
+        embeds: [buildEmbed(currentPage)],
+        components: getComponents(
+          currentPage,
+          false
+        ) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+        flags: ['SuppressNotifications']
+      },
       60000
     )
 
@@ -632,10 +644,16 @@ class SearchCommand extends BaseCommand {
         .setFooter({ text: 'Hãy chọn danh sách phát bạn muốn nghe trong vòng 60s.' })
     }
 
-    const reply = await replySuccessEmbed(
+    const reply = await safeReplyMessage(
       message,
-      buildEmbed(currentPage),
-      getComponents(currentPage, false) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+      {
+        embeds: [buildEmbed(currentPage)],
+        components: getComponents(
+          currentPage,
+          false
+        ) as ActionRowBuilder<MessageActionRowComponentBuilder>[],
+        flags: ['SuppressNotifications']
+      },
       60000
     )
 
