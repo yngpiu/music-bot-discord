@@ -4,7 +4,6 @@ import { QueueStoreManager, StoredQueue } from 'lavalink-client'
 
 // Implementation of the QueueStoreManager using Redis for persistence. Allows player queues to survive bot restarts.
 export class RedisQueueStore implements QueueStoreManager {
-  
   constructor(private redis: Redis) {}
 
   // Retrieves the stringified queue data for a guild.

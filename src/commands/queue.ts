@@ -10,11 +10,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import {
-  sendTypingMessage,
-  safeDeleteMessageAfter,
-  safeReplyMessage
-} from '~/utils/messageUtil.js'
+import { safeDeleteMessageAfter, safeReplyMessage, sendTypingMessage } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to display and navigate through the music queue.
@@ -57,14 +53,27 @@ class QueueCommand extends BaseCommand {
     bot: BotClient,
     player: Player,
     page: number,
-    totalPages: number
+    totalPages: number,
+    targetUser?: User
   ): EmbedBuilder {
-    const { current, tracks } = player.queue
+    let { current, tracks } = player.queue
+
+    let tracksWithIndex = tracks.map((t, i) => ({ track: t, index: i + 1 }))
+
+    if (targetUser) {
+      tracksWithIndex = tracksWithIndex.filter(
+        (t) => (t.track.requester as User)?.id === targetUser.id
+      )
+      if (current && (current.requester as User)?.id !== targetUser.id) {
+        current = null
+      }
+    }
+
     const start = (page - 1) * 5
-    const currentTracks = tracks.slice(start, start + 5)
+    const currentTracks = tracksWithIndex.slice(start, start + 5)
 
     const descLines: string[] = currentTracks.length
-      ? currentTracks.map((t, i: number) => this.buildTrackString(t, `${start + i + 1}.`))
+      ? currentTracks.map((t) => this.buildTrackString(t.track, `${t.index}.`))
       : ['Không có bài hát nào...']
 
     // Include the currently playing track in the description.
@@ -75,10 +84,14 @@ class QueueCommand extends BaseCommand {
       )
     }
 
+    const totalTracks = tracksWithIndex.length + (current ? 1 : 0)
+
     return new EmbedBuilder()
       .setAuthor({
-        name: `Danh sách chờ - ${tracks.length + (current ? 1 : 0)} bài hát`,
-        iconURL: getBotAvatar(bot)
+        name: targetUser
+          ? `Danh sách chờ của ${targetUser.displayName} - ${totalTracks} bài hát`
+          : `Danh sách chờ - ${totalTracks} bài hát`,
+        iconURL: targetUser ? targetUser.displayAvatarURL() : getBotAvatar(bot)
       })
       .setDescription(descLines.join('\n'))
       .setFooter({ text: `Trang ${page}/${totalPages}` })
@@ -116,7 +129,8 @@ class QueueCommand extends BaseCommand {
     message: Message,
     replyMessage: Message,
     player: Player,
-    totalPages: number
+    totalPages: number,
+    targetUser?: User
   ): void {
     let currentPage = 1
 
@@ -134,7 +148,7 @@ class QueueCommand extends BaseCommand {
 
       await i
         .update({
-          embeds: [this.buildEmbed(bot, player, currentPage, totalPages)],
+          embeds: [this.buildEmbed(bot, player, currentPage, totalPages, targetUser)],
           components: [this.buildNavRow(currentPage, totalPages)]
         })
         .catch((err) => logger.warn(`[Command: queue] Error updating queue page:`, err))
@@ -153,7 +167,7 @@ class QueueCommand extends BaseCommand {
   async execute(
     bot: BotClient,
     message: Message,
-    _args: string[],
+    args: string[],
     { player }: CommandContext
   ): Promise<void> {
     await sendTypingMessage(message)
@@ -163,10 +177,26 @@ class QueueCommand extends BaseCommand {
       throw new BotError(`${getBotName(bot)} đang không phát bản nhạc nào cả.`)
     }
 
-    const totalPages = Math.ceil(player.queue.tracks.length / 5) || 1
+    const targetUser = message.mentions.users.first()
+
+    let tracks = player.queue.tracks
+    let current = player.queue.current
+
+    if (targetUser) {
+      tracks = tracks.filter((t) => (t.requester as User)?.id === targetUser.id)
+      if (current && (current.requester as User)?.id !== targetUser.id) {
+        current = null
+      }
+
+      if (!current && tracks.length === 0) {
+        throw new BotError(`<@${targetUser.id}> chưa yêu cầu phát bài nào.`)
+      }
+    }
+
+    const totalPages = Math.ceil(tracks.length / 5) || 1
 
     const replyMessage = await safeReplyMessage(message, {
-      embeds: [this.buildEmbed(bot, player, 1, totalPages)],
+      embeds: [this.buildEmbed(bot, player, 1, totalPages, targetUser)],
       components: totalPages > 1 ? [this.buildNavRow(1, totalPages)] : []
     })
 
@@ -174,7 +204,7 @@ class QueueCommand extends BaseCommand {
 
     // Initialize interactive navigation if there is more than one page.
     if (totalPages > 1) {
-      this.startPageCollector(bot, message, replyMessage, player, totalPages)
+      this.startPageCollector(bot, message, replyMessage, player, totalPages, targetUser)
     } else {
       safeDeleteMessageAfter([replyMessage, message], TIME.VERY_LONG)
     }

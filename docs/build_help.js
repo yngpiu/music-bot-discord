@@ -219,11 +219,15 @@ const commands = [
     desc: 'Hiển thị các bài hát đang có trong hàng chờ của phòng. Bạn có thể dùng các nút điều hướng để xem các trang tiếp theo một cách dễ dàng.',
     category: 'queue',
     options: [
-      { name: 'số trang', required: false, desc: 'Số trang bạn muốn xem (mặc định là trang 1).' }
+      {
+        name: '@Người dùng',
+        required: false,
+        desc: 'Giới hạn hiển thị danh sách bài hát chờ theo một người dùng cụ thể bằng cách tag họ.'
+      }
     ],
     examples: [
       ['queue', ''],
-      ['queue', '2']
+      ['queue', '@User']
     ]
   },
   {

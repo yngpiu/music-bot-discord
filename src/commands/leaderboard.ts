@@ -16,10 +16,10 @@ import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
   safeEditMessage,
   safeEditReplyInteraction,
-  safeReplyMessage
+  safeReplyMessage,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { formatTrack, getGuildIcon } from '~/utils/stringUtil.js'
 

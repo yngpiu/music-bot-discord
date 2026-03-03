@@ -4,7 +4,6 @@ import { DebugEvents } from 'lavalink-client'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
-
 // Event handler for player debug messages.
 class PlayerDebugEvent extends LavalinkEvent {
   name = 'playerDebug'

@@ -26,12 +26,12 @@ import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
   safeEditMessage,
   safeFollowUpInteraction,
   safeReplyMessage,
   safeReplySuccessMessage,
-  sendFollowUpEphemeral
+  sendFollowUpEphemeral,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 

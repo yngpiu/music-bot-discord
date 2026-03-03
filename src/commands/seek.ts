@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { safeReplySuccessMessage, sendTypingMessage } from '~/utils/messageUtil.js'
 import { formatDuration, getBotName } from '~/utils/stringUtil.js'
 
 // Parses a time string (e.g., "1:30" or "90") into milliseconds.

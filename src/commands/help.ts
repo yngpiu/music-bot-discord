@@ -81,7 +81,11 @@ export const commandsByCategory = {
     }
   ],
   Queue: [
-    { name: 'queue', args: '[trang]', desc: 'Xem danh sách chờ.' },
+    {
+      name: 'queue',
+      args: '[@user]',
+      desc: 'Xem danh sách chờ hoặc danh sách bài người dùng yêu cầu.'
+    },
     {
       name: 'clear',
       args: '',

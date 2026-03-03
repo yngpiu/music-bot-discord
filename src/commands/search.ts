@@ -27,12 +27,12 @@ import {
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
   safeEditMessage,
   safeEditReplyInteraction,
   safeFollowUpInteraction,
   safeReplyMessage,
-  sendFollowUpEphemeral
+  sendFollowUpEphemeral,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { formatDuration, formatTrack, getBotAvatar, getBotName, lines } from '~/utils/stringUtil.js'
 

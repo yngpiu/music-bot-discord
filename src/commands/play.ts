@@ -10,7 +10,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { safeReplyMessage, sendTypingMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command for searching and playing music.

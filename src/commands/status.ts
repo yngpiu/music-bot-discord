@@ -6,7 +6,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { safeReplyMessage, sendTypingMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show comprehensive player information.
