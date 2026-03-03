@@ -17,6 +17,7 @@ import { EmbedBuilder, type Message, type TextChannel } from 'discord.js'
 import type { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time.js'
 
 import { logger } from '~/utils/logger.js'
 import { safeDeleteMessageNow, safeSendMessageWithContainer } from '~/utils/messageUtil'
@@ -111,7 +112,8 @@ export class LyricsManager {
 
       await safeSendMessageWithContainer(
         channel,
-        `${EMOJI.ERROR} Không tìm thấy lời bài hát **${title}**.`
+        `${EMOJI.ERROR} Không tìm thấy lời bài hát **${title}**.`,
+        TIME.SHORT
       )
     })
   }
