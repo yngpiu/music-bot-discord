@@ -56,7 +56,8 @@ class QueueCommand extends BaseCommand {
     totalPages: number,
     targetUser?: User
   ): EmbedBuilder {
-    let { current, tracks } = player.queue
+    let { current } = player.queue
+    const { tracks } = player.queue
 
     let tracksWithIndex = tracks.map((t, i) => ({ track: t, index: i + 1 }))
 
