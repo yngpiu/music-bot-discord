@@ -41,11 +41,10 @@ class TrackStartEvent extends LavalinkEvent {
     // Handle Live Lyrics re-subscribe
     const isLive = player.get<boolean>('liveLyrics')
     if (isLive) {
+      // Clear previous message ID to force LyricsFound/LyricsLine to spawn a new embed
+      // for the new track.
+      player.set('lyricsMessageId', null)
       if (channel?.isTextBased()) {
-        const msg = await (channel as import('discord.js').TextChannel).send({
-          content: '🎤 Đang tìm lời bài hát (Live)...'
-        })
-        player.set('lyricsMessageId', msg.id)
         player.set('lyricsChannelId', channel.id)
       }
       player.subscribeLyrics().catch(() => {})

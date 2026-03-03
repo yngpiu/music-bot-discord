@@ -10,7 +10,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command for searching and playing music.
@@ -122,7 +122,7 @@ class PlayCommand extends BaseCommand {
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(
       `[Command: play] User ${message.author.tag} requested to play track in server ${message.guild!.id}`
     )

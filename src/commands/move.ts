@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to rearrange tracks in the music queue.
@@ -23,7 +23,7 @@ class MoveCommand extends BaseCommand {
     args: string[],
     { player, prefix }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(
       `[Command: move] User ${message.author.tag} requested to move track ${args[0]} to position ${args[1] || 1}`
     )

@@ -5,7 +5,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { formatDuration, getBotName } from '~/utils/stringUtil.js'
 
 // Parses a time string (e.g., "1:30" or "90") into milliseconds.
@@ -33,7 +33,7 @@ class SeekCommand extends BaseCommand {
     args: string[],
     { player, prefix }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     if (!player.queue.current) {
       throw new BotError('Đang không phát bản nhạc nào cả.')
     }

@@ -7,7 +7,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show currently playing track details.
@@ -24,7 +24,7 @@ class NowplayingCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: nowplaying] User ${message.author.tag} requested to view current track`)
 
     // Check if there is a track currently in the queue being played.

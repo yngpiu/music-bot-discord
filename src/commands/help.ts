@@ -14,7 +14,7 @@ import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeDeleteMessageAfter,
   safeEditMessage,
   safeReplyMessage
@@ -254,7 +254,7 @@ class HelpCommand extends BaseCommand {
 
   // Executes the help command.
   async execute(bot: BotClient, message: Message): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: help] User ${message.author.tag} requested to view commands list`)
 
     const prefix = await resolvePrefix(message.guild!.id, message.author.id)

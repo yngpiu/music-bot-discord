@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to pause the Lavalink player.
@@ -23,7 +23,7 @@ class PauseCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: pause] User ${message.author.tag} requested to pause track`)
 
     // Verify player state before attempting to pause.

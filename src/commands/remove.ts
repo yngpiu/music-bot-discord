@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Parses raw command arguments into a sorted list of unique queue positions. Supports individual numbers and ranges (e.g., "1-5").
@@ -55,7 +55,7 @@ class RemoveCommand extends BaseCommand {
     args: string[],
     { player, prefix }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: remove] User ${message.author.tag} requested to remove track from queue`)
 
     if (player.queue.tracks.length === 0) {

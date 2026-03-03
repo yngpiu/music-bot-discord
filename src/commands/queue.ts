@@ -11,7 +11,7 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeDeleteMessageAfter,
   safeReplyMessage
 } from '~/utils/messageUtil.js'
@@ -156,7 +156,7 @@ class QueueCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: queue] User ${message.author.tag} requested to view queue`)
 
     if (!player.playing && !player.queue.current) {

@@ -6,7 +6,7 @@ import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { formatTrack, getBotAvatar } from '~/utils/stringUtil.js'
 
 // Command to show comprehensive player information.
@@ -23,7 +23,7 @@ class StatusCommand extends BaseCommand {
     _args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: status] User ${message.author.tag} requested bot status`)
 
     const currentMode = player.repeatMode

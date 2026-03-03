@@ -17,7 +17,7 @@ import { BotError } from '~/core/errors'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeEditMessage,
   safeReplyMessage,
   safeReplySuccessMessage
@@ -93,7 +93,7 @@ class CommandAliasCommand extends BaseCommand {
 
   // Adds a new alias.
   private async handleAdd(bot: BotClient, message: Message, args: string[]): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
 
     if (args.length < 2) {
       throw new BotError(
@@ -131,7 +131,7 @@ class CommandAliasCommand extends BaseCommand {
 
   // Removes aliases by position (supports range and multiple positions like remove.ts).
   private async handleRemove(message: Message, args: string[]): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
 
     if (args.length === 0) {
       throw new BotError(
@@ -164,7 +164,7 @@ class CommandAliasCommand extends BaseCommand {
 
   // Shows paginated list with navigation buttons.
   private async handleList(bot: BotClient, message: Message): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     const aliases = await listAliases(message.author.id)
 
     if (aliases.length === 0) {

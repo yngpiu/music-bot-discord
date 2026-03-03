@@ -10,7 +10,7 @@ import { buildAddedItemEmbed } from '~/lib/embeds.js'
 import { isSpotifyQuery, spotifySearch } from '~/lib/spotify/resolver.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplyMessage } from '~/utils/messageUtil.js'
 import { getBotAvatar, getBotName } from '~/utils/stringUtil.js'
 
 // Command to add tracks to a specific index in the queue.
@@ -22,7 +22,7 @@ class InsertCommand extends BaseCommand {
 
   // Executes the insert command, searching for the track and placing it at the requested position.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(
       `[Command: insert] User ${message.author.tag} requested to insert track at position ${args[0] || '?'}`
     )

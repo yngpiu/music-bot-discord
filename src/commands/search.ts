@@ -27,7 +27,7 @@ import {
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeEditMessage,
   safeEditReplyInteraction,
   safeFollowUpInteraction,
@@ -457,7 +457,7 @@ class SearchCommand extends BaseCommand {
           await interaction.deferUpdate().catch(() => {})
 
           const loadingQuery = `https://open.spotify.com/album/${album.id}`
-          await reactLoadingMessage(message)
+          await sendTypingMessage(message)
 
           try {
             const spotifyAlbum = await fetchAlbum(album.id)
@@ -696,7 +696,7 @@ class SearchCommand extends BaseCommand {
           await interaction.deferUpdate().catch(() => {})
 
           const loadingQuery = `https://open.spotify.com/playlist/${playlist.id}`
-          await reactLoadingMessage(message)
+          await sendTypingMessage(message)
 
           try {
             const spotifyPlaylist = await fetchPlaylist(playlist.id)
@@ -789,7 +789,7 @@ class SearchCommand extends BaseCommand {
     args: string[],
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     if (!message.guild) return
     logger.info(
       `[Command: search] User ${message.author.tag} requested to search: ${args.join(' ')}`

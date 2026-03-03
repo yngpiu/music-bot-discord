@@ -7,7 +7,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
 // Command to summon the bot to a voice channel.
@@ -72,7 +72,7 @@ class JoinCommand extends BaseCommand {
     { vcId, player: existingPlayer }: CommandContext
   ): Promise<void> {
     if (!message.guild) return
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: join] User ${message.author.tag} requested bot to join channel`)
 
     if (!vcId) throw new BotError('Bạn đang không ở kênh thoại nào cả.')

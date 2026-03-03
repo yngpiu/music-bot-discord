@@ -26,7 +26,7 @@ import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeEditMessage,
   safeFollowUpInteraction,
   safeReplyMessage,
@@ -75,7 +75,7 @@ class FavoriteCommand extends BaseCommand {
 
   // Routes the command to the appropriate handler.
   async execute(bot: BotClient, message: Message, args: string[]): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     const subCommand = args[0]?.toLowerCase()
 
     if (subCommand === 'add') {

@@ -6,7 +6,7 @@ import type { BotClient } from '~/core/BotClient.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
-import { reactLoadingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
+import { sendTypingMessage, safeReplySuccessMessage } from '~/utils/messageUtil.js'
 import { isDeveloperOrServerOwner } from '~/utils/permissionUtil.js'
 import { getBotName } from '~/utils/stringUtil.js'
 
@@ -27,7 +27,7 @@ class PermissionCommand extends BaseCommand {
 
     if (!subCommand) {
       const currentOwnerId = ctx.player?.get<string>('owner')
-      await reactLoadingMessage(message)
+      await sendTypingMessage(message)
       if (!currentOwnerId) {
         await safeReplySuccessMessage(message, `**Chủ xị** hiện chưa được thiết lập.`)
         return
@@ -57,7 +57,7 @@ class PermissionCommand extends BaseCommand {
     message: Message,
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(
       `[Command: permission claim] User ${message.author.tag} requested to claim player control`
     )
@@ -104,7 +104,7 @@ class PermissionCommand extends BaseCommand {
     args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     const currentOwnerId = player.get<string>('owner')
 
     // Only the current owner, developers, or server owners can transfer.

@@ -16,7 +16,7 @@ import prisma from '~/lib/prisma.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
+  sendTypingMessage,
   safeEditMessage,
   safeEditReplyInteraction,
   safeReplyMessage
@@ -305,7 +305,7 @@ class LeaderboardCommand extends BaseCommand {
 
   // Executes the leaderboard command, handling interactions for pagination and view switching.
   async execute(bot: BotClient, message: Message): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     let currentView: LeaderboardView = 'personal'
     let currentPage = 0
 

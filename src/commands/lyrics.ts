@@ -1,4 +1,4 @@
-import { EmbedBuilder, type Message, TextChannel } from 'discord.js'
+import { EmbedBuilder, type Message } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
@@ -6,8 +6,8 @@ import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  reactLoadingMessage,
-  safeReplyErrorMessage,
+  sendTypingMessage,
+  safeDeleteMessageNow,
   safeReplyMessage,
   safeReplySuccessMessage
 } from '~/utils/messageUtil.js'
@@ -17,7 +17,8 @@ import { getBotAvatar } from '~/utils/stringUtil.js'
 class LyricsCommand extends BaseCommand {
   name = 'lyrics'
   aliases = ['ly']
-  description = 'Xem lời bài hát hoặc bật chế độ Live Lyrics (Karaoke) (`!lyrics live`)'
+  description =
+    'Xem lời tĩnh hoặc bật/tắt chế độ Live Lyrics (Karaoke) (`!lyrics on` | `!lyrics off`)'
   requiresVoice = true
 
   async execute(
@@ -26,39 +27,57 @@ class LyricsCommand extends BaseCommand {
     args: string[],
     { player }: CommandContext
   ): Promise<void> {
-    await reactLoadingMessage(message)
+    await sendTypingMessage(message)
     logger.info(`[Command: lyrics] User ${message.author.tag} requested lyrics. Args: ${args}`)
 
     if (!player.queue.current) {
       throw new BotError('Danh sách phát hiện tại đang trống.')
     }
 
-    // Toggle live lyrics
-    if (args[0]?.toLowerCase() === 'live') {
+    const commandArg = args[0]?.toLowerCase()
+
+    // Toggle live lyrics ON
+    if (commandArg === 'on') {
       const isLive = player.get<boolean>('liveLyrics')
 
       if (isLive) {
-        player.set('liveLyrics', false)
-        await player.unsubscribeLyrics().catch(() => {})
-        await safeReplySuccessMessage(message, 'Đã **tắt** chế độ Live Lyrics.')
-      } else {
-        player.set('liveLyrics', true)
-
-        // Setup initial message
-        if (message.channel.isTextBased()) {
-          const msg = await (message.channel as TextChannel).send({
-            content: '🎤 Đang tìm lời bài hát (Live)...'
-          })
-          player.set('lyricsMessageId', msg.id)
-          player.set('lyricsChannelId', message.channel.id)
-        }
-
-        await player.subscribeLyrics().catch(() => {})
-        await safeReplySuccessMessage(
-          message,
-          'Đã **bật** chế độ Live Lyrics. Lời bài hát sẽ hiển thị khi có (yêu cầu bài hát có hỗ trợ synced lyrics).'
-        )
+        throw new BotError('Chế độ **Live Lyrics** đã được bật sẵn.')
       }
+
+      player.set('liveLyrics', true)
+      player.set('lyricsChannelId', message.channel.id)
+
+      await player.subscribeLyrics().catch(() => {})
+      await safeReplySuccessMessage(message, 'Đã **bật** chế độ **Live Lyrics**.')
+      return
+    }
+
+    // Toggle live lyrics OFF
+    if (commandArg === 'off') {
+      const isLive = player.get<boolean>('liveLyrics')
+
+      if (!isLive) {
+        throw new BotError('Chế độ **Live Lyrics** đang không được bật.')
+      }
+
+      player.set('liveLyrics', false)
+      await player.unsubscribeLyrics().catch(() => {})
+
+      const channelId = player.get<string | null>('lyricsChannelId')
+      const messageId = player.get<string | null>('lyricsMessageId')
+
+      if (channelId && messageId) {
+        const channel = bot.channels.cache.get(channelId)
+        if (channel?.isTextBased()) {
+          const msg = channel.messages.cache.get(messageId)
+          if (msg) await safeDeleteMessageNow(msg)
+        }
+      }
+
+      player.set('lyricsMessageId', null)
+      player.set('lyricsChannelId', null)
+
+      await safeReplySuccessMessage(message, 'Đã **tắt** chế độ **Live Lyrics**.')
       return
     }
 
@@ -66,8 +85,7 @@ class LyricsCommand extends BaseCommand {
     const lyrics = await player.getCurrentLyrics().catch(() => null)
 
     if (!lyrics) {
-      await safeReplyErrorMessage(message, 'Không tìm thấy lời cho bài hát này.')
-      return
+      throw new BotError('Không tìm thấy lời cho bài hát này.')
     }
 
     let description: string
@@ -76,27 +94,49 @@ class LyricsCommand extends BaseCommand {
     } else if (lyrics.text) {
       description = lyrics.text
     } else {
-      await safeReplyErrorMessage(message, 'Không tìm thấy lời cho bài hát này.')
-      return
+      throw new BotError('Không tìm thấy lời cho bài hát này.')
     }
 
-    // If lyrics are too long, Discord max embed description is 4096.
-    // We can truncate it or send chunks. Let's truncate for simplicity.
+    // If lyrics are too long, split them into chunks. Discord max embed description is 4096.
     const maxLen = 4000
-    if (description.length > maxLen) {
-      description = description.substring(0, maxLen) + '\n... (còn tiếp)'
+    const chunks: string[] = []
+    let remaining = description
+
+    while (remaining.length > 0) {
+      if (remaining.length > maxLen) {
+        // Try to split at the last newline before maxLen
+        let splitIndex = remaining.lastIndexOf('\n', maxLen)
+        if (splitIndex === -1) {
+          splitIndex = maxLen
+        }
+        chunks.push(remaining.substring(0, splitIndex))
+        remaining = remaining.substring(splitIndex).trimStart()
+      } else {
+        chunks.push(remaining)
+        break
+      }
     }
 
-    const embed = new EmbedBuilder()
-      .setAuthor({
-        name: `Lời bài hát: ${player.queue.current.info.title}`,
-        iconURL: getBotAvatar(bot)
-      })
-      .setDescription(description)
-      .setFooter({ text: `Nguồn: ${lyrics.provider || lyrics.sourceName}` })
+    const embeds = chunks.map((chunk, index) => {
+      const embed = new EmbedBuilder().setColor('#1DB954').setDescription(chunk)
 
+      if (index === 0) {
+        embed.setAuthor({
+          name: `Lời bài hát: ${player.queue.current!.info.title}`,
+          iconURL: getBotAvatar(bot)
+        })
+      }
+
+      if (index === chunks.length - 1) {
+        embed.setFooter({ text: `Nguồn: ${lyrics.provider || lyrics.sourceName}` })
+      }
+
+      return embed
+    })
+
+    // Take up to 10 chunks to avoid Discord embed limit
     await safeReplyMessage(message, {
-      embeds: [embed],
+      embeds: embeds.slice(0, 10),
       flags: ['SuppressNotifications']
     })
   }

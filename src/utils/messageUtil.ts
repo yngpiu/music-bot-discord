@@ -34,15 +34,6 @@ export type RepliableInteraction =
 
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms))
 
-async function safeRemoveAllReactions(message: Message): Promise<void> {
-  if (!message.reactions.cache.size) return
-  try {
-    await message.reactions.removeAll()
-  } catch {
-    // Thiếu MANAGE_MESSAGES permission hoặc message đã bị xóa
-  }
-}
-
 function scheduleDelete(messages: Message[], timeout?: number): void {
   if (!timeout || timeout <= 0) return
   safeDeleteMessageAfter(messages, timeout)
@@ -75,7 +66,6 @@ export async function safeReplyMessage(
 
   try {
     const repliedMessage = await message.reply(messageOptions)
-    await safeRemoveAllReactions(message)
     scheduleDelete([repliedMessage, message], timeoutDeleteMessage)
     return repliedMessage
   } catch {
@@ -92,7 +82,6 @@ export async function safeEditMessage(
 
   try {
     const editedMessage = await message.edit(messageOptions)
-    await safeRemoveAllReactions(message)
     scheduleDelete([editedMessage], timeoutDeleteMessage)
     return editedMessage
   } catch {
@@ -100,13 +89,12 @@ export async function safeEditMessage(
   }
 }
 
-// Quickly adds a loading reaction to a message.
-export async function reactLoadingMessage(message: Message | null | undefined): Promise<void> {
-  if (!message) return
+// Quickly sends a typing indicator to a message's channel instead of a loading reaction.
+export async function sendTypingMessage(message: Message | null | undefined): Promise<void> {
+  if (!message || !message.channel) return
   try {
-    const existing = message.reactions.cache.get(EMOJI.LOADING.match(/:(\d+)>/)?.[1] ?? '')
-    if (!existing || !existing.me) {
-      await message.react(EMOJI.LOADING)
+    if (message.channel.isTextBased() && message.channel.isSendable()) {
+      await message.channel.sendTyping()
     }
   } catch {
     // Ignore error
@@ -119,8 +107,6 @@ export async function safeDeleteMessageNow(
   const msgArray = Array.isArray(messages) ? messages : [messages]
   const valid = msgArray.filter((m): m is Message => m != null && m.deletable)
   if (valid.length === 0) return false
-
-  await Promise.allSettled(valid.map((m) => safeRemoveAllReactions(m)))
 
   const results = await Promise.allSettled(valid.map((m) => m.delete()))
   return results.some((r) => r.status === 'fulfilled')
@@ -169,7 +155,6 @@ export async function safeEditReplyInteraction(
 
   try {
     const edited = await interaction.editReply(options)
-    await safeRemoveAllReactions(edited)
     return edited
   } catch {
     return null

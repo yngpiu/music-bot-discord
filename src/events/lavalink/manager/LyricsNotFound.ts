@@ -1,10 +1,12 @@
-import { EmbedBuilder, TextChannel } from 'discord.js'
+import { type TextChannel } from 'discord.js'
 import type { Player, Track, UnresolvedTrack } from 'lavalink-client'
 
+import { EMOJI } from '~/constants/emoji'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
 import { logger } from '~/utils/logger.js'
+import { safeSendMessageWithContainer } from '~/utils/messageUtil'
 
 class LyricsNotFoundEventHandler extends LavalinkEvent {
   name = 'LyricsNotFound'
@@ -23,28 +25,22 @@ class LyricsNotFoundEventHandler extends LavalinkEvent {
 
     const channelId = player.get<string | null>('lyricsChannelId')
     const messageId = player.get<string | null>('lyricsMessageId')
-    if (!channelId || !messageId) return
+    if (!channelId) return
 
     const channel = bot.channels.cache.get(channelId)
     if (channel?.isTextBased()) {
-      let msg = (channel as TextChannel).messages.cache.get(messageId)
-      if (!msg) {
-        msg = await (channel as TextChannel).messages.fetch(messageId).catch(() => undefined)
+      if (messageId) {
+        const msg = (channel as TextChannel).messages.cache.get(messageId)
+        if (!msg) {
+          await (channel as TextChannel).messages.fetch(messageId).catch(() => undefined)
+        }
       }
+      const title = track?.info?.title || 'hiện đang phát'
 
-      if (msg) {
-        const title = track?.info?.title || '🎶 Đang phát'
-        const embed = new EmbedBuilder()
-          .setColor('#E0245E') // Red color
-          .setAuthor({ name: '🎤 Live Lyrics' })
-          .setTitle(title)
-          .setDescription(
-            `_Không tìm thấy lời bài hát có hỗ trợ lyrics động (synced) cho bài hát này._`
-          )
-          .setFooter({ text: 'Thử dùng lệnh "!lyrics" để lấy lời tĩnh nếu có.' })
-
-        await msg.edit({ content: '', embeds: [embed] }).catch(() => {})
-      }
+      await safeSendMessageWithContainer(
+        channel,
+        `${EMOJI.ERROR} Không tìm thấy lời bài hát **${title}**.`
+      )
     }
   }
 }
