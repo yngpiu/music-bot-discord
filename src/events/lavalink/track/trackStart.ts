@@ -37,6 +37,19 @@ class TrackStartEvent extends LavalinkEvent {
       `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`,
       TIME.MEDIUM
     )
+
+    // Handle Live Lyrics re-subscribe
+    const isLive = player.get<boolean>('liveLyrics')
+    if (isLive) {
+      if (channel?.isTextBased()) {
+        const msg = await (channel as import('discord.js').TextChannel).send({
+          content: '🎤 Đang tìm lời bài hát (Live)...'
+        })
+        player.set('lyricsMessageId', msg.id)
+        player.set('lyricsChannelId', channel.id)
+      }
+      player.subscribeLyrics().catch(() => {})
+    }
   }
 }
 
