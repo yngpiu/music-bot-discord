@@ -1,4 +1,6 @@
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const commands = [
   // MUSIC CATEGORY
@@ -189,6 +191,24 @@ const commands = [
       ['fav rm', '1-3'],
       ['fav play', ''],
       ['favorite', '']
+    ]
+  },
+  {
+    name: 'lyrics',
+    aliases: ['ly'],
+    desc: 'Xem lời tĩnh hoặc bật/tắt chế độ Live Lyrics (Karaoke) để tự động hiển thị dòng chữ nhấp nháy đồng bộ với bài hát đang phát.',
+    category: 'music',
+    options: [
+      {
+        name: 'on / off',
+        required: false,
+        desc: 'Nhập `on` để bật lời động chạy karaoke hiện giữa màn hình. Dùng `off` để tắt sạch tính năng này. Bỏ trống để bot hiển thị lời tĩnh toàn bộ của bài hát.'
+      }
+    ],
+    examples: [
+      ['lyrics', ''],
+      ['lyrics on', ''],
+      ['lyrics off', '']
     ]
   },
 
@@ -897,5 +917,10 @@ const template = `<!DOCTYPE html>
 </body>
 </html>`
 
-fs.writeFileSync('/home/yngpiu/Documents/music-bot/docs/help.html', template)
-console.log('Successfully generated help.html with beautiful structured arguments!')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const outputPath = path.join(__dirname, 'help.html')
+
+fs.writeFileSync(outputPath, template)
+console.log('Successfully generated help.html!')

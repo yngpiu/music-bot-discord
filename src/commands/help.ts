@@ -14,10 +14,10 @@ import type { BotClient } from '~/core/BotClient.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
   safeDeleteMessageAfter,
   safeEditMessage,
-  safeReplyMessage
+  safeReplyMessage,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
@@ -73,6 +73,11 @@ export const commandsByCategory = {
       name: 'favorite',
       args: '[add/remove/play]',
       desc: 'Quản lý danh sách nhạc yêu thích.'
+    },
+    {
+      name: 'lyrics',
+      args: '[on/off]',
+      desc: 'Xem lời tĩnh hoặc bật/tắt chế độ Live Lyrics.'
     }
   ],
   Queue: [
