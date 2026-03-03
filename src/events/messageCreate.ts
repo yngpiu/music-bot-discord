@@ -110,7 +110,10 @@ class MessageCreateEvent extends BotEvent {
       : lines(`${EMOJI.ANIMATED_CAT_CRYING} Chúng tớ đang bận hết rồi, bạn thử lại sau nhé.`)
 
     const container = new ContainerBuilder().addTextDisplayComponents((t) => t.setContent(text))
-    await safeReplyMessage(message, { components: [container], flags: ['IsComponentsV2'] })
+    await safeReplyMessage(message, {
+      components: [container],
+      flags: ['IsComponentsV2', 'SuppressNotifications']
+    })
   }
 
   // Checks if a user is currently banned from using the bot.
@@ -126,7 +129,7 @@ class MessageCreateEvent extends BotEvent {
     )
     const reply = await safeReplyMessage(message, {
       components: [container],
-      flags: ['IsComponentsV2']
+      flags: ['IsComponentsV2', 'SuppressNotifications']
     })
 
     if (reply) {
@@ -151,7 +154,7 @@ class MessageCreateEvent extends BotEvent {
     )
     const reply = await safeReplyMessage(message, {
       components: [container],
-      flags: ['IsComponentsV2']
+      flags: ['IsComponentsV2', 'SuppressNotifications']
     })
 
     if (reply) {

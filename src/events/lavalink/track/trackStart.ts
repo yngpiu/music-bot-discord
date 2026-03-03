@@ -5,6 +5,7 @@ import { EMOJI } from '~/constants/emoji'
 import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
+import { LyricsManager } from '~/core/LyricsManager.js'
 
 import { logger } from '~/utils/logger.js'
 import { safeSendMessageWithContainer } from '~/utils/messageUtil'
@@ -39,14 +40,9 @@ class TrackStartEvent extends LavalinkEvent {
     )
 
     // Handle Live Lyrics re-subscribe
-    const isLive = player.get<boolean>('liveLyrics')
-    if (isLive) {
-      // Clear previous message ID to force LyricsFound/LyricsLine to spawn a new embed
-      // for the new track.
-      player.set('lyricsMessageId', null)
-      if (channel?.isTextBased()) {
-        player.set('lyricsChannelId', channel.id)
-      }
+    const mgr = LyricsManager.for(player, bot)
+    if (mgr.isEnabled) {
+      mgr.resetForNewTrack(channel?.isTextBased() ? channel.id : player.textChannelId)
       player.subscribeLyrics().catch(() => {})
     }
   }

@@ -2,14 +2,14 @@ import { EmbedBuilder, type Message } from 'discord.js'
 
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
+import { LyricsManager } from '~/core/LyricsManager.js'
 import { BotError } from '~/core/errors.js'
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
-  safeDeleteMessageNow,
   safeReplyMessage,
-  safeReplySuccessMessage
+  safeReplySuccessMessage,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
@@ -35,17 +35,16 @@ class LyricsCommand extends BaseCommand {
     }
 
     const commandArg = args[0]?.toLowerCase()
+    const mgr = LyricsManager.for(player, bot)
 
     // Toggle live lyrics ON
     if (commandArg === 'on') {
-      const isLive = player.get<boolean>('liveLyrics')
-
-      if (isLive) {
+      if (mgr.isEnabled) {
         throw new BotError('Chế độ **Live Lyrics** đã được bật sẵn.')
       }
 
       player.set('liveLyrics', true)
-      player.set('lyricsChannelId', message.channel.id)
+      mgr.setChannel(message.channel.id)
 
       await player.subscribeLyrics().catch(() => {})
       await safeReplySuccessMessage(message, 'Đã **bật** chế độ **Live Lyrics**.')
@@ -54,28 +53,13 @@ class LyricsCommand extends BaseCommand {
 
     // Toggle live lyrics OFF
     if (commandArg === 'off') {
-      const isLive = player.get<boolean>('liveLyrics')
-
-      if (!isLive) {
+      if (!mgr.isEnabled) {
         throw new BotError('Chế độ **Live Lyrics** đang không được bật.')
       }
 
       player.set('liveLyrics', false)
       await player.unsubscribeLyrics().catch(() => {})
-
-      const channelId = player.get<string | null>('lyricsChannelId')
-      const messageId = player.get<string | null>('lyricsMessageId')
-
-      if (channelId && messageId) {
-        const channel = bot.channels.cache.get(channelId)
-        if (channel?.isTextBased()) {
-          const msg = channel.messages.cache.get(messageId)
-          if (msg) await safeDeleteMessageNow(msg)
-        }
-      }
-
-      player.set('lyricsMessageId', null)
-      player.set('lyricsChannelId', null)
+      await mgr.cleanup()
 
       await safeReplySuccessMessage(message, 'Đã **tắt** chế độ **Live Lyrics**.')
       return

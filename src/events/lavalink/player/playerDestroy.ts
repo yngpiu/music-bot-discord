@@ -5,6 +5,7 @@ import { Player } from 'lavalink-client'
 import { EMOJI } from '~/constants/emoji.js'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
+import { LyricsManager } from '~/core/LyricsManager.js'
 
 import { logger } from '~/utils/logger.js'
 import { safeDeleteMessageNow, safeSendMessageWithContainer } from '~/utils/messageUtil'
@@ -32,6 +33,10 @@ class PlayerDestroyEvent extends LavalinkEvent {
       }
       player.set('queueEmptyMessageId', null)
     }
+
+    // Attempt to cleanup lyrics manager messages
+    const mgr = LyricsManager.for(player, bot)
+    await mgr.cleanup()
 
     await safeSendMessageWithContainer(
       channel,

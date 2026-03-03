@@ -4,6 +4,7 @@ import { captureTrackPlay } from '~/services/trackService.js'
 
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
+import { LyricsManager } from '~/core/LyricsManager.js'
 
 import { logger } from '~/utils/logger.js'
 
@@ -23,6 +24,9 @@ class QueueEndEvent extends LavalinkEvent {
     )
 
     if (payload?.reason !== 'finished' || !track) return
+
+    const mgr = LyricsManager.for(player, bot)
+    await mgr.cleanup()
 
     captureTrackPlay(bot, player, track)
   }

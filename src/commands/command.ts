@@ -17,10 +17,10 @@ import { BotError } from '~/core/errors'
 
 import { logger } from '~/utils/logger.js'
 import {
-  sendTypingMessage,
   safeEditMessage,
   safeReplyMessage,
-  safeReplySuccessMessage
+  safeReplySuccessMessage,
+  sendTypingMessage
 } from '~/utils/messageUtil.js'
 import { getBotAvatar } from '~/utils/stringUtil.js'
 
