@@ -2,6 +2,7 @@
 import { Player, WebSocketClosedEvent } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -25,7 +26,8 @@ class PlayerSocketClosedEvent extends LavalinkEvent {
 
     await safeSendMessageWithContainer(
       channel,
-      `${EMOJI.ERROR} ${getBotName(bot)} đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`
+      `${EMOJI.ERROR} ${getBotName(bot)} đang gặp sự cố, hiện không thể tiếp tục phát nhạc.`,
+      TIME.SHORT
     )
   }
 }

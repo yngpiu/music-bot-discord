@@ -2,6 +2,7 @@
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -42,7 +43,7 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
       ? `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ai đó bịt miệng, không thể tiếp tục phát nhạc.`
       : `${EMOJI.ANIMATED_CAT_LOVE_YOU} ${getBotName(bot)} đã nói lại được rồi, có thể tiếp tục phát nhạc.`
 
-    await safeSendMessageWithContainer(channel, message)
+    await safeSendMessageWithContainer(channel, message, TIME.SHORT)
   }
 }
 

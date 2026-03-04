@@ -2,6 +2,7 @@
 import { Player, Track, TrackStuckEvent } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -36,7 +37,8 @@ class TrackStuckHandler extends LavalinkEvent {
 
     await safeSendMessageWithContainer(
       channel,
-      `${EMOJI.ERROR} ${getBotName(bot)} đã bỏ qua ${trackDisplay} do lỗi phát nhạc.`
+      `${EMOJI.ERROR} ${getBotName(bot)} đã bỏ qua ${trackDisplay} do lỗi phát nhạc.`,
+      TIME.SHORT
     )
   }
 }

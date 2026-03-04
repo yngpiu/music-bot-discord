@@ -2,6 +2,7 @@
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -37,7 +38,7 @@ class PlayerSuppressChangeEvent extends LavalinkEvent {
       ? `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị đuổi khỏi sân khấu, không thể tiếp tục phát nhạc.`
       : `${EMOJI.ANIMATED_CAT_LOVE} ${getBotName(bot)} đã được bế lên sân khấu để phát nhạc.`
 
-    await safeSendMessageWithContainer(channel, message)
+    await safeSendMessageWithContainer(channel, message, TIME.SHORT)
   }
 }
 

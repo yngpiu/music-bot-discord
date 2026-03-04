@@ -2,6 +2,7 @@
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -27,7 +28,8 @@ class PlayerMoveEvent extends LavalinkEvent {
 
     await safeSendMessageWithContainer(
       channel,
-      `${EMOJI.ANIMATED_CAT_NO_IDEA} ${getBotName(bot)} đã bị ai đó bê sang kênh <#${newVoiceChannelId}>.`
+      `${EMOJI.ANIMATED_CAT_NO_IDEA} ${getBotName(bot)} đã bị ai đó bê sang kênh <#${newVoiceChannelId}>.`,
+      TIME.SHORT
     )
   }
 }

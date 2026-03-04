@@ -2,6 +2,7 @@
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -21,7 +22,7 @@ class PlayerReconnectEvent extends LavalinkEvent {
 
     const message = `${EMOJI.ANIMATED_CAT_CONGRATULATION} ${getBotName(bot)} đã kết nối lại thành công.`
 
-    await safeSendMessageWithContainer(channel, message)
+    await safeSendMessageWithContainer(channel, message, TIME.SHORT)
   }
 }
 

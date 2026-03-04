@@ -3,6 +3,7 @@ import { TextChannel } from 'discord.js'
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 import { LyricsManager } from '~/core/LyricsManager.js'
@@ -40,7 +41,8 @@ class PlayerDestroyEvent extends LavalinkEvent {
 
     await safeSendMessageWithContainer(
       channel,
-      `${EMOJI.ANIMATED_CAT_BYE} ${getBotName(bot)} đã rời đi.`
+      `${EMOJI.ANIMATED_CAT_BYE} ${getBotName(bot)} đã rời đi.`,
+      TIME.SHORT
     )
   }
 }

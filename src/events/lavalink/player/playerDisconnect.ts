@@ -2,6 +2,7 @@
 import { Player } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji.js'
+import { TIME } from '~/constants/time'
 import { BotClient } from '~/core/BotClient.js'
 import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 
@@ -20,7 +21,8 @@ class PlayerDisconnectEvent extends LavalinkEvent {
 
     await safeSendMessageWithContainer(
       channel,
-      `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ngắt kết nối.`
+      `${EMOJI.ANIMATED_CAT_CRYING} ${getBotName(bot)} đã bị ngắt kết nối.`,
+      TIME.SHORT
     )
   }
 }
