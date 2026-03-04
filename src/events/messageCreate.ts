@@ -121,10 +121,10 @@ class MessageCreateEvent extends BotEvent {
     const banRemainingMs = await getBanRemainingMs(message.author.id)
     if (banRemainingMs <= 0) return false
 
-    const banHours = (banRemainingMs / 3_600_000).toFixed(1)
+    const expireTimestamp = Math.floor((Date.now() + banRemainingMs) / 1000)
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ERROR} Bạn đã bị cấm sử dụng bot trong **${banHours} tiếng** nữa do spam lệnh quá mức.`
+        `${EMOJI.ERROR} Bạn đã bị cấm dùng **DJ BOT**, vui lòng chờ **<t:${expireTimestamp}:R>** trước khi thử lại.`
       )
     )
     const reply = await safeReplyMessage(message, {
@@ -146,10 +146,10 @@ class MessageCreateEvent extends BotEvent {
     const { limited, remainingMs } = await checkRateLimit(message.author.id)
     if (!limited) return false
 
-    const remaining = (remainingMs / 1000).toFixed(1)
+    const expireTimestamp = Math.floor((Date.now() + remainingMs) / 1000)
     const container = new ContainerBuilder().addTextDisplayComponents((t) =>
       t.setContent(
-        `${EMOJI.ERROR} Bạn đang dùng lệnh quá nhanh. Vui lòng chờ **${remaining}s** trước khi thử lại.`
+        `${EMOJI.ERROR} Bạn đã dùng lệnh quá nhanh, vui lòng chờ **<t:${expireTimestamp}:R>** trước khi thử lại.`
       )
     )
     const reply = await safeReplyMessage(message, {
