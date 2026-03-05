@@ -6,12 +6,10 @@ const WINDOW_MS = 2_000
 // Maximum allowed uses within the time window.
 const MAX_USES = 1
 
-// Progressive ban tiers: [violation_count, duration_ms].
-const BAN_TIERS: [number, number][] = [
-  [30, 12 * 60 * 60 * 1000], // 12 hours
-  [20, 6 * 60 * 60 * 1000], // 6 hours
-  [10, 1 * 60 * 60 * 1000] // 1 hour
-]
+// Number of violations before a ban is triggered.
+const BAN_THRESHOLD = 10
+// Duration of the ban (1 hour).
+const BAN_DURATION_MS = 1 * 60 * 60 * 1000
 
 let redis: Redis | null = null
 
@@ -51,13 +49,11 @@ export async function checkRateLimit(
     const violationsKey = `violations:${userId}`
     const violations = await redis.incr(violationsKey)
 
-    await redis.expire(violationsKey, 24 * 60 * 60)
+    await redis.expire(violationsKey, 12 * 60 * 60)
 
-    for (const [threshold, banMs] of BAN_TIERS) {
-      if (violations > threshold) {
-        await redis.set(`ban:${userId}`, '1', 'PX', banMs)
-        break
-      }
+    if (violations > BAN_THRESHOLD) {
+      await redis.set(`ban:${userId}`, '1', 'PX', BAN_DURATION_MS)
+      await redis.del(violationsKey) // Reset violations after banning
     }
 
     return { limited: true, remainingMs }
