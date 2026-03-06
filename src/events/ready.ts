@@ -1,7 +1,6 @@
 // Initializes Lavalink and logs bot status when the Discord client is ready.
 import { ActivityType, Events } from 'discord.js'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { getKpopRadarData, getKpopRadarYoutubeDailyData } from '~/services/kpopRadarService.js'
 
 import type { BotClient } from '~/core/BotClient'
 import { BotEvent } from '~/core/BotEvent.js'
@@ -13,49 +12,104 @@ class ReadyEvent extends BotEvent {
   name = Events.ClientReady
   once = true
 
-  // Initializes Lavalink and sets up the rotating lyric status for the bot instance.
+  // Initializes Lavalink and sets up the rotating stat status for the bot instance.
   async execute(bot: BotClient): Promise<void> {
     await bot.lavalink.init({ ...bot.user!, shards: 'auto' })
 
-    // Load lyrics from the JSON file.
-    const lyricsPath = join(process.cwd(), 'data', 'lyrics.json')
-    try {
-      const lyricsData = JSON.parse(readFileSync(lyricsPath, 'utf8'))
-      const songKeys = Object.keys(lyricsData)
+    const formatNumber = (num: number) => new Intl.NumberFormat('en-US').format(num)
+    let currentLine = 0
 
-      if (songKeys.length > 0) {
-        // Assign a unique song to each bot based on its index.
-        const songKey = songKeys[bot.botIndex % songKeys.length]
-        const songLyrics = lyricsData[songKey]
+    const updateStatus = async () => {
+      try {
+        if (bot.botIndex === 0) {
+          const ytTasks = await getKpopRadarYoutubeDailyData()
+          if (ytTasks && ytTasks.length > 0) {
+            // Each line is a song, we show 2 lines per song (name/views + diff)
+            const songIndex = Math.floor(currentLine / 2) % ytTasks.length
+            const isShowingDiff = currentLine % 2 !== 0
+            const botYoutubeSong = ytTasks[songIndex]
 
-        if (Array.isArray(songLyrics) && songLyrics.length > 0) {
-          let currentLine = 0
+            if (botYoutubeSong) {
+              const baseStr = `${botYoutubeSong.songName} - ${formatNumber(botYoutubeSong.playCount)} lượt xem`
+              let diffStr = ''
 
-          // Function to update the bot's status with the current lyric line.
-          const updateStatus = () => {
-            bot.user?.setActivity({
-              name: songLyrics[currentLine],
-              type: ActivityType.Custom
-            })
-            currentLine = (currentLine + 1) % songLyrics.length
+              const ratio =
+                botYoutubeSong.playCount - botYoutubeSong.incCount > 0
+                  ? (
+                      (botYoutubeSong.incCount /
+                        (botYoutubeSong.playCount - botYoutubeSong.incCount)) *
+                      100
+                    ).toFixed(2)
+                  : '100.00'
+
+              if (botYoutubeSong.incCount > 0) {
+                diffStr = `${botYoutubeSong.songName} - Tăng ${formatNumber(botYoutubeSong.incCount)} (${ratio}%) lượt xem so với hôm qua`
+              } else if (botYoutubeSong.incCount < 0) {
+                diffStr = `${botYoutubeSong.songName} - Giảm ${formatNumber(Math.abs(botYoutubeSong.incCount))} (${Math.abs(parseFloat(ratio))}%) lượt xem so với hôm qua`
+              } else {
+                diffStr = `${botYoutubeSong.songName} - Không đổi so với hôm qua`
+              }
+
+              bot.user?.setActivity({
+                name: isShowingDiff ? diffStr : baseStr,
+                type: ActivityType.Custom
+              })
+
+              currentLine = currentLine + 1
+              return
+            }
           }
+        } else {
+          // Other bots display SNS stats
+          const snsData = await getKpopRadarData()
+          if (snsData && snsData.length > 0) {
+            // Shift index back 1 to use 0-indexed positions
+            const botPlatform = snsData[(bot.botIndex - 1) % snsData.length]
 
-          // Initial status set and interval for subsequent updates.
-          updateStatus()
-          setInterval(updateStatus, 5_000) // Update every 10 seconds.
+            if (botPlatform) {
+              const platformName =
+                botPlatform.name.charAt(0).toUpperCase() + botPlatform.name.slice(1)
+              const line1 = `${platformName} - ${formatNumber(botPlatform.totalCount)} người theo dõi`
 
-          logger.info(`[System] Bot ${bot.user?.tag} assigned song: ${songKey}`)
+              let line2 = ''
+              if (botPlatform.incCount > 0) {
+                const ratio = parseFloat(botPlatform.incRatio).toFixed(2)
+                line2 = `${platformName} - Tăng ${formatNumber(botPlatform.incCount)} (${ratio}%) so với hôm qua`
+              } else if (botPlatform.incCount < 0) {
+                const ratio = parseFloat(botPlatform.incRatio).toFixed(2)
+                // Avoid negative signs in Giảm text
+                line2 = `${platformName} - Giảm ${formatNumber(Math.abs(botPlatform.incCount))} (${Math.abs(parseFloat(ratio))}%) so với hôm qua`
+              } else {
+                line2 = `${platformName} - Không đổi so với hôm qua`
+              }
+
+              const statusLines = [line1, line2]
+              const lineToShow = statusLines[currentLine % statusLines.length]
+
+              bot.user?.setActivity({
+                name: lineToShow,
+                type: ActivityType.Custom
+              })
+
+              currentLine = currentLine + 1
+              return
+            }
+          }
         }
+      } catch {
+        // Log silently
       }
-    } catch (err) {
-      logger.error(`[System] Failed to load lyrics for bot ${bot.user?.tag}:`, err)
 
-      // Fallback status if lyrics fail to load.
+      // Fallback status if data fails to load.
       bot.user?.setActivity({
         name: '.help',
         type: ActivityType.Listening
       })
     }
+
+    // Initial status set and interval for subsequent updates.
+    await updateStatus()
+    setInterval(updateStatus, 5_000) // Update every 5 seconds.
 
     logger.info(`[System] Bot ${bot.user?.tag} is ready and successfully initialized Lavalink!`)
   }

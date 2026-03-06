@@ -4,6 +4,7 @@ import { Redis } from 'ioredis'
 import { LavalinkManager } from 'lavalink-client'
 import { config } from '~/config/env.js'
 import { setAliasRedisClient } from '~/services/aliasService.js'
+import { setKpopRadarRedisClient } from '~/services/kpopRadarService.js'
 import { setPrefixRedisClient } from '~/services/prefixService.js'
 import { initTrackService } from '~/services/trackService.js'
 
@@ -47,6 +48,7 @@ export class BotManager {
       setPrefixRedisClient(this.redis)
       setAliasRedisClient(this.redis)
       setSpotifyRedisClient(this.redis)
+      setKpopRadarRedisClient(this.redis)
       initTrackService(this.redis)
       await initSpotifyToken()
     } catch (err) {
