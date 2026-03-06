@@ -71,54 +71,67 @@ plugins:
       # # - WEBEMBEDDED
       # # - ANDROID_MUSIC
       # ---------
-      - MUSIC
-      - WEB
-      - MWEB
-      - WEBEMBEDDED
-      - ANDROID_MUSIC
-      - ANDROID_VR
-      - TV
-      - TVHTML5_SIMPLY
-    ANDROID_MUSIC:
-      playback: true
-      playlistLoading: false
-      searching: true
-      videoLoading: true
-    ANDROID_VR:
-      playback: true
-      playlistLoading: true
-      searching: true
-      videoLoading: true
-    MUSIC:
-      playback: false
-      playlistLoading: false
-      searching: true
-      videoLoading: false
-    MWEB:
-      playback: false
-      playlistLoading: true
-      searching: true
-      videoLoading: true
-    TV:
-      playback: true
-      playlistLoading: false
-      searching: false
-      videoLoading: false
-    TVHTML5_SIMPLY:
-      playback: true
-      playlistLoading: false
-      searching: true
-      videoLoading: true
-    WEB:
-      playback: false
-      playlistLoading: true
-      searching: true
-      videoLoading: true
-    WEBEMBEDDED:
-      playback: true
-      playlistLoading: false
-      searching: false
-      videoLoading: true
+      # - MUSIC
+      # - WEB
+      # - MWEB
+      # - WEBEMBEDDED
+      # - ANDROID_MUSIC
+      # - ANDROID_VR
+      # - TV
+      # - TVHTML5_SIMPLY
+      # ----------------
+      - 'TVHTML5_AUDIO'
+      - 'TV'
+      - 'TVHTML5_SIMPLY'
+      - 'TVHTML5_KIDS'
+      - 'ANDROID_VR'
+      - 'WEB'
+      - 'MWEB'
+      - 'WEBEMBEDDED'
+      - 'MUSIC'
+      - 'ANDROID'
+      - 'IOS'
+    # ANDROID_MUSIC:
+    #   playback: true
+    #   playlistLoading: false
+    #   searching: true
+    #   videoLoading: true
+    # ANDROID_VR:
+    #   playback: true
+    #   playlistLoading: true
+    #   searching: true
+    #   videoLoading: true
+    # MUSIC:
+    #   playback: false
+    #   playlistLoading: false
+    #   searching: true
+    #   videoLoading: false
+    # MWEB:
+    #   playback: false
+    #   playlistLoading: true
+    #   searching: true
+    #   videoLoading: true
+    # TV:
+    #   playback: true
+    #   playlistLoading: false
+    #   searching: false
+    #   videoLoading: false
+    # TVHTML5_SIMPLY:
+    #   playback: true
+    #   playlistLoading: false
+    #   searching: true
+    #   videoLoading: true
+    # WEB:
+    #   playback: false
+    #   playlistLoading: true
+    #   searching: true
+    #   videoLoading: true
+    # WEBEMBEDDED:
+    #   playback: true
+    #   playlistLoading: false
+    #   searching: false
+    #   videoLoading: true
+    # ------------------
     # ANDROID_MUSIC:
     #   playlistLoading: false
     #   videoLoading: true
