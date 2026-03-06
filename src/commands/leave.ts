@@ -1,6 +1,7 @@
 // Command to disconnect the bot from its current voice channel.
 import { type Message } from 'discord.js'
 
+import { TIME } from '~/constants/time'
 import { BaseCommand } from '~/core/BaseCommand.js'
 import type { BotClient } from '~/core/BotClient.js'
 
@@ -28,7 +29,11 @@ class LeaveCommand extends BaseCommand {
 
     // Shutdown the player and disconnect from voice.
     await player.destroy()
-    await safeReplySuccessMessage(message, `${getBotName(bot)} đã rời khỏi kênh thoại.`)
+    await safeReplySuccessMessage(
+      message,
+      `${getBotName(bot)} đã rời khỏi kênh thoại.`,
+      TIME.VERY_SHORT
+    )
   }
 }
 
