@@ -69,35 +69,13 @@ sudo apt install -y git
 
 ```bash
 cd ~
-git clone https://github.com/<your-username>/music-bot.git
-cd music-bot
+git clone https://github.com/yngpiu/music-bot-discord.git
+cd music-bot-discord
 ```
 
-### 2.4. Tải Lavalink plugins
+### 2.4. (Đã lược bỏ) Tải Lavalink plugins
 
-Lavalink plugins (`.jar` files) **không được commit** vào repo. Bạn cần tải chúng thủ công trên VPS:
-
-```bash
-mkdir -p lavalink/plugins
-cd lavalink/plugins
-
-# YouTube plugin
-curl -LO https://github.com/lavalink-devs/youtube-source/releases/download/1.17.0/youtube-plugin-1.17.0.jar
-
-# LavaSrc (Spotify, Apple Music, Deezer)
-curl -LO https://github.com/topi314/LavaSrc/releases/download/4.8.1/lavasrc-plugin-4.8.1.jar
-
-# LavaSearch
-curl -LO https://github.com/topi314/LavaSearch/releases/download/1.0.0/lavasearch-plugin-1.0.0.jar
-
-# LavaLyrics
-curl -LO https://github.com/topi314/LavaLyrics/releases/download/1.1.0/lavalyrics-plugin-1.1.0.jar
-
-# SponsorBlock
-curl -LO https://github.com/topi314/Sponsorblock-Plugin/releases/download/3.0.1/sponsorblock-plugin-3.0.1.jar
-
-cd ~/music-bot
-```
+> **Lưu ý:** Bot hiện tại sử dụng Lavalink v4. Các plugins (YouTube, Spotify, Apple Music, Lyrics...) đã được cấu hình sẵn trong `lavalink/application.yml` (thuộc tính `plugins.dependency`). Lavalink sẽ **tự động tải** các plugins này khi khởi động. Bạn **không cần** tải thủ công.
 
 ### 2.5. Tạo file `.env`
 
@@ -118,6 +96,10 @@ LAVALINK_SERVER_PASSWORD=<password-lavalink-mạnh>
 NUMBER_OF_BOTS=1
 BOT_1_CLIENT_ID=<client-id>
 BOT_1_DISCORD_TOKEN=<token>
+
+# Điền API keys cho YouTube (bắt buộc để chạy lavalink youtube-source ổn định)
+YOUTUBE_REFRESH_TOKEN=...
+YT_CIPHER_PASSWORD=<tạo-một-password-bất-kỳ>
 
 # Điền API keys cho Spotify, Apple Music, Deezer (nếu dùng)
 LAVASRC_SPOTIFY_CLIENT_ID=...
@@ -143,7 +125,7 @@ sudo ufw enable
 ### 3.1. Build và khởi động tất cả services
 
 ```bash
-cd ~/music-bot
+cd ~/music-bot-discord
 docker compose up -d --build
 ```
 
@@ -159,6 +141,7 @@ docker compose ps
 # NAME                 STATUS
 # music-bot-postgres   Up (healthy)
 # music-bot-redis      Up (healthy)
+# music-bot-yt-cipher  Up
 # music-bot-lavalink   Up
 # music-bot-app        Up
 ```
@@ -185,7 +168,7 @@ docker compose logs -f lavalink
 ### 3.5. Cập nhật code mới
 
 ```bash
-cd ~/music-bot
+cd ~/music-bot-discord
 git pull origin main
 docker compose up -d --build bot
 docker compose exec -T bot npx prisma migrate deploy || true
@@ -339,7 +322,7 @@ docker compose logs lavalink
 
 # Kiểm tra:
 # 1. LAVALINK_SERVER_PASSWORD phải khớp giữa .env và application.yml
-# 2. Plugins đã được tải đúng: ls -la lavalink/plugins/
+# 2. Server VPS có thể truy cập được internet để tải external plugin hay không
 ```
 
 ### Database connection refused
@@ -368,7 +351,7 @@ docker stats --no-stream
 ### Rebuild hoàn toàn
 
 ```bash
-cd ~/music-bot
+cd ~/music-bot-discord
 docker compose down
 docker compose build --no-cache bot
 docker compose up -d
