@@ -42,17 +42,8 @@ function getSecondsUntilNext1AMUTC(): number {
   return Math.floor((nextTarget.getTime() - now.getTime()) / 1000)
 }
 
-function getYesterdayYYYYMMDD(): string {
-  const now = new Date()
-  now.setUTCDate(now.getUTCDate() - 1)
-  const yyyy = now.getUTCFullYear()
-  const mm = String(now.getUTCMonth() + 1).padStart(2, '0')
-  const dd = String(now.getUTCDate()).padStart(2, '0')
-  return `${yyyy}${mm}${dd}`
-}
-
-export async function getKpopRadarYoutubeDailyData(): Promise<KpopRadarYoutubeTask[]> {
-  const cacheKey = 'kpopradar:nmixx:youtube_daily'
+export async function getKpopRadarYoutubeRealtimeData(): Promise<KpopRadarYoutubeTask[]> {
+  const cacheKey = 'kpopradar:nmixx:youtube_realtime'
 
   const now = Date.now()
   if (now < youtubeMemCacheExpiry && youtubeMemCache) {
@@ -77,8 +68,7 @@ export async function getKpopRadarYoutubeDailyData(): Promise<KpopRadarYoutubeTa
 
   isFetchingYoutube = true
   try {
-    const day = getYesterdayYYYYMMDD()
-    const url = `https://s.kpop-radar.com/api/artist/dailyDataNew?artistId=2298&sortType=1&dateOrder=1&day=${day}&orderCountInPage=30&lastOrderNo=0`
+    const url = `https://s.kpop-radar.com/api/artist/realtimeDataNew?artistId=2298&sortType=1&orderCountInPage=30&lastOrderNo=0`
     const res = await fetch(url)
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
     const json = await res.json()
@@ -86,15 +76,15 @@ export async function getKpopRadarYoutubeDailyData(): Promise<KpopRadarYoutubeTa
 
     if (Array.isArray(tasks)) {
       if (redis) {
-        const ttl = getSecondsUntilNext1AMUTC()
-        await redis.setex(cacheKey, ttl, JSON.stringify(tasks))
+        // Cache for 1 hour (3600 seconds)
+        await redis.setex(cacheKey, 3600, JSON.stringify(tasks))
       }
       youtubeMemCache = tasks
       youtubeMemCacheExpiry = now + 60_000
       return tasks as KpopRadarYoutubeTask[]
     }
   } catch (err) {
-    logger.error('[KpopRadar] Error fetching Youtube API data:', err)
+    logger.error('[KpopRadar] Error fetching Youtube Realtime API data:', err)
   } finally {
     isFetchingYoutube = false
   }

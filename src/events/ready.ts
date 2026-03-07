@@ -1,6 +1,6 @@
 // Initializes Lavalink and logs bot status when the Discord client is ready.
 import { ActivityType, Events } from 'discord.js'
-import { getKpopRadarData, getKpopRadarYoutubeDailyData } from '~/services/kpopRadarService.js'
+import { getKpopRadarData, getKpopRadarYoutubeRealtimeData } from '~/services/kpopRadarService.js'
 
 import type { BotClient } from '~/core/BotClient'
 import { BotEvent } from '~/core/BotEvent.js'
@@ -22,36 +22,16 @@ class ReadyEvent extends BotEvent {
     const updateStatus = async () => {
       try {
         if (bot.botIndex === 0) {
-          const ytTasks = await getKpopRadarYoutubeDailyData()
+          const ytTasks = await getKpopRadarYoutubeRealtimeData()
           if (ytTasks && ytTasks.length > 0) {
-            // Each line is a song, we show 2 lines per song (name/views + diff)
-            const songIndex = Math.floor(currentLine / 2) % ytTasks.length
-            const isShowingDiff = currentLine % 2 !== 0
+            const songIndex = currentLine % ytTasks.length
             const botYoutubeSong = ytTasks[songIndex]
 
             if (botYoutubeSong) {
-              const baseStr = `${botYoutubeSong.songName} - ${formatNumber(botYoutubeSong.playCount)} lượt xem`
-              let diffStr = ''
-
-              const ratio =
-                botYoutubeSong.playCount - botYoutubeSong.incCount > 0
-                  ? (
-                      (botYoutubeSong.incCount /
-                        (botYoutubeSong.playCount - botYoutubeSong.incCount)) *
-                      100
-                    ).toFixed(2)
-                  : '100.00'
-
-              if (botYoutubeSong.incCount > 0) {
-                diffStr = `${botYoutubeSong.songName} - Tăng ${formatNumber(botYoutubeSong.incCount)} (${ratio}%) lượt xem so với hôm qua`
-              } else if (botYoutubeSong.incCount < 0) {
-                diffStr = `${botYoutubeSong.songName} - Giảm ${formatNumber(Math.abs(botYoutubeSong.incCount))} (${Math.abs(parseFloat(ratio))}%) lượt xem so với hôm qua`
-              } else {
-                diffStr = `${botYoutubeSong.songName} - Không đổi so với hôm qua`
-              }
+              const statusStr = `${botYoutubeSong.songName} - ${formatNumber(botYoutubeSong.playCount)} lượt xem`
 
               bot.user?.setActivity({
-                name: isShowingDiff ? diffStr : baseStr,
+                name: statusStr,
                 type: ActivityType.Custom
               })
 
