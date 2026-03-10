@@ -1,4 +1,5 @@
 // Event handler for when a track starts playing.
+import { Message } from 'discord.js'
 import { Player, Track } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
@@ -8,7 +9,7 @@ import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 import { LyricsManager } from '~/core/LyricsManager.js'
 
 import { logger } from '~/utils/logger.js'
-import { safeSendMessageWithContainer } from '~/utils/messageUtil'
+import { safeDeleteMessageNow, safeSendMessageWithContainer } from '~/utils/messageUtil'
 import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
 // Event handler for the 'trackStart' event.
@@ -33,11 +34,20 @@ class TrackStartEvent extends LavalinkEvent {
       author: track.info.author
     })
 
-    await safeSendMessageWithContainer(
+    const prevMessage = player.get<Message>('nowPlayingMessage')
+    if (prevMessage) {
+      await safeDeleteMessageNow(prevMessage)
+    }
+
+    const sentMessage = await safeSendMessageWithContainer(
       channel,
       `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`,
       TIME.MEDIUM
     )
+
+    if (sentMessage) {
+      player.set('nowPlayingMessage', sentMessage)
+    }
 
     // Handle Live Lyrics re-subscribe
     const mgr = LyricsManager.for(player, bot)
