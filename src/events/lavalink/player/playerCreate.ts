@@ -15,9 +15,9 @@ class PlayerCreateEvent extends LavalinkEvent {
     logger.info(`[Player: ${player.guildId}] Initialized player for server`)
 
     // Temporary ignore voice state updates during initialization to prevent race conditions.
-    player.set('ignore_voice_state', true)
+    player.setData('ignore_voice_state', true)
     setTimeout(() => {
-      if (player) player.set('ignore_voice_state', false)
+      if (player) player.setData('ignore_voice_state', false)
     }, 3000)
 
     // Enable SponsorBlock to skip non-music segments.

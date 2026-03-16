@@ -21,12 +21,12 @@ class PlayerQueueEmptyCancelEvent extends LavalinkEvent {
     const channel = bot.channels.cache.get(player.textChannelId!)
     if (!channel?.isTextBased() || !('send' in channel)) return
 
-    const msgId = player.get<string | null>('queueEmptyMessageId')
+    const msgId = player.getData<string | null>('queueEmptyMessageId')
 
     if (msgId) {
       const msg = await (channel as TextChannel).messages.fetch(msgId).catch(() => null)
       if (msg) await safeDeleteMessageNow([msg])
-      player.set('queueEmptyMessageId', null)
+      player.setData('queueEmptyMessageId', null)
     }
   }
 }

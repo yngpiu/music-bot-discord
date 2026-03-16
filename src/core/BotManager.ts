@@ -87,7 +87,8 @@ export class BotManager {
           onEmptyQueue: {
             destroyAfterMs: 300000,
             autoPlayFunction: async (player, lastPlayedTrack) => {
-              if (!player.get('autoplay')) {
+              const isAutoplayEnabled = player.getData<boolean>('autoplay')
+              if (!isAutoplayEnabled) {
                 logger.debug('[Autoplay] Skipped because autoplay is disabled.')
                 return
               }
@@ -169,7 +170,10 @@ export class BotManager {
                   }
                 } else {
                   logger.warn(`[Autoplay] Fallback search returned no results.`)
-                  player.set('autoplay', false)
+                  const currentAutoplay = player.getData<boolean>('autoplay') ?? false
+                  if (currentAutoplay) {
+                    player.setData('autoplay', false)
+                  }
                   await safeSendMessageWithContainer(
                     bot.channels.cache.get(player.textChannelId!),
                     `${EMOJI.ERROR} ${getBotName(bot)} đã tự động tắt **Tự động phát** vì không tìm thấy bài hát đề xuất.`,

@@ -20,17 +20,17 @@ class PlayerSuppressChangeEvent extends LavalinkEvent {
 
     if (suppress) {
       // Pause if we are moved to audience in a stage channel.
-      player.set('paused_of_servermute', true)
+      player.setData('paused_of_servermute', true)
       if (!player.paused) await player.pause()
     } else {
       // Resume if we are invited to speak.
-      if (player.get('paused_of_servermute')) {
+      if (player.getData('paused_of_servermute')) {
         if (player.paused) await player.resume()
-        player.set('paused_of_servermute', false)
+        player.setData('paused_of_servermute', false)
       }
     }
 
-    if (player.get('ignore_voice_state')) return
+    if (player.getData('ignore_voice_state')) return
 
     const channel = bot.channels.cache.get(player.textChannelId!)
 

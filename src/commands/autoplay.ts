@@ -25,12 +25,12 @@ class AutoplayCommand extends BaseCommand {
     await sendTypingMessage(message)
     logger.info(`[Command: autoplay] User ${message.author.tag} requested to toggle autoplay state`)
 
-    const currentAutoplay = player.get<boolean>('autoplay') ?? false
+    const currentAutoplay = player.getData<boolean>('autoplay') ?? false
 
     // Toggle the state.
-    player.set('autoplay', !currentAutoplay)
+    player.setData('autoplay', !currentAutoplay)
 
-    const isAutoplayEnabled = player.get<boolean>('autoplay')
+    const isAutoplayEnabled = player.getData<boolean>('autoplay')
 
     const actionText = isAutoplayEnabled
       ? '**bật** chế độ `Tự động phát`'

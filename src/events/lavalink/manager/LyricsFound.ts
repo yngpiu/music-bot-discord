@@ -25,7 +25,7 @@ class LyricsFoundEventHandler extends LavalinkEvent {
 
     // Store synced lines for multi-line rendering in LyricsLine
     if (payload.lyrics.lines?.length) {
-      player.set('syncedLyrics', payload.lyrics.lines)
+      player.setData('syncedLyrics', payload.lyrics.lines)
     }
 
     const title = track?.info?.title || '🎶 Đang phát'

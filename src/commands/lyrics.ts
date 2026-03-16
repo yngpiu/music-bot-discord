@@ -43,7 +43,7 @@ class LyricsCommand extends BaseCommand {
         throw new BotError('Chế độ **Live Lyrics** đã được bật sẵn.')
       }
 
-      player.set('liveLyrics', true)
+      player.setData('liveLyrics', true)
       mgr.setChannel(message.channel.id)
 
       await player.subscribeLyrics().catch(() => {})
@@ -57,7 +57,7 @@ class LyricsCommand extends BaseCommand {
         throw new BotError('Chế độ **Live Lyrics** đang không được bật.')
       }
 
-      player.set('liveLyrics', false)
+      player.setData('liveLyrics', false)
       await player.unsubscribeLyrics().catch(() => {})
       await mgr.cleanup()
 

@@ -31,7 +31,7 @@ class ClearCommand extends BaseCommand {
     }
 
     // Additional check to ensure the user has permission to clear the queue.
-    const owner = player.get('owner')
+    const owner = player.getData('owner')
     if (owner && message.author.id !== owner) {
       throw new BotError('Chỉ **Chủ xị** mới có quyền dùng lệnh này.')
     }

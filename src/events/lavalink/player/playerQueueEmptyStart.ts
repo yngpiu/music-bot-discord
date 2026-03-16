@@ -23,7 +23,7 @@ class PlayerQueueEmptyStartEvent extends LavalinkEvent {
     const channel = bot.channels.cache.get(player.textChannelId!)
 
     // Reset any existing message ID.
-    player.set('queueEmptyMessageId', null)
+    player.setData('queueEmptyMessageId', null)
 
     const message = await safeSendMessageWithContainer(
       channel,
@@ -34,7 +34,7 @@ class PlayerQueueEmptyStartEvent extends LavalinkEvent {
     )
 
     if (message) {
-      player.set('queueEmptyMessageId', message.id)
+      player.setData('queueEmptyMessageId', message.id)
     }
   }
 }

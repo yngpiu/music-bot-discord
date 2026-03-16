@@ -60,7 +60,7 @@ class JoinCommand extends BaseCommand {
     if (!player.connected) await player.connect()
 
     // Assign owner if not already set.
-    if (!player.get('owner')) player.set('owner', message.author.id)
+    if (!player.getData('owner')) player.setData('owner', message.author.id)
     return player
   }
 

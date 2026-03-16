@@ -25,17 +25,17 @@ class PlayerMuteChangeEvent extends LavalinkEvent {
 
     // Automatically pause playback if server-muted by an admin.
     if (serverMuted) {
-      player.set('paused_of_servermute', true)
+      player.setData('paused_of_servermute', true)
       if (!player.paused) await player.pause().catch(() => {})
     } else {
       // Automatically resume when unmuted if we were the ones who paused it.
-      if (player.get('paused_of_servermute')) {
+      if (player.getData('paused_of_servermute')) {
         if (player.paused) await player.resume().catch(() => {})
-        player.set('paused_of_servermute', false)
+        player.setData('paused_of_servermute', false)
       }
     }
 
-    if (player.get('ignore_voice_state')) return
+    if (player.getData('ignore_voice_state')) return
 
     const channel = bot.channels.cache.get(player.textChannelId!)
 

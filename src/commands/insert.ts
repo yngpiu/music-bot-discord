@@ -74,8 +74,8 @@ class InsertCommand extends BaseCommand {
       throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
     // Set initial owner if not defined.
-    if (!player.get('owner')) {
-      player.set('owner', message.author.id)
+    if (!player.getData('owner')) {
+      player.setData('owner', message.author.id)
     }
 
     // Adjust insert index to be within bounds.

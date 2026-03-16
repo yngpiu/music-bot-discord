@@ -34,7 +34,7 @@ class TrackStartEvent extends LavalinkEvent {
       author: track.info.author
     })
 
-    const prevMessage = player.get<Message>('nowPlayingMessage')
+    const prevMessage = player.getData<Message>('nowPlayingMessage')
     if (prevMessage) {
       await safeDeleteMessageNow(prevMessage)
     }
@@ -46,7 +46,7 @@ class TrackStartEvent extends LavalinkEvent {
     )
 
     if (sentMessage) {
-      player.set('nowPlayingMessage', sentMessage)
+      player.setData('nowPlayingMessage', sentMessage)
     }
 
     // Handle Live Lyrics re-subscribe

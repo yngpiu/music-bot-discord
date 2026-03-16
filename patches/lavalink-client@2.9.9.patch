@@ -1,8 +1,8 @@
-diff --git a/dist/index.js b/dist/index.js
-index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676775dcec2 100644
---- a/dist/index.js
-+++ b/dist/index.js
-@@ -1098,7 +1098,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
+diff --git a/dist/index.cjs b/dist/index.cjs
+index dd80cbbdbbced620d83a6ac2cd43774da50d9681..54b6a7d57727e7278298f1687635f396e8f6c0bc 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -1163,7 +1163,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
  }
  async function applyUnresolvedData(resTrack, data, utils) {
    if (!resTrack?.info || !data?.info) return;
@@ -12,7 +12,7 @@ index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676
    if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
      if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
      if (data.info.title?.length) resTrack.info.title = data.info.title;
-@@ -1110,8 +1111,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
+@@ -1175,8 +1176,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
      if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
    }
    for (const key of Object.keys(data.info))
@@ -24,7 +24,42 @@ index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676
    return resTrack;
  }
  async function getClosestTrack(data, player) {
-@@ -1130,7 +1133,7 @@ async function getClosestTrack(data, player) {
+@@ -1195,7 +1198,7 @@ async function getClosestTrack(data, player) {
+     const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
+     if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
+   }
+-  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" by ");
++  const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" ");
+   const sourceName = data.info?.sourceName;
+   return await player.search(
+     {
+diff --git a/dist/index.js b/dist/index.js
+index 030d3da3f5d6f770b59f24f5a96cc9e32db39e91..2e2cb6f7b7954d8ad3eb8501291297bbd89a238c 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1099,7 +1099,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
+ }
+ async function applyUnresolvedData(resTrack, data, utils) {
+   if (!resTrack?.info || !data?.info) return;
+-  if (data.info.uri) resTrack.info.uri = data.info.uri;
++  const resolvedUri = resTrack.info.uri;
++  const resolvedSourceName = resTrack.info.sourceName;
+   if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
+     if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
+     if (data.info.title?.length) resTrack.info.title = data.info.title;
+@@ -1111,8 +1112,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
+     if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
+   }
+   for (const key of Object.keys(data.info))
+-    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key])
++    if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && key !== "uri" && key !== "sourceName" && data.info[key])
+       resTrack.info[key] = data.info[key];
++  resTrack.info.uri = resolvedUri;
++  resTrack.info.sourceName = resolvedSourceName;
+   return resTrack;
+ }
+ async function getClosestTrack(data, player) {
+@@ -1131,7 +1134,7 @@ async function getClosestTrack(data, player) {
      const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
      if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
    }
@@ -34,10 +69,10 @@ index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676
    return await player.search(
      {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676775dcec2 100644
+index 030d3da3f5d6f770b59f24f5a96cc9e32db39e91..2e2cb6f7b7954d8ad3eb8501291297bbd89a238c 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -1098,7 +1098,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
+@@ -1099,7 +1099,8 @@ async function queueTrackEnd(player, dontShiftQueue = false) {
  }
  async function applyUnresolvedData(resTrack, data, utils) {
    if (!resTrack?.info || !data?.info) return;
@@ -47,7 +82,7 @@ index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676
    if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
      if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
      if (data.info.title?.length) resTrack.info.title = data.info.title;
-@@ -1110,8 +1111,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
+@@ -1111,8 +1112,10 @@ async function applyUnresolvedData(resTrack, data, utils) {
      if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
    }
    for (const key of Object.keys(data.info))
@@ -59,7 +94,7 @@ index b967b2044d91342e3eab0e494797f7cb3767425c..ee71f4b128145628421c7c8bf4ddd676
    return resTrack;
  }
  async function getClosestTrack(data, player) {
-@@ -1130,7 +1133,7 @@ async function getClosestTrack(data, player) {
+@@ -1131,7 +1134,7 @@ async function getClosestTrack(data, player) {
      const r = await player.search({ query: data?.info?.uri }, data.requester).then((v) => v.tracks?.[0]);
      if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
    }

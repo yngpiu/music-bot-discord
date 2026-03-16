@@ -26,7 +26,7 @@ class PermissionCommand extends BaseCommand {
     const subCommand = args[0]?.toLowerCase()
 
     if (!subCommand) {
-      const currentOwnerId = ctx.player?.get<string>('owner')
+      const currentOwnerId = ctx.player?.getData<string>('owner')
       await sendTypingMessage(message)
       if (!currentOwnerId) {
         await safeReplySuccessMessage(message, `**Chủ xị** hiện chưa được thiết lập.`)
@@ -62,11 +62,11 @@ class PermissionCommand extends BaseCommand {
       `[Command: permission claim] User ${message.author.tag} requested to claim player control`
     )
 
-    const currentOwnerId = player.get<string>('owner')
+    const currentOwnerId = player.getData<string>('owner')
 
     // If there is no current owner, just take it.
     if (!currentOwnerId) {
-      player.set('owner', message.author.id)
+      player.setData('owner', message.author.id)
 
       await safeReplySuccessMessage(
         message,
@@ -92,7 +92,7 @@ class PermissionCommand extends BaseCommand {
     }
 
     // Transfer ownership.
-    player.set('owner', message.author.id)
+    player.setData('owner', message.author.id)
 
     await safeReplySuccessMessage(message, `Bạn đã trở thành **Chủ xị** thành công.`)
   }
@@ -105,7 +105,7 @@ class PermissionCommand extends BaseCommand {
     { player }: CommandContext
   ): Promise<void> {
     await sendTypingMessage(message)
-    const currentOwnerId = player.get<string>('owner')
+    const currentOwnerId = player.getData<string>('owner')
 
     // Only the current owner, developers, or server owners can transfer.
     if (currentOwnerId !== message.author.id && !isDeveloperOrServerOwner(message)) {
@@ -136,7 +136,7 @@ class PermissionCommand extends BaseCommand {
       throw new BotError('Người nhận quyền phải ở trong cùng kênh thoại với bot.')
     }
 
-    player.set('owner', targetUser.id)
+    player.setData('owner', targetUser.id)
     logger.info(
       `[Command: permission transfer] Owner transferred from ${message.author.tag} to ${targetUser.tag}`
     )

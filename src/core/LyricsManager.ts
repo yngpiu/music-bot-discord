@@ -48,10 +48,10 @@ export class LyricsManager {
    * the same player.
    */
   static for(player: Player, bot: BotClient): LyricsManager {
-    let mgr = player.get<LyricsManager | null>(LYRICS_MGR_KEY)
+    let mgr = player.getData<LyricsManager | null>(LYRICS_MGR_KEY)
     if (!mgr) {
       mgr = new LyricsManager(bot, player)
-      player.set(LYRICS_MGR_KEY, mgr)
+      player.setData(LYRICS_MGR_KEY, mgr)
     }
     return mgr
   }
@@ -65,7 +65,7 @@ export class LyricsManager {
 
   /** Whether the live-lyrics feature is currently enabled. */
   get isEnabled(): boolean {
-    return this.player.get<boolean>('liveLyrics') ?? false
+    return this.player.getData<boolean>('liveLyrics') ?? false
   }
 
   /**

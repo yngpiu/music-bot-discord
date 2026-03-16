@@ -839,8 +839,8 @@ class SearchCommand extends BaseCommand {
     if (player.voiceChannelId !== vcId)
       throw new BotError(`Bạn không ở cùng kênh thoại với ${getBotName(bot)}.`)
 
-    if (!player.get('owner')) {
-      player.set('owner', message.author.id)
+    if (!player.getData('owner')) {
+      player.setData('owner', message.author.id)
     }
 
     if (mode === 'album') return this.handleAlbumSearch(bot, message, query, player)

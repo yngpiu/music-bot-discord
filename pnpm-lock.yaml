@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  lavalink-client@2.9.6:
-    hash: d22b19a6699358b21b99e9ab6cf40118fedd8db271523af3385cd1129e2862e3
-    path: patches/lavalink-client@2.9.6.patch
+  lavalink-client@2.9.9:
+    hash: 251e353a59fa47c1d8fa79f5129819101d0cb522dabf56d310a2c60117ed570c
+    path: patches/lavalink-client@2.9.9.patch
 
 importers:
   .:
@@ -31,8 +31,8 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       lavalink-client:
-        specifier: ^2.9.6
-        version: 2.9.6(patch_hash=d22b19a6699358b21b99e9ab6cf40118fedd8db271523af3385cd1129e2862e3)
+        specifier: ^2.9.9
+        version: 2.9.9(patch_hash=251e353a59fa47c1d8fa79f5129819101d0cb522dabf56d310a2c60117ed570c)
       pg:
         specifier: ^8.18.0
         version: 8.18.0
@@ -61,6 +61,9 @@ importers:
       '@types/pg':
         specifier: ^8.16.0
         version: 8.16.0
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       eslint:
         specifier: ^10.0.0
         version: 10.0.0(jiti@2.6.1)
@@ -1767,10 +1770,10 @@ packages:
         integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
       }
 
-  lavalink-client@2.9.6:
+  lavalink-client@2.9.9:
     resolution:
       {
-        integrity: sha512-Wzj/1dX0yQb94SH6HCSw23gli6Nb0gnh24zNNLxWG7QKC0JNs5wsIPI33hwQpFEASjNk3Qo9Dk40soMKYwt7tg==
+        integrity: sha512-BWb/ZpHqZHuyNROsX5T3m0vO4tRNGAZ5Esm7gHhkHNO2zYhBqRkc+n0DYoEtwEzSB5zhBQM/sCDCQm6c+xM29g==
       }
     engines: { bun: '>=1.1.27', node: '>=18.0.0' }
 
@@ -3740,7 +3743,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  lavalink-client@2.9.6(patch_hash=d22b19a6699358b21b99e9ab6cf40118fedd8db271523af3385cd1129e2862e3):
+  lavalink-client@2.9.9(patch_hash=251e353a59fa47c1d8fa79f5129819101d0cb522dabf56d310a2c60117ed570c):
     dependencies:
       tslib: 2.8.1
       ws: 8.19.0

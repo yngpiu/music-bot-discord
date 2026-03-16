@@ -23,7 +23,7 @@ class PlayerDestroyEvent extends LavalinkEvent {
     const channel = bot.channels.cache.get(player.textChannelId!)
 
     // Delete queue empty message if exists
-    const queueEmptyMessageId = player.get<string | null>('queueEmptyMessageId')
+    const queueEmptyMessageId = player.getData<string | null>('queueEmptyMessageId')
     if (queueEmptyMessageId) {
       const channel = bot.channels.cache.get(player.textChannelId!)
       if (channel?.isTextBased()) {
@@ -32,7 +32,7 @@ class PlayerDestroyEvent extends LavalinkEvent {
           .catch(() => null)
         if (msg) await safeDeleteMessageNow(msg)
       }
-      player.set('queueEmptyMessageId', null)
+      player.setData('queueEmptyMessageId', null)
     }
 
     // Attempt to cleanup lyrics manager messages
