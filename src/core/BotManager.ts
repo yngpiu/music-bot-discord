@@ -79,7 +79,7 @@ export class BotManager {
         },
         autoSkip: true,
         playerOptions: {
-          defaultSearchPlatform: 'dzsearch',
+          defaultSearchPlatform: 'amsearch',
           onDisconnect: {
             autoReconnect: true,
             destroyPlayer: false
