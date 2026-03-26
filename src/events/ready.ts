@@ -88,8 +88,10 @@ class ReadyEvent extends BotEvent {
     }
 
     // Initial status set and interval for subsequent updates.
-    await updateStatus()
-    setInterval(updateStatus, 5_000) // Update every 5 seconds.
+    if (bot.botIndex !== 999) {
+      await updateStatus()
+      setInterval(updateStatus, 5_000) // Update every 5 seconds.
+    }
 
     logger.info(`[System] Bot ${bot.user?.tag} is ready and successfully initialized Lavalink!`)
   }
