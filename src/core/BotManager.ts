@@ -25,6 +25,8 @@ import { formatDuration, formatTrack, getBotAvatar, getBotName } from '~/utils/s
 export class BotManager {
   // Array of active bot client instances.
   public bots: BotClient[] = []
+  // Lofi bot dedicated instance.
+  public lofiBot: BotClient | null = null
   // Shared Redis client for state management.
   private redis: Redis
   // Tracks which bot is handling specific message contexts.
@@ -247,6 +249,51 @@ export class BotManager {
       await bot.login(botConfig.token)
       logger.info(`[System] Successfully logged in MusicBot #${i + 1} (${botConfig.clientId})`)
       this.bots.push(bot)
+    }
+
+    if (config.lofiBot) {
+      const bot = new BotClient(999)
+      bot.manager = this
+
+      bot.lavalink = new LavalinkManager({
+        nodes: [
+          {
+            id: `node_lofi`,
+            host: config.lavalink.host,
+            port: config.lavalink.port,
+            authorization: config.lavalink.password,
+            secure: config.lavalink.secure,
+            retryAmount: 5,
+            retryDelay: 5000
+          }
+        ],
+        sendToShard: (guildId, payload) => bot.guilds.cache.get(guildId)?.shard?.send(payload),
+        client: {
+          id: config.lofiBot.clientId,
+          username: `LofiBot`
+        },
+        autoSkip: true,
+        playerOptions: {
+          defaultSearchPlatform: 'ytsearch',
+          onDisconnect: {
+            autoReconnect: true,
+            destroyPlayer: false
+          }
+        },
+        queueOptions: {
+          maxPreviousTracks: 10,
+          queueStore: new RedisQueueStore(this.redis)
+        }
+      })
+
+      await Loader.loadCommands(bot)
+      await Loader.loadInteractions(bot)
+      await Loader.registerEvents(bot, this)
+      await Loader.registerLavalinkEvents(bot)
+
+      await bot.login(config.lofiBot.token)
+      logger.info(`[System] Successfully logged in LofiBot (${config.lofiBot.clientId})`)
+      this.lofiBot = bot
     }
   }
 

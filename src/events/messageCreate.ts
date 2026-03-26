@@ -73,6 +73,24 @@ class MessageCreateEvent extends BotEvent {
     const member = message.guild!.members.cache.get(message.author.id) as GuildMember
     const vcId = member?.voice?.channelId ?? undefined
 
+    // Intercept lofi command routing
+    if (commandName === 'lofi') {
+      if (!manager.lofiBot) {
+        const randomBotIndex = getDeterministicIndexFromId(message.id, manager.bots.length)
+        if (bot.botIndex === randomBotIndex) {
+          const container = new ContainerBuilder().addTextDisplayComponents((t) =>
+            t.setContent(`${EMOJI.ERROR} Lofi bot chưa được cài đặt trong hệ thống.`)
+          )
+          await safeReplyMessage(message, {
+            components: [container],
+            flags: ['IsComponentsV2', 'SuppressNotifications']
+          })
+        }
+        return null
+      }
+      return manager.lofiBot
+    }
+
     // Special logic for joining commands to prefer a specific bot if mentioned.
     const targetBotId =
       commandName === 'join' || commandName === 'j'

@@ -44,6 +44,11 @@ export const config = {
   DEVELOPERS: process.env.DEVELOPERS ? process.env.DEVELOPERS.split(',') : [],
   // Array of bot instances to run.
   bots,
+  // Lofi bot configuration.
+  lofiBot:
+    process.env.LOFI_BOT_CLIENT_ID && process.env.LOFI_BOT_DISCORD_TOKEN
+      ? { clientId: process.env.LOFI_BOT_CLIENT_ID, token: process.env.LOFI_BOT_DISCORD_TOKEN }
+      : null,
   // Lavalink server connection settings.
   lavalink: {
     host: process.env.LAVALINK_HOST ?? 'localhost',
