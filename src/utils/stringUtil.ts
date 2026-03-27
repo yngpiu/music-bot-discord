@@ -35,8 +35,9 @@ export function formatTrack(item: {
     (item.trackLink.includes('youtube.com') || item.trackLink.includes('youtu.be'))
 
   const label = item.author && !isYouTube ? `${item.title} - ${item.author}` : item.title
+  const safeLabel = label.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
 
-  return item.trackLink ? `**[${label}](${item.trackLink})**` : `**${label}**`
+  return item.trackLink ? `**[${safeLabel}](${item.trackLink})**` : `**${safeLabel}**`
 }
 
 export function getBotName(bot: BotClient): string {
