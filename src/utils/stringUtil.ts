@@ -1,5 +1,5 @@
 // Utilities for string manipulation, duration formatting, and display optimization.
-import { Guild } from 'discord.js'
+import { Guild, hyperlink } from 'discord.js'
 
 import { type BotClient } from '~/core/BotClient'
 
@@ -35,9 +35,14 @@ export function formatTrack(item: {
     (item.trackLink.includes('youtube.com') || item.trackLink.includes('youtu.be'))
 
   const label = item.author && !isYouTube ? `${item.title} - ${item.author}` : item.title
-  const safeLabel = label.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
+  const safeLabel = label.replace(/\[/g, '［').replace(/\]/g, '］')
 
-  return item.trackLink ? `**[${safeLabel}](${item.trackLink})**` : `**${safeLabel}**`
+  if (!item.trackLink) {
+    return `**${safeLabel}**`
+  }
+
+  const url = item.trackLink
+  return `**${hyperlink(safeLabel, url)}**`
 }
 
 export function getBotName(bot: BotClient): string {
