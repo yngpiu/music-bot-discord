@@ -1,5 +1,5 @@
 // Event handler for when a track starts playing.
-import { Message } from 'discord.js'
+import { EmbedBuilder, Message } from 'discord.js'
 import { Player, Track } from 'lavalink-client'
 
 import { EMOJI } from '~/constants/emoji'
@@ -9,7 +9,7 @@ import { LavalinkEvent } from '~/core/LavalinkEvent.js'
 import { LyricsManager } from '~/core/LyricsManager.js'
 
 import { logger } from '~/utils/logger.js'
-import { safeDeleteMessageNow, safeSendMessageWithContainer } from '~/utils/messageUtil'
+import { safeDeleteMessageNow, safeSendMessageToChannel } from '~/utils/messageUtil'
 import { formatDuration, formatTrack } from '~/utils/stringUtil'
 
 // Event handler for the 'trackStart' event.
@@ -39,9 +39,16 @@ class TrackStartEvent extends LavalinkEvent {
       await safeDeleteMessageNow(prevMessage)
     }
 
-    const sentMessage = await safeSendMessageWithContainer(
+    const embed = new EmbedBuilder().setDescription(
+      `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`
+    )
+
+    const sentMessage = await safeSendMessageToChannel(
       channel,
-      `${EMOJI.ANIMATED_CAT_DANCE} Bắt đầu phát **\\[${stringDuration}\\]** ${trackDisplay}`,
+      {
+        embeds: [embed],
+        flags: ['SuppressNotifications']
+      },
       TIME.MEDIUM
     )
 
