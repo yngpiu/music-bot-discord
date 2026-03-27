@@ -153,13 +153,11 @@ class LofiCommand extends BaseCommand {
 
     if (result.loadType === 'playlist') {
       await player.queue.add(result.tracks)
-      // Lofi should loop the whole queue
-      await player.setRepeatMode('queue')
     } else {
       await player.queue.add(result.tracks[0])
-      // If single track, loop that track
-      await player.setRepeatMode('track')
     }
+    // Always loop the whole queue so it cycles back when finished
+    await player.setRepeatMode('queue')
 
     const addedEmbed = this.buildEmbed(bot, message, player, result, query)
     await safeReplyMessage(
