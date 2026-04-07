@@ -1,5 +1,6 @@
 // Initializes Lavalink and logs bot status when the Discord client is ready.
-import { ActivityType, Events } from 'discord.js'
+import { Events } from 'discord.js'
+
 // import { getKpopRadarData, getKpopRadarYoutubeRealtimeData } from '~/services/kpopRadarService.js'
 
 import type { BotClient } from '~/core/BotClient'
@@ -93,10 +94,10 @@ class ReadyEvent extends BotEvent {
     //   setInterval(updateStatus, 5_000) // Update every 5 seconds.
     // }
 
-    bot.user?.setActivity({
-      name: '.help',
-      type: ActivityType.Listening
-    })
+    // bot.user?.setActivity({
+    //   name: '.help',
+    //   type: ActivityType.Listening
+    // })
 
     logger.info(`[System] Bot ${bot.user?.tag} is ready and successfully initialized Lavalink!`)
   }
