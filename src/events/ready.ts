@@ -16,6 +16,10 @@ class ReadyEvent extends BotEvent {
   // Initializes Lavalink and sets up the rotating stat status for the bot instance.
   async execute(bot: BotClient): Promise<void> {
     await bot.lavalink.init({ ...bot.user!, shards: 'auto' })
+    await bot.user?.setPresence({
+      status: 'online',
+      activities: []
+    })
 
     // const formatNumber = (num: number) => new Intl.NumberFormat('en-US').format(num)
     // let currentLine = 0
