@@ -1,119 +1,114 @@
 <div align="center">
-  <h1>🎵 Discord Music Bot</h1>
-  <p>A feature-rich, high-performance, and scalable Discord music bot built with TypeScript, Discord.js v14, and Lavalink.</p>
 
-  <p>
-    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-22.x-green.svg?style=flat-square" alt="Node.js" /></a>
-    <a href="https://discord.js.org/"><img src="https://img.shields.io/badge/Discord.js-v14.x-blue.svg?style=flat-square" alt="Discord.js" /></a>
-    <a href="https://github.com/lavalink-devs/Lavalink"><img src="https://img.shields.io/badge/Lavalink-v4.x-red.svg?style=flat-square" alt="Lavalink" /></a>
-    <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-16.x-blue.svg?style=flat-square" alt="PostgreSQL" /></a>
-    <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7.x-red.svg?style=flat-square" alt="Redis" /></a>
-    <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-Ready-blue.svg?style=flat-square" alt="Docker" /></a>
-  </p>
+  # Music Bot Discord
 
-  <p>
-    <a href="#-features">Features</a> •
-    <a href="#-commands-overview">Commands</a> •
-    <a href="#-getting-started">Getting Started</a> •
-    <a href="#-docker-deployment">Deployment</a>
-  </p>
+  **High-performance Discord music bot designed to run multiple bots concurrently from a single setup.**
+
+  [![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+  [![Discord.js](https://img.shields.io/badge/Discord.js-14.x-5865F2?logo=discord&logoColor=white)](https://discord.js.org)
+  [![Lavalink](https://img.shields.io/badge/Lavalink-4.x-FF0000?logo=apache&logoColor=white)](https://github.com/lavalink-devs/Lavalink)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 </div>
 
 ---
 
-## 🌟 Features
+## ✨ Features
 
-- **High-Quality Audio**: Powered by [Lavalink](https://github.com/lavalink-devs/Lavalink), ensuring lag-free and high-quality playback.
-- **Multiple Music Sources**: Play music effortlessly from YouTube, Spotify, Apple Music, Deezer, Yandex Music, and more APIs.
-- **Multi-Bot Architecture**: Easily run multiple bot instances from a single codebase and database without clashing.
-- **Rich Audio Controls**: Full control over playback with volume adjustments, seeking, looping, shuffling, autoplay, and audio filters.
-- **Lyrics Integration**: Fetch and display high-quality synced and un-synced lyrics using Genius and LavaLyrics.
-- **SponsorBlock Integration**: Automatically recognize and skip non-music segments (sponsors, intros, outros) in YouTube videos.
-- **Database Driven**: Uses PostgreSQL and Prisma ORM for robust data persistence (favorites, custom settings, leaderboards).
-- **Docker Ready**: Pre-configured `docker-compose.yml` for scalable and dead-simple deployment of all dependent services.
+- 🎧 **High-Quality Audio**: Powered by [Lavalink](https://github.com/lavalink-devs/Lavalink) for lag-free, high-quality playback.
+- 🌐 **Multiple Music Sources**: Play effortlessly from YouTube, Spotify, Apple Music, Deezer, Yandex Music, and more.
+- 🤖 **Multi-Bot Architecture**: Run multiple bot instances concurrently from a single codebase and database without clashing.
+- 🎛️ **Rich Audio Controls**: Full playback control with volume, seek, loop, shuffle, autoplay, and audio filters.
+- 📝 **Lyrics Integration**: Fetch and display synced and plain lyrics via Genius and LavaLyrics.
+- ⏭️ **SponsorBlock Integration**: Automatically skip sponsors, intros, and outros in YouTube videos.
+- 💾 **Database Driven**: PostgreSQL + Prisma ORM for favorites, custom settings, and leaderboards.
+- 🐳 **Docker Ready**: Pre-configured `docker-compose.yml` for dead-simple deployment of bot, Lavalink, PostgreSQL, and Redis.
 
 ## 🎵 Commands Overview
 
-The bot supports a wide array of slash (`/`) commands and text prefix commands for quick access:
+The bot supports a wide array of slash (`/`) commands and text prefix commands:
 
 | Music Playback                         | Queue Management                          | Utilities & Controls                         |
 | -------------------------------------- | ----------------------------------------- | -------------------------------------------- |
 | `/play`, `/search`, `/nowplaying`      | `/queue`, `/clear`, `/remove`, `/shuffle` | `/volume`, `/pause`, `/resume`, `/loop`      |
 | `/skip`, `/skipto`, `/replay`, `/seek` | `/move`, `/insert`, `/autoplay`           | `/lyrics`, `/filter`, `/favorite`, `/status` |
 
-_...and many more available utilities and configuration commands directly via the bot's help menu!_
+_...and many more utilities and configuration commands via the built-in help menu!_
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Discord.js v14](https://discord.js.org/) + [lavalink-client](https://github.com/TMUniversal/lavalink-client)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/)
+- **Cache & Queue**: [Redis](https://redis.io/) + [ioredis](https://github.com/redis/ioredis)
+- **Logging**: [Winston](https://github.com/winstonjs/winston)
+- **Deployment**: [Docker](https://www.docker.com/) + Docker Compose
 
 ## 🚀 Getting Started
 
-To run the bot locally for development, follow these steps:
-
 ### Prerequisites
 
-- Node.js (v22.x or higher)
-- [pnpm](https://pnpm.io/) package manager
-- PostgreSQL Database
-- Redis Server
-- Lavalink Server (v4+ with proper plugins for full source support)
+Ensure you have [Node.js](https://nodejs.org/) (v22+), [pnpm](https://pnpm.io/), a PostgreSQL database, a Redis server, and a Lavalink server (v4+ with plugins for full source support).
 
-### 1. Clone the repository
+### Installation
 
+1. Clone the repository:
 ```bash
 git clone https://github.com/yngpiu/music-bot-discord.git
 cd music-bot-discord
 ```
 
-### 2. Install dependencies
-
+2. Install dependencies:
 ```bash
 pnpm install
 ```
 
-### 3. Environment Setup
-
-Copy the example environment file and fill in your details:
-
+3. Set up your environment:
 ```bash
 cp .env.example .env
 ```
+Fill in your Discord token(s), database URL, Redis URL, Lavalink credentials, and any external API keys.
 
-_(Make sure to provide your Discord token(s), database URL, Redis URL, Lavalink credentials, and any external API keys you wish to use.)_
-
-### 4. Database Setup
-
-Generate Prisma client and push the schema to your database:
-
+4. Set up the database:
 ```bash
 pnpm run postinstall
 npx prisma db push
 ```
 
-### 5. Start the bot
-
-For development mode with hot-reload:
-
+5. Start the bot:
 ```bash
 pnpm run dev
 ```
 
-To build and start for production without Docker:
-
+To build and run for production without Docker:
 ```bash
 pnpm run build
 pnpm run start
 ```
 
+## 🌐 Environment Variables
+
+Copy `.env.example` to `.env` and fill in the values (Discord tokens, `DATABASE_URL`, `REDIS_URL`, Lavalink host/password, API keys for Apple Music, Deezer, Genius, Yandex, YouTube):
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/6music
+REDIS_URL=redis://localhost:6379
+LAVALINK_HOST=localhost
+LAVALINK_PORT=2333
+LAVALINK_SERVER_PASSWORD=your-password
+BOT_1_DISCORD_TOKEN=your-bot-token
+DEFAULT_PREFIX=m
+```
+
+See [.env.example](./.env.example) for the full list.
+
 ## 🐳 Docker Deployment
 
-The project provides a comprehensive Docker Compose setup for deploying the Bot, Lavalink, PostgreSQL, and Redis together seamlessly.
+The project includes a full Docker Compose setup to run the bot together with Lavalink, PostgreSQL, and Redis.
 
-For the complete, step-by-step production deployment guide (including CI/CD with GitHub Actions), check out the detailed documentation here:
+For the complete step-by-step production guide (including CI/CD with GitHub Actions), see:
 
-👉 **[View Deployment Guide (Vietnamese)](./DEPLOYMENT.md)**
+👉 **[View Deployment Guide](./DEPLOYMENT.md)**
 
-## 🤝 Contributing
+## 📄 License
 
-Contributions, issues, and feature requests are highly welcome! Feel free to check the [issues page](https://github.com/yngpiu/music-bot-discord/issues) if you want to contribute.
-
-## 📝 License
-
-This project is open-sourced under the [ISC License](LICENSE).
+This project is open-source and available under the [ISC License](LICENSE).
